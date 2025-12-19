@@ -3,8 +3,6 @@
 **ShopFlow** is a full-stack e-commerce web application built with the **MERN stack**.  
 It provides a complete online shopping experience, including user authentication, product browsing, shopping cart management, and order processing.
 
----
-
 ## 🚀 Features
 
 - User authentication (Sign up / Login / Logout)
@@ -13,8 +11,6 @@ It provides a complete online shopping experience, including user authentication
 - Order placement and order history
 - RESTful API for backend services
 - Responsive frontend UI
-
----
 
 ## 🧱 Tech Stack
 
@@ -36,8 +32,6 @@ It provides a complete online shopping experience, including user authentication
 - GitHub
 - RESTful APIs
 - JWT Authentication (in progress)
-
----
 
 ## 📁 Project Structure
 
