@@ -1,0 +1,108 @@
+.auth-card {
+  width: 600px;
+  max-width: 92vw;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  padding: 48px 56px;
+  position: relative;
+}
+
+.auth-close {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  border: none;
+  background: transparent;
+  font-size: 24px;
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.auth-title {
+  margin: 0 0 24px 0;
+  font-size: 34px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.auth-form {
+  display: grid;
+  gap: 18px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.field-label {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.field-row {
+  position: relative;
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 14px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  background: white;
+}
+
+.input.error {
+  border-color: #ef4444;
+}
+
+.inline-action {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.error-text {
+  font-size: 12px;
+  color: #ef4444;
+  margin-top: 6px;
+  text-align: right;
+}
+
+.primary-btn {
+  margin-top: 8px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background: #4f46e5;
+  color: white;
+  font-weight: 600;
+}
+
+.bottom-row {
+  margin-top: 18px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.bottom-row a {
+  color: #4f46e5;
+  text-decoration: none;
+}
+
+.bottom-row a:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,125 @@
+.shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: 64px 1fr 64px;
+  background: #f3f4f6;
+}
+
+.topbar {
+  background: #111827;
+  color: white;
+  display: flex;
+  align-items: center;
+}
+
+.topbar-inner {
+  width: min(1200px, 92vw);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 18px;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.brand-main {
+  font-size: 26px;
+}
+
+.brand-sub {
+  font-size: 12px;
+  opacity: 0.9;
+  font-weight: 600;
+}
+
+.search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-input {
+  width: min(560px, 60vw);
+  padding: 10px 40px 10px 14px;
+  border-radius: 4px;
+  border: none;
+  outline: none;
+  font-size: 14px;
+}
+
+.search-icon {
+  position: absolute;
+  right: 18px;
+  opacity: 0.65;
+  font-size: 14px;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.95;
+}
+
+.icon {
+  opacity: 0.9;
+}
+
+/* 关键：中间区域居中放 modal */
+.content {
+  background: #f3f4f6;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.footer {
+  background: #111827;
+  color: #e5e7eb;
+  display: flex;
+  align-items: center;
+}
+
+.footer-inner {
+  width: min(1200px, 92vw);
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.footer-icons {
+  display: flex;
+  gap: 12px;
+  opacity: 0.95;
+}
+
+.footer-links {
+  display: flex;
+  gap: 16px;
+}
+
+.footer-links a {
+  color: #e5e7eb;
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
