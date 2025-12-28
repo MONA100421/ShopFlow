@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+
 
 export default function AuthForm({ mode }: { mode: "login" | "register" | "reset" }) {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
+  const navigate = useNavigate();
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -24,9 +26,15 @@ export default function AuthForm({ mode }: { mode: "login" | "register" | "reset
 
     // mock login
     if (mode === "login") {
-      login("user"); // 先用 user，之後會加 admin
+      login("admin");
+      navigate("/");
+    } else if (mode === "register") {
+      login("user");
+      navigate("/");
+    } else if (mode === "reset") {
+      navigate("/login");
     }
-  };
+  }
 
   return (
     <form onSubmit={handleSubmit}>
