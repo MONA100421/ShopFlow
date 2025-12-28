@@ -1,0 +1,78 @@
+// src/api/authApi.js
+
+const USERS_KEY = "shopflow_users";
+const SESSION_KEY = "shopflow_session_user";
+
+function loadUsers() {
+  try {
+    const raw = localStorage.getItem(USERS_KEY);
+    const users = raw ? JSON.parse(raw) : [];
+    return Array.isArray(users) ? users : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveUsers(users) {
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+
+export function seedUsersIfEmpty() {
+  const users = loadUsers();
+  if (users.length > 0) return;
+
+  // 你可以改成项目要求的 admin/regular
+  const seeded = [
+    { id: "u1", email: "admin@chuwa.com", password: "123456", role: "admin" },
+    { id: "u2", email: "user@chuwa.com", password: "123456", role: "regular" },
+  ];
+  saveUsers(seeded);
+}
+
+export function getSessionUser() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function setSessionUser(user) {
+  localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+}
+
+export function clearSession() {
+  localStorage.removeItem(SESSION_KEY);
+}
+
+export async function loginApi({ email, password }) {
+  // 模拟网络延迟（可删）
+  await new Promise((r) => setTimeout(r, 200));
+
+  const users = loadUsers();
+  const u = users.find((x) => x.email.toLowerCase() === email.toLowerCase());
+
+  if (!u) {
+    const err = new Error("User not found");
+    err.code = "USER_NOT_FOUND";
+    throw err;
+  }
+
+  if (u.password !== password) {
+    const err = new Error("Incorrect password");
+    err.code = "WRONG_PASSWORD";
+    throw err;
+  }
+
+  // 返回“后端会返回的用户信息”（不要包含 password）
+  const safeUser = { id: u.id, email: u.email, role: u.role };
+  setSessionUser(safeUser);
+  return safeUser;
+}
+
+export async function logoutApi() {
+  await new Promise((r) => setTimeout(r, 100));
+  clearSession();
+  return true;
+}
