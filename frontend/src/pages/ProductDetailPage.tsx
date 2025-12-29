@@ -16,7 +16,7 @@ export default function ProductDetailPage() {
   if (!product) return <p>Product not found</p>;
 
   return (
-    <div>
+    <div className="container">
       <h1>{product.title}</h1>
       <p>{product.description}</p>
       <p>${product.price}</p>

@@ -1,3 +1,7 @@
 export default function NotFoundPage() {
-  return <div>Oops! Something went wrong!</div>;
+  return (
+    <div className="container">
+      Oops! Something went wrong!
+    </div>
+  );
 }

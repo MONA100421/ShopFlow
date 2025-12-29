@@ -14,11 +14,15 @@ export default function CartPage() {
   } = useCart();
 
   if (items.length === 0) {
-    return <p>Your cart is empty</p>;
+    return (
+      <div className="container">
+        <p>Your cart is empty</p>
+      </div>
+    );
   }
 
   return (
-    <div>
+    <div className="container">
       <h1>Shopping Cart</h1>
 
       {/* Cart Items */}

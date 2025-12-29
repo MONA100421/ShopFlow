@@ -24,41 +24,52 @@ export default function ProductListPage() {
   }, [dispatch]);
 
   return (
-    <div>
+    <div className="container">
+      {/* Page title */}
       <h1>Products</h1>
 
-      {/* Admin only */}
+      {/* Admin only action */}
       {role === "admin" && (
-        <button onClick={() => navigate("/products/new")}>
+        <button
+          type="button"
+          onClick={() => navigate("/products/new")}
+        >
           Add Product
         </button>
       )}
 
+      {/* States */}
       {loading && <p>Loading...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p className="error-text">{error}</p>}
 
-      {!loading && list.length === 0 && <p>No products</p>}
+      {!loading && list.length === 0 && (
+        <p>No products found.</p>
+      )}
 
+      {/* Product list (UI will be upgraded in Phase 2) */}
       <ul>
         {list.map((p) => (
           <li key={p.id}>
             <h3>{p.title}</h3>
             <p>${p.price}</p>
 
-            <Link to={`/products/${p.id}`}>View</Link>
+            <div>
+              <Link to={`/products/${p.id}`}>View</Link>
 
-            <button
-              onClick={() =>
-                addToCart({
-                  id: p.id,
-                  name: p.title,
-                  price: p.price,
-                  image: p.image,
-                })
-              }
-            >
-              Add to Cart
-            </button>
+              <button
+                type="button"
+                onClick={() =>
+                  addToCart({
+                    id: p.id,
+                    name: p.title,
+                    price: p.price,
+                    image: p.image,
+                  })
+                }
+              >
+                Add to Cart
+              </button>
+            </div>
           </li>
         ))}
       </ul>
