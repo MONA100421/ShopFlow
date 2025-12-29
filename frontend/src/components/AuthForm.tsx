@@ -26,7 +26,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" | "reset
 
     // mock login
     if (mode === "login") {
-      login("admin");
+      login("user");
       navigate("/");
     } else if (mode === "register") {
       login("user");
