@@ -7,7 +7,6 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ProductListPage from "./pages/ProductListPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import ProductFormPage from "./pages/ProductFormPage";
-import CartPage from "./pages/CartPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
@@ -35,7 +34,6 @@ function App() {
               </RequireAdmin>
             }
         />
-        <Route path="/cart" element={<CartPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
