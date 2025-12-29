@@ -1,14 +1,11 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-
-
-// 这是一个“纯前端”的 action（下面我会告诉你去哪定义）
-import { addLocalProduct } from "../redux/productSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { createProduct } from "../redux/productSlice";
 
 export default function AddProduct() {
     const dispatch = useDispatch();
-    const navigate = useNavigate();
+    const loading = useSelector((s) => s.products.loading);
+    const error = useSelector((s) => s.products.error);
 
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
@@ -16,108 +13,102 @@ export default function AddProduct() {
     const [price, setPrice] = useState("");
     const [stock, setStock] = useState("");
     const [image, setImage] = useState("");
+    const [msg, setMsg] = useState("");
 
-    function handleSubmit(e) {
+    async function onSubmit(e) {
         e.preventDefault();
+        setMsg("");
 
-        if (!name || !price) {
-            alert("Product name and price are required");
-            return;
-        }
+        if (!name.trim()) return alert("Name is required");
+        if (price === "" || Number(price) < 0) return alert("Price must be >= 0");
 
-        const newProduct = {
-            id: Date.now(), // 前端临时 id（后端版会换成 _id）
-            name,
-            description,
+        const payload = {
+            name: name.trim(),
+            description: description.trim(),
             category,
             price: Number(price),
-            stock: Number(stock),
-            image,
+            stock: Number(stock || 0),
+            image: image.trim(),
         };
 
-        // ✅ 核心：把新 product 放进 Redux
-        dispatch(addLocalProduct(newProduct));
+        try {
+            await dispatch(createProduct(payload)).unwrap();
+            setMsg("Created ✅ You can add another one.");
 
-        // 回到 products list
-        navigate("/");
+            // ✅ 清空表单，继续添加
+            setName("");
+            setDescription("");
+            setCategory("Category1");
+            setPrice("");
+            setStock("");
+            setImage("");
+        } catch (err) {
+            alert(err?.message || "Create failed");
+        }
     }
 
     return (
-        <div className="add-product-page">
-            <h1>Create Product</h1>
+        <div className="page">
+            <div className="page-head">
+                <h1>Create Product</h1>
+            </div>
 
-            <form className="add-product-form" onSubmit={handleSubmit}>
-                <label>
-                    Product Name
-                    <input
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="iWatch"
-                    />
+            {msg && <div style={{ marginBottom: 12, opacity: 0.85 }}>{msg}</div>}
+            {!loading && error && (
+                <div style={{ marginBottom: 12 }}>Error: {error}</div>
+            )}
+
+            <form className="form" onSubmit={onSubmit}>
+                <label className="field">
+                    <div className="label">Product Name</div>
+                    <input value={name} onChange={(e) => setName(e.target.value)} placeholder="绿豆糕" />
                 </label>
 
-                <label>
-                    Product Description
+                <label className="field">
+                    <div className="label">Product Description</div>
                     <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Product description"
+                        placeholder="台湾绿豆糕"
                     />
                 </label>
 
                 <div className="row">
-                    <label>
-                        Category
-                        <select
-                            value={category}
-                            onChange={(e) => setCategory(e.target.value)}
-                        >
+                    <label className="field">
+                        <div className="label">Category</div>
+                        <select value={category} onChange={(e) => setCategory(e.target.value)}>
                             <option value="Category1">Category1</option>
                             <option value="Category2">Category2</option>
                             <option value="Category3">Category3</option>
                         </select>
                     </label>
 
-                    <label>
-                        Price
-                        <input
-                            type="number"
-                            value={price}
-                            onChange={(e) => setPrice(e.target.value)}
-                            placeholder="50"
-                        />
+                    <label className="field">
+                        <div className="label">Price</div>
+                        <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="8.99" />
                     </label>
                 </div>
 
                 <div className="row">
-                    <label>
-                        In Stock Quantity
-                        <input
-                            type="number"
-                            value={stock}
-                            onChange={(e) => setStock(e.target.value)}
-                            placeholder="100"
-                        />
+                    <label className="field">
+                        <div className="label">Stock</div>
+                        <input type="number" value={stock} onChange={(e) => setStock(e.target.value)} placeholder="100" />
                     </label>
 
-                    <label>
-                        Image URL
-                        <input
-                            value={image}
-                            onChange={(e) => setImage(e.target.value)}
-                            placeholder="http://..."
-                        />
+                    <label className="field">
+                        <div className="label">Image URL</div>
+                        <input value={image} onChange={(e) => setImage(e.target.value)} placeholder="" />
                     </label>
                 </div>
 
                 {image && (
-                    <div className="image-preview">
-                        <img src={image} alt="preview" />
+                    <div style={{ marginTop: 12 }}>
+                        <img src={image} alt="preview" style={{ maxWidth: 240, borderRadius: 8 }} />
                     </div>
                 )}
 
-                <button type="submit" className="primary-btn">
-                    Add Product
+                <button className="btn primary" type="submit" disabled={loading}>
+                    {loading ? "Saving..." : "Add Product"}
                 </button>
             </form>
         </div>

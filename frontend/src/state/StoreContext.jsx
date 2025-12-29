@@ -1,160 +1,148 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 
 const StoreContext = createContext(null);
-
-const LS_PRODUCTS = "sf_products";
+const LS_SEARCH = "sf_search";
 const LS_CART = "sf_cart";
 const LS_PROMO = "sf_promo";
 
-function seedProducts() {
-    return [];
-}
+
 
 function loadJson(key, fallback) {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
-  }
+    try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+    } catch {
+        return fallback;
+    }
 }
 
 export function StoreProvider({ children }) {
-  const [products, setProducts] = useState(() => {
-    const existing = loadJson(LS_PRODUCTS, null);
-    if (existing && Array.isArray(existing) && existing.length) return existing;
-    const seeded = seedProducts();
-    localStorage.setItem(LS_PRODUCTS, JSON.stringify(seeded));
-    return seeded;
-  });
+    // ✅ 商品唯一来源：Redux（Mongo）
+    const products = useSelector((s) => s.products.items || []);
 
-  // cart: { [productId]: qty }
-  const [cart, setCart] = useState(() => loadJson(LS_CART, {}));
-  const [promo, setPromo] = useState(() => localStorage.getItem(LS_PROMO) || "");
+    // cart: { [productId]: qty }
+    const [cart, setCart] = useState(() => loadJson(LS_CART, {}));
+    const [promo, setPromo] = useState(() => localStorage.getItem(LS_PROMO) || "");
+    const [search, setSearch] = useState(() => localStorage.getItem(LS_SEARCH) || "");
+    useEffect(() => {
+        localStorage.setItem(LS_CART, JSON.stringify(cart));
+    }, [cart]);
 
-  useEffect(() => {
-    localStorage.setItem(LS_CART, JSON.stringify(cart));
-  }, [cart]);
+    useEffect(() => {
+        localStorage.setItem(LS_PROMO, promo);
+    }, [promo]);
 
-  useEffect(() => {
-    localStorage.setItem(LS_PRODUCTS, JSON.stringify(products));
-  }, [products]);
+    useEffect(() => {
+        localStorage.setItem(LS_SEARCH, search);
+    }, [search]);
 
-  useEffect(() => {
-    localStorage.setItem(LS_PROMO, promo);
-  }, [promo]);
+    // ------- cart actions -------
+    function addToCart(id, qty = 1) {
+        if (!id) return; // 防御：避免 undefined
+        setCart((prev) => ({ ...prev, [id]: (prev[id] || 0) + qty }));
+    }
 
-  // ------- product actions -------
-  function addProduct(p) {
-    setProducts((prev) => [{ ...p }, ...prev]);
-  }
+    function setQty(id, qty) {
+        setCart((prev) => {
+            const next = { ...prev };
+            if (qty <= 0) delete next[id];
+            else next[id] = qty;
+            return next;
+        });
+    }
 
-  function updateProduct(id, patch) {
-    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
-  }
+    function removeFromCart(id) {
+        setCart((prev) => {
+            const next = { ...prev };
+            delete next[id];
+            return next;
+        });
+    }
 
-  function deleteProduct(id) {
-    setProducts((prev) => prev.filter((p) => p.id !== id));
-    setCart((prev) => {
-      const next = { ...prev };
-      delete next[id];
-      return next;
-    });
-  }
+    function clearCart() {
+        setCart({});
+    }
 
-  // ------- cart actions -------
-  function addToCart(id, qty = 1) {
-    setCart((prev) => ({ ...prev, [id]: (prev[id] || 0) + qty }));
-  }
+    // ------- derived totals (join by _id) -------
+    const cartItems = useMemo(() => {
+        // Map: productId -> product
+        const byId = new Map(products.map((p) => [String(p._id || p.id), p]));
 
-  function setQty(id, qty) {
-    setCart((prev) => {
-      const next = { ...prev };
-      if (qty <= 0) delete next[id];
-      else next[id] = qty;
-      return next;
-    });
-  }
+        return Object.entries(cart)
+            .map(([id, qty]) => {
+                const p = byId.get(String(id));
+                if (!p) return null; // products 还没加载完时先跳过
+                const pid = String(p._id || p.id);
 
-  function removeFromCart(id) {
-    setCart((prev) => {
-      const next = { ...prev };
-      delete next[id];
-      return next;
-    });
-  }
+                return {
+                    ...p,
+                    id: pid, // ✅ 给 CartDrawer/Cart 页统一用 it.id
+                    qty,
+                    lineTotal: Number(p.price || 0) * qty,
+                    image: p.image || "https://via.placeholder.com/120?text=No+Image",
+                };
+            })
+            .filter(Boolean);
+    }, [cart, products]);
 
-  function clearCart() {
-    setCart({});
-  }
+    const subtotal = useMemo(
+        () => cartItems.reduce((s, it) => s + it.lineTotal, 0),
+        [cartItems]
+    );
 
-  // ------- derived totals -------
-  const cartItems = useMemo(() => {
-    const byId = new Map(products.map((p) => [p.id, p]));
-    return Object.entries(cart)
-      .map(([id, qty]) => {
-        const p = byId.get(id);
-        if (!p) return null;
-        return { ...p, qty, lineTotal: p.price * qty };
-      })
-      .filter(Boolean);
-  }, [cart, products]);
+    const taxRate = 0.1;
 
-  const subtotal = useMemo(
-    () => cartItems.reduce((s, it) => s + it.lineTotal, 0),
-    [cartItems]
-  );
+    const tax = useMemo(() => +(subtotal * taxRate).toFixed(2), [subtotal]);
 
-  const taxRate = 0.1; // 10%
-  const tax = useMemo(() => +(subtotal * taxRate).toFixed(2), [subtotal]);
+    const discount = useMemo(() => {
+        const code = promo.trim().toUpperCase();
+        if (!code) return 0;
 
-  const discount = useMemo(() => {
-    // demo: code SAVE20 => $20 off, SAVE10 => 10% off
-    const code = promo.trim().toUpperCase();
-    if (!code) return 0;
-    if (code === "SAVE20") return Math.min(20, subtotal);
-    if (code === "SAVE10") return +(subtotal * 0.1).toFixed(2);
-    return 0;
-  }, [promo, subtotal]);
+        // ✅ SAVE10：10% off subtotal
+        if (code === "SAVE10") return Math.min(10, subtotal);
 
-  const total = useMemo(
-    () => +(subtotal + tax - discount).toFixed(2),
-    [subtotal, tax, discount]
-  );
+        // ✅ SAVE20：$20 off (cap at subtotal)
+        if (code === "SAVE20") return Math.min(20, subtotal);
 
-  const cartCount = useMemo(
-    () => cartItems.reduce((c, it) => c + it.qty, 0),
-    [cartItems]
-  );
+        // ✅ invalid code => no discount
+        return 0;
+    }, [promo, subtotal]);
 
-  const value = {
-    products,
-    addProduct,
-    updateProduct,
-    deleteProduct,
+    const total = useMemo(() => +(subtotal + tax - discount).toFixed(2), [subtotal, tax, discount]);
 
-    cart,
-    cartItems,
-    addToCart,
-    setQty,
-    removeFromCart,
-    clearCart,
 
-    promo,
-    setPromo,
+    const cartCount = useMemo(
+        () => cartItems.reduce((c, it) => c + it.qty, 0),
+        [cartItems]
+    );
 
-    subtotal,
-    tax,
-    discount,
-    total,
-    cartCount,
-  };
+    const value = {
+        cart,
+        cartItems,
+        addToCart,
+        setQty,
+        removeFromCart,
+        clearCart,
 
-  return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
+        promo,
+        setPromo,
+
+        search,
+        setSearch,
+
+        subtotal,
+        tax,
+        discount,
+        total,
+        cartCount,
+    };
+
+    return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
 
 export function useStore() {
-  const ctx = useContext(StoreContext);
-  if (!ctx) throw new Error("useStore must be used within StoreProvider");
-  return ctx;
+    const ctx = useContext(StoreContext);
+    if (!ctx) throw new Error("useStore must be used within StoreProvider");
+    return ctx;
 }

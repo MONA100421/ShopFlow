@@ -1,15 +1,12 @@
 import { useState } from "react";
 import { Link, Outlet } from "react-router-dom";
-import { useSelector } from "react-redux";
-
 import CartDrawer from "../components/CartDrawer";
+import { useStore } from "../state/StoreContext";
 import "./LayoutShell.css";
 
 export default function LayoutShell() {
     // ✅ 先让页面跑起来：从 Redux 读（如果还没 cart slice，就给默认值）
-    const cartCount = useSelector((state) => state?.cart?.items?.length ?? 0);
-    const subtotal = useSelector((state) => state?.cart?.subtotal ?? 0);
-
+    const { cartCount, subtotal, search, setSearch } = useStore();
     const [cartOpen, setCartOpen] = useState(false);
 
     return (
@@ -22,9 +19,15 @@ export default function LayoutShell() {
                     </div>
 
                     <div className="search">
-                        <input className="search-input" placeholder="Search" />
+                        <input
+                            className="search-input"
+                            placeholder="Search products"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
                         <span className="search-icon">🔍</span>
                     </div>
+
 
                     <div className="top-actions">
                         {/* Sign In → /signin */}
