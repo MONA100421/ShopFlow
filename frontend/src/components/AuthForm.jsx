@@ -18,6 +18,9 @@ export default function AuthForm({ mode }) {
 
   const navigate = useNavigate();
 
+  // 你可以保留这个状态（方便你未来在 UI 上显示当前选择）
+  const [loginRole, setLoginRole] = useState("user");
+
   const [email, setEmail] = useState("you@example.com");
   const [password, setPassword] = useState("12345678");
   const [showPw, setShowPw] = useState(false);
@@ -32,8 +35,12 @@ export default function AuthForm({ mode }) {
   const passwordError =
     touched.password && password.length < 6 ? "Invalid Password input!" : "";
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  // ✅ 支持两种调用方式：
+  // 1) form submit: handleSubmit(e)
+  // 2) button click: handleSubmit(e, "admin") / handleSubmit(e, "user")
+  async function handleSubmit(e, roleOverride) {
+    e?.preventDefault?.(); // ✅ 兼容没有 event 的情况（不过我们下面按钮会传 e）
+
     setServerError("");
     setTouched({ email: true, password: true });
 
@@ -48,6 +55,9 @@ export default function AuthForm({ mode }) {
     const endpoint = isSignIn
       ? `${API_BASE}/api/auth/login`
       : `${API_BASE}/api/auth/register`;
+
+    // ✅ 本次点击选择的角色（不依赖 setState 的异步更新）
+    const chosenRole = roleOverride || loginRole || "user";
 
     try {
       setLoading(true);
@@ -77,26 +87,44 @@ export default function AuthForm({ mode }) {
         setServerError("Login succeeded but token is missing.");
         return;
       }
-
       localStorage.setItem("token", data.token);
 
-      // ✅ 立刻调 /me 验证 token 真能用（也方便你 debug）
+      // ✅ 调 /me 获取真实 user（含 role）
       const meResp = await fetch(`${API_BASE}/api/auth/me`, {
         headers: { Authorization: `Bearer ${data.token}` },
       });
       const meData = await meResp.json().catch(() => ({}));
 
+      // ✅ 先确认 /me 成功
       if (!meResp.ok) {
         setServerError(meData?.message || "Token validation failed");
         localStorage.removeItem("token");
         return;
       }
 
-     alert(`Signed in ✅ Hello ${meData?.user?.email || "user"}`);
-     navigate("/", { replace: true });
-     window.location.reload();
+      // ✅ 再做 role mismatch 校验
+      const actualRole = meData?.user?.role;
 
+      // ✅【改动 1】Debug：马上看出是谁不对
+      console.log("chosenRole =", chosenRole, "actualRole =", actualRole);
 
+      if (actualRole && actualRole !== chosenRole) {
+        setServerError("Role mismatch. Please use the correct login button.");
+        localStorage.removeItem("token");
+        return;
+      }
+
+      alert(`Signed in ✅ Hello ${meData?.user?.email || "user"}`);
+
+      // ✅【改动 2】按 role 跳转：admin 去创建商品页
+      if (actualRole === "admin") {
+        navigate("/add-product", { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
+
+      // 不建议强制 reload；如果你暂时依赖它可以打开
+      // window.location.reload();
     } catch (err) {
       setServerError(
         "Network error. Check backend is running on http://localhost:5001"
@@ -164,9 +192,38 @@ export default function AuthForm({ mode }) {
 
         {serverError && <div className="error-text">{serverError}</div>}
 
-        <button className="primary-btn" type="submit" disabled={loading}>
-          {loading ? "Loading..." : mode === "signin" ? "Sign In" : "Submit"}
-        </button>
+        {/* ✅ SignIn：两个按钮；非 SignIn：一个 Submit */}
+        {isSignIn ? (
+          <div className="two-btn-row">
+            <button
+              className="primary-btn"
+              type="button"
+              disabled={loading}
+              onClick={(e) => {
+                setLoginRole("user");
+                handleSubmit(e, "user");
+              }}
+            >
+              {loading ? "Loading..." : "Login as User"}
+            </button>
+
+            <button
+              className="primary-btn"
+              type="button"
+              disabled={loading}
+              onClick={(e) => {
+                setLoginRole("admin");
+                handleSubmit(e, "admin");
+              }}
+            >
+              {loading ? "Loading..." : "Login as Manager"}
+            </button>
+          </div>
+        ) : (
+          <button className="primary-btn" type="submit" disabled={loading}>
+            {loading ? "Loading..." : "Submit"}
+          </button>
+        )}
       </form>
 
       {isSignIn && (

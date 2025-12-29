@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Link, Outlet } from "react-router-dom";
-import { useStore } from "../state/StoreContext";
+import { useSelector } from "react-redux";
+
 import CartDrawer from "../components/CartDrawer";
 import "./LayoutShell.css";
 
-
 export default function LayoutShell() {
-    // ✅ 新增：从全局 store 拿购物车数量和小计
-    const { cartCount, subtotal } = useStore();
+    // ✅ 先让页面跑起来：从 Redux 读（如果还没 cart slice，就给默认值）
+    const cartCount = useSelector((state) => state?.cart?.items?.length ?? 0);
+    const subtotal = useSelector((state) => state?.cart?.subtotal ?? 0);
+
     const [cartOpen, setCartOpen] = useState(false);
 
     return (
@@ -31,7 +33,6 @@ export default function LayoutShell() {
                             <span>Sign In</span>
                         </Link>
 
-
                         {/* Cart Drawer */}
                         <button
                             className="action"
@@ -39,19 +40,17 @@ export default function LayoutShell() {
                             onClick={() => setCartOpen(true)}
                         >
                             <span className="icon">🛒</span>
-                            <span>${subtotal.toFixed(2)}</span>
+                            <span>${Number(subtotal || 0).toFixed(2)}</span>
                             {cartCount > 0 && <span className="badge">{cartCount}</span>}
                         </button>
-
                     </div>
                 </div>
             </header>
 
-
-            {/* 中间内容区：让页面内容显示在 header/footer 之间 */}
             <main className="content">
                 <Outlet />
             </main>
+
             <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
 
             <footer className="footer">
@@ -72,5 +71,3 @@ export default function LayoutShell() {
         </div>
     );
 }
-
-        

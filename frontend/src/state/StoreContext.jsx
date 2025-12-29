@@ -7,29 +7,7 @@ const LS_CART = "sf_cart";
 const LS_PROMO = "sf_promo";
 
 function seedProducts() {
-  return [
-    {
-      id: "p1",
-      name: "Meta Quest2 VR headset",
-      price: 299,
-      category: "Category1",
-      stock: 100,
-      image:
-        "https://images.pexels.com/photos/8728382/pexels-photo-8728382.jpeg?auto=compress&cs=tinysrgb&w=1200",
-      description:
-        "Hundreds of hit games, one-of-a-kind experiences, live events, new ways to stay fit and a growing community.",
-    },
-    {
-      id: "p2",
-      name: "iWatch",
-      price: 100,
-      category: "Category1",
-      stock: 50,
-      image:
-        "https://images.pexels.com/photos/277406/pexels-photo-277406.jpeg?auto=compress&cs=tinysrgb&w=1200",
-      description: "A clean smartwatch product.",
-    },
-  ];
+    return [];
 }
 
 function loadJson(key, fallback) {
