@@ -1,5 +1,5 @@
 /* ===============================
-   Global Reset
+   Global
 ================================ */
 
 * {
@@ -9,13 +9,11 @@
 body {
   margin: 0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
-    "Helvetica Neue", sans-serif;
-  background-color: #f9fafb;
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: #f3f4f6;
   color: #111827;
 }
 
-/* Root has no width constraint (very important) */
 #root {
   min-height: 100vh;
 }
@@ -24,66 +22,143 @@ body {
    Layout
 ================================ */
 
-header {
-  width: 100%;
-  background-color: #111827;
-  color: #ffffff;
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-footer {
-  width: 100%;
-  background-color: #111827;
-  color: #ffffff;
-  margin-top: auto;
-}
-
-/* Central content container (used across all pages) */
 .container {
   max-width: 1280px;
+  /* 🔑 Figma 同寬 */
   margin: 0 auto;
-  padding: 24px 16px;
+  padding: 0 24px;
 }
 
 /* ===============================
    Header
 ================================ */
 
+.site-header {
+  background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+  color: white;
+}
+
 .header-inner {
   display: flex;
   align-items: center;
   gap: 24px;
+  height: 72px;
+  /* 🔑 與 Figma 一致 */
 }
 
 .header-logo {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
+  color: white;
+  text-decoration: none;
   white-space: nowrap;
+}
+
+.header-logo span {
+  font-size: 12px;
+  margin-left: 6px;
+  opacity: 0.75;
 }
 
 .header-search {
   flex: 1;
 }
 
+.header-search input {
+  width: 100%;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+  background-color: #ffffff;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
+}
+
+.header-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.cart-btn {
+  position: relative;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: white;
+  cursor: pointer;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background-color: #ef4444;
+  color: white;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
+/* ===============================
+   Main
+================================ */
+
+.site-main {
+  flex: 1;
+  padding: 48px 0;
+  /* 🔑 與 Figma 留白一致 */
 }
 
 /* ===============================
    Footer
 ================================ */
 
+.site-footer {
+  background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+  color: white;
+}
+
 .footer-inner {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 0;
+  height: 72px;
   font-size: 14px;
 }
 
+.footer-links {
+  display: flex;
+  gap: 24px;
+}
+
+.footer-links a {
+  color: white;
+  text-decoration: none;
+  opacity: 0.8;
+}
+
+.footer-links a:hover {
+  opacity: 1;
+}
+
 /* ===============================
-   Product List - Grid
+   Product Grid (global)
 ================================ */
 
 .product-grid {
@@ -93,166 +168,14 @@ footer {
   margin-top: 24px;
 }
 
-/* Tablet */
 @media (max-width: 1024px) {
   .product-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* Mobile */
 @media (max-width: 640px) {
   .product-grid {
     grid-template-columns: 1fr;
-  }
-}
-
-/* ===============================
-   Product Card
-================================ */
-
-.product-card {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background-color: #ffffff;
-  overflow: hidden;
-}
-
-/* Image */
-.product-image {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  overflow: hidden;
-}
-
-.product-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Content */
-.product-content {
-  display: flex;
-  flex-direction: column;
-  padding: 16px;
-  flex: 1;
-}
-
-.product-title {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.product-price {
-  font-size: 15px;
-  color: #374151;
-  margin-bottom: 12px;
-}
-
-/* Quantity */
-.product-quantity {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.product-quantity button {
-  width: 32px;
-  height: 32px;
-  border: 1px solid #d1d5db;
-  background-color: #ffffff;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.product-quantity span {
-  min-width: 20px;
-  text-align: center;
-}
-
-/* Actions */
-.product-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: auto;
-}
-
-.add-to-cart-btn {
-  flex: 1;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 4px;
-  background-color: #2563eb;
-  color: #ffffff;
-  cursor: pointer;
-}
-
-.edit-product-btn {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  background-color: #ffffff;
-  cursor: pointer;
-}
-
-/* ===============================
-   Product Detail Page
-================================ */
-
-.product-detail {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 48px;
-  margin-top: 32px;
-}
-
-/* Image */
-.product-detail-img {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  background-color: #ffffff;
-}
-
-/* Info */
-.product-detail-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.product-category {
-  font-size: 13px;
-  color: #6b7280;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.product-description {
-  font-size: 15px;
-  line-height: 1.6;
-  color: #374151;
-  margin-bottom: 24px;
-}
-
-/* ===============================
-   Responsive
-================================ */
-
-@media (max-width: 768px) {
-  .product-detail {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-
-  .product-title {
-    font-size: 24px;
   }
 }

@@ -1,3 +1,4 @@
+// src/layouts/MainLayout.tsx
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
@@ -10,12 +11,10 @@ export default function MainLayout() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  /* ================= Auth (Redux ONLY) ================= */
-  const isAuthenticated = useSelector(
-    (state: RootState) => state.auth.isAuthenticated
+  const { isAuthenticated } = useSelector(
+    (state: RootState) => state.auth
   );
 
-  /* ================= Cart ================= */
   const items = useSelector(
     (state: RootState) => state.cart.items
   );
@@ -27,48 +26,38 @@ export default function MainLayout() {
 
   const handleLogout = () => {
     dispatch(logout());
-    navigate("/auth/login"); // 🔥 登出後回到登入頁
+    navigate("/auth/login");
   };
 
   return (
     <div className="app">
       {/* ================= Header ================= */}
-      <header>
-        <div className="header-inner">
+      <header className="site-header">
+        <div className="container header-inner">
           {/* Logo */}
-          <Link to="/" className="logo">
-            Management Chuwa
+          <Link to="/" className="header-logo">
+            Management <span>Chuwa</span>
           </Link>
 
           {/* Search */}
-          <input
-            type="text"
-            placeholder="Search products..."
-            className="header-search"
-          />
+          <div className="header-search">
+            <input type="text" placeholder="Search" />
+          </div>
 
-          {/* Actions */}
+          {/* Right Actions */}
           <div className="header-actions">
-            {/* Auth */}
             {isAuthenticated ? (
-              <button
-                className="header-btn"
-                onClick={handleLogout}
-              >
+              <button className="header-btn" onClick={handleLogout}>
                 Sign Out
               </button>
             ) : (
-              <Link
-                to="/auth/login"
-                className="header-btn"
-              >
+              <Link to="/auth/login" className="header-btn">
                 Sign In
               </Link>
             )}
 
-            {/* Cart */}
             <button
-              className="cart-icon"
+              className="cart-btn"
               onClick={() => setCartOpen(true)}
             >
               🛒
@@ -83,14 +72,21 @@ export default function MainLayout() {
       </header>
 
       {/* ================= Main ================= */}
-      <main>
-        <Outlet context={{ setCartOpen }} />
+      <main className="site-main">
+        <div className="container">
+          <Outlet context={{ setCartOpen }} />
+        </div>
       </main>
 
       {/* ================= Footer ================= */}
-      <footer>
-        <div className="footer-inner">
-          <span>© 2025 All Rights Reserved.</span>
+      <footer className="site-footer">
+        <div className="container footer-inner">
+          <span>© 2022 All Rights Reserved.</span>
+          <div className="footer-links">
+            <a href="#">Contact us</a>
+            <a href="#">Privacy Policies</a>
+            <a href="#">Help</a>
+          </div>
         </div>
       </footer>
 
