@@ -1,13 +1,15 @@
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "../store/store";
+import { loginSuccess } from "../store/authSlice";
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 
 export default function AuthForm({ mode }: { mode: "login" | "register" | "reset" }) {
-  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,11 +27,14 @@ export default function AuthForm({ mode }: { mode: "login" | "register" | "reset
     setError("");
 
     // mock login
-    if (mode === "login") {
-      login("user");
-      navigate("/");
-    } else if (mode === "register") {
-      login("user");
+    if (mode === "login" || mode === "register") {
+      dispatch(
+        loginSuccess({
+          id: crypto.randomUUID(),
+          role: "user",
+        })
+      );
+
       navigate("/");
     } else if (mode === "reset") {
       navigate("/auth/login");
