@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useMemo, useState } from "react";
-import { fetchProducts } from "../redux/productSlice";
-import { useStore } from "../state/StoreContext";
-import { isManager } from "../utils/auth";
+
+import { fetchProducts } from "../redux/slices/productSlice";
+import { addToCart, setQty } from "../redux/slices/cartSlice";
 
 const PAGE_SIZE = 8;
 
@@ -17,16 +17,22 @@ function getImg(p) {
 }
 
 export default function ProductsList() {
-    const manager = isManager();
     const dispatch = useDispatch();
 
-    // Redux: products
+    // ✅ Manager 判定：优先 Redux（auth.user.role），没有就 fallback 到 localStorage（兼容旧后端/旧逻辑）
+    const role = useSelector((s) => String(s.auth?.user?.role || "").toLowerCase());
+    const manager = role === "admin" || role === "manager";
+
+    // ✅ Redux: products
     const products = useSelector((state) => state.products.items || []);
     const loading = useSelector((state) => state.products.loading);
     const error = useSelector((state) => state.products.error);
 
-    // StoreContext: cart + search
-    const { cart, addToCart, setQty, search } = useStore();
+    // ✅ Redux: search（从 uiSlice 来）
+    const search = useSelector((state) => state.ui.search || "");
+
+    // ✅ Redux: cart（从 cartSlice 来）
+    const cart = useSelector((state) => state.cart.items || {});
 
     // UI: sort + pagination
     const [sortKey, setSortKey] = useState("last");
@@ -138,7 +144,7 @@ export default function ProductsList() {
                     <div className="grid">
                         {paged.map((p) => {
                             const pid = String(p?._id ?? p?.id ?? "");
-                            const qty = cart?.[pid] || 0;
+                            const qty = Number(cart?.[pid] || 0);
 
                             return (
                                 <div className="card product-card" key={pid || `${p?.name}-${p?.price}`}>
@@ -164,7 +170,7 @@ export default function ProductsList() {
                                                     type="button"
                                                     onClick={() => {
                                                         if (!pid) return;
-                                                        setQty(pid, Math.max(0, qty - 1));
+                                                        dispatch(setQty({ id: pid, qty: Math.max(0, qty - 1) }));
                                                     }}
                                                     aria-label="decrease"
                                                 >
@@ -175,7 +181,7 @@ export default function ProductsList() {
                                                     type="button"
                                                     onClick={() => {
                                                         if (!pid) return;
-                                                        addToCart(pid, 1);
+                                                        dispatch(addToCart({ id: pid, delta: 1 }));
                                                     }}
                                                     aria-label="increase"
                                                 >

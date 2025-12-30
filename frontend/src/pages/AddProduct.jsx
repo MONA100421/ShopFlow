@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createProduct } from "../redux/productSlice";
+import { createProduct } from "../redux/slices/productSlice";
 import { useNavigate } from "react-router-dom";
 import "../ui.css";
 

@@ -1,12 +1,26 @@
-import { useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { signin, signup, clearAuthError } from "../redux/slices/authSlice";
+
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { API_BASE } from "../config";
+
 import "./AuthForm.css";
 
 export default function AuthForm({ mode }) {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const isSignIn = mode === "signin";
 
+  // ✅ 从 Redux 读取 auth 状态（替代本地 state）
+  const { loading, error } = useSelector((s) => s.auth);
+
+  // ✅ 仍然是“表单本地状态”（这是正常的，不属于 auth）
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
+
+  // ✅ 标题逻辑保持不变
   const title = useMemo(() => {
     if (mode === "signin") return "Sign in to your account";
     if (mode === "signup") return "Sign up an account";
@@ -14,58 +28,45 @@ export default function AuthForm({ mode }) {
     return "Auth";
   }, [mode]);
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPw, setShowPw] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  // ✅ 切换 signin / signup 时清空 Redux 里的 error
+  useEffect(() => {
+    dispatch(clearAuthError());
+  }, [dispatch, mode]);
 
-  /**
-   * 真正的登录逻辑（user / manager）
-   */
+  // ✅ Redux 版登录（user / manager）
   async function doLogin(wantRole) {
-    setError("");
-    setLoading(true);
-
     try {
-      const resp = await fetch(`${API_BASE}/api/auth/signin`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: email.trim(),
-          password,
-        }),
-      });
+      const result = await dispatch(
+        signin({ email: email.trim(), password })
+      ).unwrap();
 
-      const data = await resp.json().catch(() => ({}));
-      if (!resp.ok) throw new Error(data?.message || "Login failed");
+      // 如果后端返回 user.role
+      const role = String(result?.user?.role || "").toLowerCase();
 
-      const token = data?.token;
-      if (!token) throw new Error("No token returned from server");
-
-      // ✅ 存 token
-      localStorage.setItem("token", token);
-
-      // ✅ ====== HERE：把 role 存起来（给 ProductsList 的 isManager() 用）======
-      const role = String(data?.user?.role || "").toLowerCase();
-      localStorage.setItem("role", role);
-      // ✅ =====================================================================
-
-      // ✅ 跳转逻辑（不要让 manager 去 /add-product；去 /products 才能看到 Edit）
       if (wantRole === "manager") {
-        // 允许 admin/manager
         if (role !== "admin" && role !== "manager") {
-          // 可选：如果你希望“manager按钮只能manager账号登录”，就保留这个检查
           throw new Error(`This account is not admin/manager (role=${role})`);
         }
-        navigate("/products"); // ✅ manager 登录后先去 products（看见 Edit / Add Product）
-      } else {
-        navigate("/products"); // user 也去 products
       }
+
+      // 登录成功 → 去 products
+      navigate("/products");
     } catch (err) {
-      setError(err?.message || "Login error");
-    } finally {
-      setLoading(false);
+      // ❗什么都不用写
+      // error 已经被 authSlice 写进 redux state.auth.error
+    }
+  }
+
+  // ✅ Redux 版注册（如果你有 signup 页面）
+  async function doSignup() {
+    try {
+      await dispatch(
+        signup({ email: email.trim(), password })
+      ).unwrap();
+
+      navigate("/products");
+    } catch (err) {
+      // 同上，error 已在 redux
     }
   }
 
@@ -106,6 +107,7 @@ export default function AuthForm({ mode }) {
             </div>
           </div>
 
+          {/* ✅ Redux error */}
           {error && (
             <div style={{ color: "#dc2626", marginBottom: 8 }}>{error}</div>
           )}
@@ -143,8 +145,17 @@ export default function AuthForm({ mode }) {
               </div>
             </div>
           ) : (
-            <button className="btn btn-primary auth-primary" type="button">
-              {mode === "signup" ? "Sign up" : "Update"}
+            <button
+              className="btn btn-primary auth-primary"
+              type="button"
+              disabled={loading}
+              onClick={doSignup}
+            >
+              {loading
+                ? "Submitting..."
+                : mode === "signup"
+                  ? "Sign up"
+                  : "Update"}
             </button>
           )}
         </div>

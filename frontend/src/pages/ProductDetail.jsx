@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProductById } from "../redux/productSlice";
-import { useStore } from "../state/StoreContext";
-import { isManager } from "../utils/auth";
+
+import { fetchProductById } from "../redux/slices/productSlice";
+import { addToCart } from "../redux/slices/cartSlice";
 
 function getImg(p) {
     return (
@@ -18,14 +18,18 @@ export default function ProductDetail() {
     const { id } = useParams();
     const nav = useNavigate();
     const dispatch = useDispatch();
-    const manager = isManager();
 
     const product = useSelector((s) => s.products.current);
     const loading = useSelector((s) => s.products.currentLoading);
     const error = useSelector((s) => s.products.currentError);
 
-    const { addToCart, cart } = useStore();
+    // ✅ cart 从 Redux 读
+    const cart = useSelector((s) => s.cart?.items || {});
     const qty = cart?.[String(id)] || 0;
+
+    // ✅ manager 从 Redux role 判断（不再用 utils/auth.js）
+    const role = useSelector((s) => String(s.auth?.user?.role || "").toLowerCase());
+    const manager = role === "admin" || role === "manager";
 
     useEffect(() => {
         if (id) dispatch(fetchProductById(id));
@@ -55,7 +59,6 @@ export default function ProductDetail() {
                             alignItems: "start",
                         }}
                     >
-                        {/* Left: image */}
                         <div style={{ borderRadius: 14, overflow: "hidden", background: "#fff" }}>
                             <img
                                 src={getImg(product)}
@@ -64,7 +67,6 @@ export default function ProductDetail() {
                             />
                         </div>
 
-                        {/* Right: info */}
                         <div>
                             <div style={{ opacity: 0.7, marginBottom: 6 }}>
                                 {product?.category || "Category"}
@@ -103,12 +105,11 @@ export default function ProductDetail() {
                                     className="btn btn-primary"
                                     type="button"
                                     disabled={Number(product?.stock ?? 1) <= 0}
-                                    onClick={() => addToCart(String(id), 1)}
+                                    onClick={() => dispatch(addToCart({ id: String(id), delta: 1 }))}
                                 >
                                     Add To Cart {qty ? `(${qty})` : ""}
                                 </button>
 
-                                {/* ✅ 只有 manager 才能看到 Edit */}
                                 {manager && (
                                     <Link className="btn" to={`/management/products/${id}/edit`}>
                                         Edit

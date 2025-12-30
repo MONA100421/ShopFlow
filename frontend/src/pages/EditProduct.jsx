@@ -1,104 +1,79 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { API_BASE } from "../config";
-import { getToken } from "../utils/auth";
+import { useDispatch, useSelector } from "react-redux";
 
-function parseMaybeJson(text) {
-  try {
-    return { json: JSON.parse(text), text };
-  } catch {
-    return { json: null, text };
-  }
-}
+import { fetchProductById, updateProduct } from "../redux/slices/productSlice";
 
 export default function EditProduct() {
   const { id } = useParams();
   const nav = useNavigate();
+  const dispatch = useDispatch();
 
-  const [loading, setLoading] = useState(true);
+  // ✅ auth：做权限保护（防止直接输入 url 进入）
+  const role = useSelector((s) => String(s.auth?.user?.role || "").toLowerCase());
+  const isManager = role === "admin" || role === "manager";
+
+  // ✅ products：读当前 product + loading/error
+  const current = useSelector((s) => s.products.current);
+  const loading = useSelector((s) => s.products.currentLoading);
+  const error = useSelector((s) => s.products.currentError);
+  const saving = useSelector((s) => s.products.saving);
+  const saveError = useSelector((s) => s.products.saveError);
+
   const [msg, setMsg] = useState("");
-  const [error, setError] = useState("");
 
+  // 表单字段仍然用 useState（✅正确：表单是组件局部状态）
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
   const [image, setImage] = useState("");
 
-  // 1) load product
+  // 1) 权限保护
   useEffect(() => {
-    (async () => {
-      setLoading(true);
-      setError("");
-      setMsg("");
+    if (!isManager) nav("/signin");
+  }, [isManager, nav]);
 
-      try {
-        const resp = await fetch(`${API_BASE}/api/products/${id}`, {
-          method: "GET",
-        });
+  // 2) load product（Redux thunk）
+  useEffect(() => {
+    if (!id) return;
+    setMsg("");
+    dispatch(fetchProductById(id));
+  }, [dispatch, id]);
 
-        const raw = await resp.text(); // ✅ 先当 text 读，避免 HTML 把 .json() 炸掉
-        const { json } = parseMaybeJson(raw);
+  // 3) 当 current 到了，把值灌进表单（保持你原来行为）
+  useEffect(() => {
+    if (!current) return;
+    setName(current?.name || "");
+    setDescription(current?.description || "");
+    setPrice(String(current?.price ?? ""));
+    setStock(String(current?.stock ?? ""));
+    setImage(current?.image || current?.imageUrl || "");
+  }, [current]);
 
-        if (!resp.ok) {
-          const m = json?.message || `Load failed (${resp.status})`;
-          throw new Error(m);
-        }
-
-        if (!json || typeof json !== "object") {
-          // ✅ 说明后端没返回 JSON（大概率请求打到了前端 HTML）
-          throw new Error(
-            "API did not return JSON. Please check API_BASE and backend route /api/products/:id."
-          );
-        }
-
-        setName(json?.name || "");
-        setDescription(json?.description || "");
-        setPrice(String(json?.price ?? ""));
-        setStock(String(json?.stock ?? ""));
-        setImage(json?.image || json?.imageUrl || "");
-      } catch (e) {
-        setError(e?.message || String(e));
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [id]);
-
-  // 2) save
+  // 4) save（Redux thunk）
   async function onSubmit(e) {
     e.preventDefault();
-    setError("");
     setMsg("");
 
     try {
-      const resp = await fetch(`${API_BASE}/api/products/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({
-          name: name.trim(),
-          description,
-          price: Number(price),
-          stock: Number(stock),
-          image: image.trim(),
-        }),
-      });
-
-      const raw = await resp.text();
-      const { json } = parseMaybeJson(raw);
-
-      if (!resp.ok) {
-        const m = json?.message || `Update failed (${resp.status})`;
-        throw new Error(m);
-      }
+      await dispatch(
+        updateProduct({
+          id,
+          data: {
+            name: name.trim(),
+            description,
+            price: Number(price),
+            stock: Number(stock),
+            image: image.trim(),
+          },
+        })
+      ).unwrap();
 
       setMsg("✅ Updated!");
       nav("/products");
-    } catch (e) {
-      setError(e?.message || String(e));
+    } catch {
+      // 错误已经进了 redux 的 saveError，这里不用重复 setError
     }
   }
 
@@ -106,8 +81,6 @@ export default function EditProduct() {
     <div className="page">
       <div className="page-head">
         <h1>Edit Product</h1>
-
-        {/* 可选：给个返回 */}
         <div className="page-actions">
           <Link className="btn" to="/products">
             Back
@@ -116,8 +89,10 @@ export default function EditProduct() {
       </div>
 
       {msg && <div style={{ marginBottom: 12, opacity: 0.85 }}>{msg}</div>}
-      {!loading && error && (
-        <div style={{ marginBottom: 12 }}>Error: {error}</div>
+      {!loading && (error || saveError) && (
+        <div style={{ marginBottom: 12 }}>
+          Error: {String(saveError || error)}
+        </div>
       )}
 
       {loading ? (
@@ -130,7 +105,6 @@ export default function EditProduct() {
               className="input"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder=""
             />
           </label>
 
@@ -140,7 +114,6 @@ export default function EditProduct() {
               className="textarea"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder=""
               rows={4}
             />
           </label>
@@ -151,20 +124,19 @@ export default function EditProduct() {
               className="input"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              placeholder=""
             />
           </label>
-          
-            <label className="field">
-              <div className="label">Stock</div>
-              <input
-                className="input"
-                type="number"
-                value={stock}
-                onChange={(e) => setStock(e.target.value)}
-                placeholder="0"
-              />
-            </label>
+
+          <label className="field">
+            <div className="label">Stock</div>
+            <input
+              className="input"
+              type="number"
+              value={stock}
+              onChange={(e) => setStock(e.target.value)}
+              placeholder="0"
+            />
+          </label>
 
           <label className="field">
             <div className="label">Image URL</div>
@@ -177,8 +149,8 @@ export default function EditProduct() {
           </label>
 
           <div className="form-actions">
-            <button className="btn btn-primary" type="submit">
-              Save
+            <button className="btn btn-primary" type="submit" disabled={saving}>
+              {saving ? "Saving..." : "Save"}
             </button>
           </div>
         </form>

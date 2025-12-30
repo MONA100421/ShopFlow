@@ -1,13 +1,39 @@
 import { useState } from "react";
 import { Link, Outlet } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+
 import CartDrawer from "../components/CartDrawer";
-import { useStore } from "../state/StoreContext";
+import { logout } from "../redux/slices/authSlice";
+import { setSearch } from "../redux/slices/uiSlice";
+
 import "./LayoutShell.css";
 
 export default function LayoutShell() {
-    // ✅ 先让页面跑起来：从 Redux 读（如果还没 cart slice，就给默认值）
-    const { cartCount, subtotal, search, setSearch } = useStore();
+    const dispatch = useDispatch();
+
+    // ===== Redux 状态 =====
+    const token = useSelector((s) => s.auth.token);
+    const search = useSelector((s) => s.ui.search);
+
+    // cart 仍然来自 Redux（你现在已经在 store 里有 cart slice）
+    const cartItems = useSelector((s) => s.cart.items || {});
+    const products = useSelector((s) => s.products.items || []);
+
+    // ===== UI 本地状态 =====
     const [cartOpen, setCartOpen] = useState(false);
+
+    // ===== 计算 cartCount / subtotal（保持和你之前一致）=====
+    const byId = new Map(products.map((p) => [String(p._id || p.id), p]));
+
+    const cartCount = Object.values(cartItems).reduce(
+        (sum, q) => sum + Number(q || 0),
+        0
+    );
+
+    const subtotal = Object.entries(cartItems).reduce((sum, [id, qty]) => {
+        const p = byId.get(String(id));
+        return sum + Number(p?.price || 0) * Number(qty || 0);
+    }, 0);
 
     return (
         <div className="shell">
@@ -18,23 +44,35 @@ export default function LayoutShell() {
                         <span className="brand-sub">Chuwa</span>
                     </div>
 
+                    {/* ===== Search（Redux） ===== */}
                     <div className="search">
                         <input
                             className="search-input"
                             placeholder="Search products"
                             value={search}
-                            onChange={(e) => setSearch(e.target.value)}
+                            onChange={(e) => dispatch(setSearch(e.target.value))}
                         />
                         <span className="search-icon">🔍</span>
                     </div>
 
-
+                    {/* ===== Top Actions ===== */}
                     <div className="top-actions">
-                        {/* Sign In → /signin */}
-                        <Link className="action" to="/signin">
-                            <span className="icon">👤</span>
-                            <span>Sign In</span>
-                        </Link>
+                        {/* Auth button */}
+                        {token ? (
+                            <button
+                                className="action"
+                                type="button"
+                                onClick={() => dispatch(logout())}
+                            >
+                                <span className="icon">👤</span>
+                                <span>Sign Out</span>
+                            </button>
+                        ) : (
+                            <Link className="action" to="/signin">
+                                <span className="icon">👤</span>
+                                <span>Sign In</span>
+                            </Link>
+                        )}
 
                         {/* Cart Drawer */}
                         <button
@@ -44,7 +82,9 @@ export default function LayoutShell() {
                         >
                             <span className="icon">🛒</span>
                             <span>${Number(subtotal || 0).toFixed(2)}</span>
-                            {cartCount > 0 && <span className="badge">{cartCount}</span>}
+                            {cartCount > 0 && (
+                                <span className="badge">{cartCount}</span>
+                            )}
                         </button>
                     </div>
                 </div>

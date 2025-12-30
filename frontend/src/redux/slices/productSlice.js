@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { API_BASE } from "../config";
+import { API_BASE } from "../../config";
 
 // --- helpers ---
 function pickProduct(data) {
@@ -29,11 +29,13 @@ export const fetchProducts = createAsyncThunk(
 );
 
 // ✅ 创建：只往后端写（manager only）
+// 🔧 改动：token 优先从 Redux(state.auth.token) 拿，必要时 fallback localStorage（迁移期更稳）
 export const createProduct = createAsyncThunk(
     "products/create",
-    async (payload, { rejectWithValue }) => {
+    async (payload, { getState, rejectWithValue }) => {
         try {
-            const token = localStorage.getItem("token");
+            const token = getState()?.auth?.token || localStorage.getItem("token") || "";
+
             const headers = { "Content-Type": "application/json" };
             if (token) headers.Authorization = `Bearer ${token}`;
 
@@ -68,23 +70,26 @@ export const fetchProductById = createAsyncThunk(
 );
 
 // ✅ 更新：给 EditProduct 保存用（manager only）
+// 🔧 改动：支持 {id, payload} 或 {id, data}；token 优先从 Redux(state.auth.token) 拿
 export const updateProduct = createAsyncThunk(
     "products/update",
-    async ({ id, payload }, { rejectWithValue }) => {
+    async ({ id, payload, data }, { getState, rejectWithValue }) => {
         try {
-            const token = localStorage.getItem("token");
+            const bodyObj = payload ?? data ?? {};
+            const token = getState()?.auth?.token || localStorage.getItem("token") || "";
+
             const headers = { "Content-Type": "application/json" };
             if (token) headers.Authorization = `Bearer ${token}`;
 
             const resp = await fetch(`${API_BASE}/api/products/${id}`, {
                 method: "PUT",
                 headers,
-                body: JSON.stringify(payload),
+                body: JSON.stringify(bodyObj),
             });
 
-            const data = await resp.json().catch(() => ({}));
-            if (!resp.ok) return rejectWithValue(data?.message || "Update product failed");
-            return pickProduct(data);
+            const resData = await resp.json().catch(() => ({}));
+            if (!resp.ok) return rejectWithValue(resData?.message || "Update product failed");
+            return pickProduct(resData);
         } catch (e) {
             return rejectWithValue(e?.message || "Network error");
         }
@@ -103,12 +108,18 @@ const productSlice = createSlice({
         current: null,
         currentLoading: false,
         currentError: "",
+
+        // 🔧 新增：保存状态（避免跟 currentLoading 混在一起）
+        saving: false,
+        saveError: "",
     },
     reducers: {
         clearCurrent(state) {
             state.current = null;
             state.currentLoading = false;
             state.currentError = "";
+            state.saving = false;
+            state.saveError = "";
         },
     },
     extraReducers: (builder) => {
@@ -155,6 +166,7 @@ const productSlice = createSlice({
             .addCase(fetchProductById.pending, (state) => {
                 state.currentLoading = true;
                 state.currentError = "";
+                state.current = null;
             })
             .addCase(fetchProductById.fulfilled, (state, action) => {
                 state.currentLoading = false;
@@ -168,11 +180,11 @@ const productSlice = createSlice({
         // ----- update -----
         builder
             .addCase(updateProduct.pending, (state) => {
-                state.currentLoading = true;
-                state.currentError = "";
+                state.saving = true;
+                state.saveError = "";
             })
             .addCase(updateProduct.fulfilled, (state, action) => {
-                state.currentLoading = false;
+                state.saving = false;
                 const p = action.payload;
                 if (!p) return;
 
@@ -186,8 +198,8 @@ const productSlice = createSlice({
                 );
             })
             .addCase(updateProduct.rejected, (state, action) => {
-                state.currentLoading = false;
-                state.currentError = action.payload || action.error?.message || "Update failed";
+                state.saving = false;
+                state.saveError = action.payload || action.error?.message || "Update failed";
             });
     },
 });
