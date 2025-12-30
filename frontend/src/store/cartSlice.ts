@@ -10,49 +10,81 @@ const initialState: CartState = {
   items: [],
 };
 
+/**
+ * ⭐ 重點：
+ * addToCart 不再只收 Product
+ * 而是同時收 product + quantity
+ */
+interface AddToCartPayload {
+  product: Product;
+  quantity: number;
+}
+
 const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    addToCart(state, action: PayloadAction<Product>) {
+    /* =========================
+       Add to Cart (一次加 N 個)
+    ========================== */
+    addToCart(
+      state,
+      action: PayloadAction<AddToCartPayload>
+    ) {
+      const { product, quantity } = action.payload;
+
       const existingItem = state.items.find(
-        (item) => item.product.id === action.payload.id
+        (item) => item.product.id === product.id
       );
 
       if (existingItem) {
-        existingItem.quantity += 1;
+        // 已存在 → 疊加數量
+        existingItem.quantity += quantity;
       } else {
+        // 不存在 → 新增一筆
         state.items.push({
-          product: action.payload,
-          quantity: 1,
+          product,
+          quantity,
         });
       }
     },
 
+    /* =========================
+       Remove item
+    ========================== */
     removeFromCart(state, action: PayloadAction<string>) {
       state.items = state.items.filter(
         (item) => item.product.id !== action.payload
       );
     },
 
+    /* =========================
+       Increase quantity (+1)
+    ========================== */
     increaseQuantity(state, action: PayloadAction<string>) {
       const item = state.items.find(
-        (item) => item.product.id === action.payload
+        (i) => i.product.id === action.payload
       );
       if (item) {
         item.quantity += 1;
       }
     },
 
+    /* =========================
+       Decrease quantity (-1)
+    ========================== */
     decreaseQuantity(state, action: PayloadAction<string>) {
       const item = state.items.find(
-        (item) => item.product.id === action.payload
+        (i) => i.product.id === action.payload
       );
       if (item && item.quantity > 1) {
         item.quantity -= 1;
       }
     },
 
+    /* =========================
+       Clear cart
+    ========================== */
     clearCart(state) {
       state.items = [];
     },

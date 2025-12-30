@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import type { Product } from "../types/Product";
 import { useDispatch } from "react-redux";
+
+import type { Product } from "../types/Product";
+import type { AppDispatch } from "../store/store";
 import { addToCart } from "../store/cartSlice";
 
 interface ProductCardProps {
@@ -15,19 +17,26 @@ export default function ProductCard({
   isAdmin,
   onEdit,
 }: ProductCardProps) {
+  const dispatch = useDispatch<AppDispatch>();
+
   const [quantity, setQuantity] = useState(1);
-  const dispatch = useDispatch();
 
   const handleIncrease = () => {
     setQuantity((q) => q + 1);
   };
 
   const handleDecrease = () => {
-    setQuantity((q) => (q > 1 ? q - 1 : 1));
+    setQuantity((q) => Math.max(1, q - 1));
   };
 
   const handleAddToCart = () => {
-    dispatch(addToCart(product));
+    dispatch(
+      addToCart({
+        product,
+        quantity,
+      })
+    );
+
     setQuantity(1);
   };
 
@@ -45,14 +54,18 @@ export default function ProductCard({
       {/* Content */}
       <div className="product-content">
         <h3 className="product-title">{product.title}</h3>
-        <p className="product-price">${product.price}</p>
+        <p className="product-price">
+          ${product.price.toFixed(2)}
+        </p>
 
-        {/* Quantity */}
+        {/* Quantity selector */}
         <div className="product-quantity">
           <button type="button" onClick={handleDecrease}>
             −
           </button>
+
           <span>{quantity}</span>
+
           <button type="button" onClick={handleIncrease}>
             +
           </button>
