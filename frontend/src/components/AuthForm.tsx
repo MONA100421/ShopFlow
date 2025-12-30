@@ -32,7 +32,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" | "reset
       login("user");
       navigate("/");
     } else if (mode === "reset") {
-      navigate("/login");
+      navigate("/auth/login");
     }
   }
 

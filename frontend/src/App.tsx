@@ -1,9 +1,7 @@
 import RequireAdmin from "./components/RequireAdmin";
 import { Routes, Route } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-import ResetPasswordPage from "./pages/ResetPasswordPage";
+import AuthPage from "./pages/AuthPage";
 import ProductListPage from "./pages/ProductListPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import ProductFormPage from "./pages/ProductFormPage";
@@ -14,9 +12,7 @@ function App() {
     <Routes>
       <Route element={<MainLayout />}>
         <Route path="/" element={<ProductListPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/auth/:mode" element={<AuthPage />} />
         <Route path="/products/:id" element={<ProductDetailPage />} />
         <Route 
            path="/products/new"
