@@ -1,22 +1,34 @@
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../store/store";
+import { logout } from "../store/authSlice";
 import CartDrawer from "../components/CartDrawer";
-import { useAuth } from "../context/AuthContext";
 
 export default function MainLayout() {
   const [cartOpen, setCartOpen] = useState(false);
-  const { isAuthenticated, logout } = useAuth();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
+  /* ================= Auth (Redux ONLY) ================= */
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
+
+  /* ================= Cart ================= */
   const items = useSelector(
     (state: RootState) => state.cart.items
   );
 
-  const totalQuantity = Object.values(items).reduce(
+  const totalQuantity = items.reduce(
     (sum, item) => sum + item.quantity,
     0
   );
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/auth/login"); // 🔥 登出後回到登入頁
+  };
 
   return (
     <div className="app">
@@ -39,12 +51,18 @@ export default function MainLayout() {
           <div className="header-actions">
             {/* Auth */}
             {isAuthenticated ? (
-              <button onClick={logout} className="header-btn">
-                Logout
+              <button
+                className="header-btn"
+                onClick={handleLogout}
+              >
+                Sign Out
               </button>
             ) : (
-              <Link to="/login" className="header-btn">
-                Login
+              <Link
+                to="/auth/login"
+                className="header-btn"
+              >
+                Sign In
               </Link>
             )}
 
