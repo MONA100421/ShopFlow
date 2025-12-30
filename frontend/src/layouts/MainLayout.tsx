@@ -1,12 +1,19 @@
 import { Outlet, Link } from "react-router-dom";
-import { useCart } from "../context/CartContext";
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import type { RootState } from "../store/store";
+import CartDrawer from "../components/CartDrawer";
 import { useAuth } from "../context/AuthContext";
 
 export default function MainLayout() {
-  const { items } = useCart();
+  const [cartOpen, setCartOpen] = useState(false);
   const { isAuthenticated, logout } = useAuth();
 
-  const totalQuantity = items.reduce(
+  const items = useSelector(
+    (state: RootState) => state.cart.items
+  );
+
+  const totalQuantity = Object.values(items).reduce(
     (sum, item) => sum + item.quantity,
     0
   );
@@ -42,34 +49,38 @@ export default function MainLayout() {
             )}
 
             {/* Cart */}
-            <Link to="/cart" className="cart-icon">
+            <button
+              className="cart-icon"
+              onClick={() => setCartOpen(true)}
+            >
               🛒
               {totalQuantity > 0 && (
                 <span className="cart-badge">
                   {totalQuantity}
                 </span>
               )}
-            </Link>
+            </button>
           </div>
         </div>
       </header>
 
       {/* ================= Main ================= */}
       <main>
-        <Outlet />
+        <Outlet context={{ setCartOpen }} />
       </main>
 
       {/* ================= Footer ================= */}
       <footer>
         <div className="footer-inner">
           <span>© 2025 All Rights Reserved.</span>
-          <div className="footer-links">
-            <a href="#">Privacy</a>
-            <a href="#">Contact</a>
-            <a href="#">Help</a>
-          </div>
         </div>
       </footer>
+
+      {/* ================= Cart Drawer ================= */}
+      <CartDrawer
+        open={cartOpen}
+        onClose={() => setCartOpen(false)}
+      />
     </div>
   );
 }

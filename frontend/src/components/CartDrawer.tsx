@@ -1,200 +1,150 @@
-import { useCart } from "../context/CartContext";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import type { RootState } from "../store/store";
+import {
+  removeFromCart,
+  increaseQuantity,
+  decreaseQuantity,
+} from "../store/cartSlice";
+import "./CartDrawer.css";
 
 interface CartDrawerProps {
- open: boolean;
- onClose: () => void;
+  open: boolean;
+  onClose: () => void;
 }
 
-export default function CartDrawer({
- open,
- onClose,
-}: CartDrawerProps) {
- const {
-   items,
-   updateQuantity,
-   removeFromCart,
-   subtotal,
-   tax,
-   discount,
-   total,
-   applyDiscountCode,
- } = useCart();
+export default function CartDrawer({ open, onClose }: CartDrawerProps) {
+  const dispatch = useDispatch();
+  const items = useSelector((state: RootState) => state.cart.items);
 
- return (
-   <>
-     {/* Overlay */}
-     {open && (
-       <div
-         className="cart-overlay"
-         onClick={onClose}
-       />
-     )}
+  const subtotal = items.reduce(
+    (sum, item) => sum + item.product.price * item.quantity,
+    0
+  );
+  const tax = subtotal * 0.1;
+  const total = subtotal + tax;
 
-     {/* Drawer */}
-     <aside
-       className={`cart-drawer ${open ? "open" : ""}`}
-     >
-       {/* Header */}
-       <div className="cart-drawer-header">
-         <h2>
-           Cart <span>({items.length})</span>
-         </h2>
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
 
-       <button
-           className="cart-close-btn"
-           onClick={onClose}
-           aria-label="Close cart"
-       >
-           ✕
-       </button>
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
 
-       </div>
+  if (!open) return null;
 
-       {/* Content */}
-       <div className="cart-drawer-content">
-         {/* Items */}
-         <div className="cart-drawer-items">
-           {items.length === 0 && (
-             <p className="empty-cart">
-               Your cart is empty
-             </p>
-           )}
+  return (
+    <div className="cart-overlay" onClick={onClose}>
+      <aside
+        className="cart-drawer"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* ================= Header ================= */}
+        <header className="drawer-header">
+          <h2 className="drawer-title">Cart ({items.length})</h2>
+          <button className="drawer-close" onClick={onClose}>
+            ✕
+          </button>
+        </header>
 
-           {items.map((item) => (
-             <div
-               key={item.id}
-               className="cart-drawer-item"
-             >
-               {/* Image */}
-               <div className="item-image">
-                 {item.image ? (
-                   <img
-                     src={item.image}
-                     alt={item.name}
-                   />
-                 ) : (
-                   <div className="image-placeholder">
-                     No Image
-                   </div>
-                 )}
-               </div>
+        {/* ================= Items ================= */}
+        <section className="drawer-items">
+          {items.length === 0 && (
+            <div className="drawer-empty">Your cart is empty</div>
+          )}
 
-               {/* Info */}
-               <div className="item-info">
-                 <div className="item-title">
-                   {item.name}
-                 </div>
+          {items.map((item) => (
+            <div key={item.product.id} className="drawer-item">
+              {/* Image */}
+              {item.product.image && (
+                <img
+                  src={item.product.image}
+                  alt={item.product.title}
+                />
+              )}
 
-                 <div className="item-price">
-                   ${item.price.toFixed(2)}
-                 </div>
+              {/* Info */}
+              <div className="drawer-item-info">
+                <div className="drawer-item-name">
+                  {item.product.title}
+                </div>
 
-                 {/* Quantity */}
-                 <div className="item-quantity">
-                   <button
-                     onClick={() =>
-                       updateQuantity(
-                         item.id,
-                         item.quantity - 1
-                       )
-                     }
-                     disabled={item.quantity <= 1}
-                   >
-                     −
-                   </button>
+                <div className="drawer-item-actions">
+                  <button
+                    onClick={() =>
+                      dispatch(
+                        decreaseQuantity(item.product.id)
+                      )
+                    }
+                  >
+                    −
+                  </button>
 
-                   <span>
-                     {item.quantity}
-                   </span>
+                  <span className="drawer-qty">
+                    {item.quantity}
+                  </span>
 
-                   <button
-                     onClick={() =>
-                       updateQuantity(
-                         item.id,
-                         item.quantity + 1
-                       )
-                     }
-                   >
-                     +
-                   </button>
-                 </div>
+                  <button
+                    onClick={() =>
+                      dispatch(
+                        increaseQuantity(item.product.id)
+                      )
+                    }
+                  >
+                    +
+                  </button>
 
-                 {/* Remove */}
-                 <button
-                   className="item-remove"
-                   onClick={() =>
-                     removeFromCart(item.id)
-                   }
-                 >
-                   Remove
-                 </button>
-               </div>
-             </div>
-           ))}
-         </div>
+                  <button
+                    className="drawer-remove"
+                    onClick={() =>
+                      dispatch(
+                        removeFromCart(item.product.id)
+                      )
+                    }
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
 
-         {/* Summary */}
-         <div className="cart-drawer-summary">
-           {/* Discount */}
-           <div className="discount-block">
-             <label>
-               Apply Discount Code
-             </label>
+              {/* Price */}
+              <div className="drawer-item-price">
+                $
+                {(item.product.price * item.quantity).toFixed(
+                  2
+                )}
+              </div>
+            </div>
+          ))}
+        </section>
 
-             <div className="discount-row">
-               <input
-                 type="text"
-                 placeholder="20 DOLLAR OFF"
-                 onBlur={(e) =>
-                   applyDiscountCode(
-                     e.target.value
-                   )
-                 }
-               />
-               <button className="apply-btn">
-                 Apply
-               </button>
-             </div>
-           </div>
+        {/* ================= Footer ================= */}
+        <footer className="drawer-footer">
+          <div className="drawer-summary">
+            <div>
+              <span>Subtotal</span>
+              <span>${subtotal.toFixed(2)}</span>
+            </div>
+            <div>
+              <span>Tax (10%)</span>
+              <span>${tax.toFixed(2)}</span>
+            </div>
+            <div className="drawer-total">
+              <span>Total</span>
+              <span>${total.toFixed(2)}</span>
+            </div>
+          </div>
 
-           {/* Totals */}
-           <div className="summary-row">
-             <span>Subtotal</span>
-             <span>
-               ${subtotal.toFixed(2)}
-             </span>
-           </div>
-
-           <div className="summary-row">
-             <span>Tax</span>
-             <span>
-               ${tax.toFixed(2)}
-             </span>
-           </div>
-
-           <div className="summary-row">
-             <span>Discount</span>
-             <span>
-               -${discount.toFixed(2)}
-             </span>
-           </div>
-
-           <div className="summary-row total">
-             <span>
-               Estimated total
-             </span>
-             <span>
-               ${total.toFixed(2)}
-             </span>
-           </div>
-
-           {/* Checkout */}
-           <button className="checkout-btn">
-             Continue to checkout
-           </button>
-         </div>
-       </div>
-     </aside>
-   </>
- );
+          <button className="drawer-checkout-btn">
+            Continue to checkout
+          </button>
+        </footer>
+      </aside>
+    </div>
+  );
 }

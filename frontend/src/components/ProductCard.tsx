@@ -1,21 +1,22 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { Product } from "../types/Product";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../store/cartSlice";
 
 interface ProductCardProps {
   product: Product;
   isAdmin: boolean;
-  onAddToCart: (product: Product, quantity: number) => void;
   onEdit?: (id: string) => void;
 }
 
 export default function ProductCard({
   product,
   isAdmin,
-  onAddToCart,
   onEdit,
 }: ProductCardProps) {
   const [quantity, setQuantity] = useState(1);
+  const dispatch = useDispatch();
 
   const handleIncrease = () => {
     setQuantity((q) => q + 1);
@@ -26,7 +27,7 @@ export default function ProductCard({
   };
 
   const handleAddToCart = () => {
-    onAddToCart(product, quantity);
+    dispatch(addToCart(product));
     setQuantity(1);
   };
 
@@ -35,14 +36,9 @@ export default function ProductCard({
       {/* Image */}
       <Link to={`/products/${product.id}`} className="product-image">
         {product.image ? (
-            <img
-                src={product.image}
-                alt={product.title}
-            />
+          <img src={product.image} alt={product.title} />
         ) : (
-            <div className="image-placeholder">
-                No Image
-            </div>
+          <div className="image-placeholder">No Image</div>
         )}
       </Link>
 
@@ -51,23 +47,13 @@ export default function ProductCard({
         <h3 className="product-title">{product.title}</h3>
         <p className="product-price">${product.price}</p>
 
-        {/* Quantity control */}
+        {/* Quantity */}
         <div className="product-quantity">
-          <button
-            type="button"
-            onClick={handleDecrease}
-            aria-label="Decrease quantity"
-          >
+          <button type="button" onClick={handleDecrease}>
             −
           </button>
-
           <span>{quantity}</span>
-
-          <button
-            type="button"
-            onClick={handleIncrease}
-            aria-label="Increase quantity"
-          >
+          <button type="button" onClick={handleIncrease}>
             +
           </button>
         </div>
@@ -76,8 +62,8 @@ export default function ProductCard({
         <div className="product-actions">
           <button
             type="button"
-            onClick={handleAddToCart}
             className="add-to-cart-btn"
+            onClick={handleAddToCart}
           >
             Add to Cart
           </button>
@@ -85,8 +71,8 @@ export default function ProductCard({
           {isAdmin && onEdit && (
             <button
               type="button"
-              onClick={() => onEdit(product.id)}
               className="edit-product-btn"
+              onClick={() => onEdit(product.id)}
             >
               Edit
             </button>
