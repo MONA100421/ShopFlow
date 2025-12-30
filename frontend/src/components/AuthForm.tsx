@@ -28,10 +28,12 @@ export default function AuthForm({ mode }: { mode: "login" | "register" | "reset
 
     // mock login
     if (mode === "login" || mode === "register") {
+      const isAdmin = email.toLowerCase().includes("admin");
+
       dispatch(
         loginSuccess({
           id: crypto.randomUUID(),
-          role: "user",
+          role: isAdmin ? "admin" : "user",
         })
       );
 
@@ -39,7 +41,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" | "reset
     } else if (mode === "reset") {
       navigate("/auth/login");
     }
-  }
+      };
 
   return (
     <form onSubmit={handleSubmit}>

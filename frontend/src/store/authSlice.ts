@@ -5,11 +5,13 @@ import type { User } from "../types/User";
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
+  initialized: boolean;
 }
 
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
+  initialized: false,
 };
 
 const authSlice = createSlice({
@@ -17,11 +19,11 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     loginSuccess(state, action: PayloadAction<User>) {
-      state.user = action.payload;
-      state.isAuthenticated = true;
+    state.user = action.payload;
+    state.isAuthenticated = true;
+    state.initialized = true;
 
-      // Persist user in localStorage
-      localStorage.setItem("user", JSON.stringify(action.payload));
+    localStorage.setItem("user", JSON.stringify(action.payload));
     },
 
     logout(state) {
@@ -32,11 +34,14 @@ const authSlice = createSlice({
     },
 
     restoreUser(state) {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
+    const storedUser = localStorage.getItem("user");
+
+    if (storedUser) {
         state.user = JSON.parse(storedUser);
         state.isAuthenticated = true;
-      }
+    }
+
+    state.initialized = true;
     },
   },
 });

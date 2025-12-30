@@ -34,10 +34,16 @@ export default function ProductCard({
     <div className="product-card">
       {/* Image */}
       <Link to={`/products/${product.id}`} className="product-image">
-        <img
-          src={product.image}
-          alt={product.title}
-        />
+        {product.image ? (
+            <img
+                src={product.image}
+                alt={product.title}
+            />
+        ) : (
+            <div className="image-placeholder">
+                No Image
+            </div>
+        )}
       </Link>
 
       {/* Content */}
