@@ -2,9 +2,11 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";                 // ✅【新增】
+import User from "./src/models/User.js";        // ✅【新增】
 
 import authRoutes from "./src/routes/auth.routes.js";
-import productRoutes from "./src/routes/product.routes.js"; // ✅ 加上这一行
+import productRoutes from "./src/routes/product.routes.js";
 
 dotenv.config();
 
@@ -17,7 +19,7 @@ app.use(express.json());
 app.get("/health", (req, res) => res.json({ ok: true }));
 
 app.use("/api/auth", authRoutes);
-app.use("/api/products", productRoutes); // ✅ 这里用 productRoutes（别写错变量名）
+app.use("/api/products", productRoutes);
 
 const PORT = process.env.PORT || 5001;
 
@@ -28,12 +30,41 @@ console.log("ENV check =", {
     CLIENT_ORIGIN,
     PORT,
 });
-console.log("✅ productRoutes loaded?", typeof productRoutes); // ✅ 可删，但建议先留着排错
+console.log("✅ productRoutes loaded?", typeof productRoutes);
 
 mongoose
     .connect(process.env.MONGODB_URI)
-    .then(() => {
+    .then(async () => {
         console.log("✅ MongoDB connected");
+
+        // ======================================================
+        // ✅【新增】自动 seed / 修复 admin（manager）账号
+        // ======================================================
+        const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "admin@chuwa.com").toLowerCase();
+        const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "123456";
+
+        try {
+            const existing = await User.findOne({ email: ADMIN_EMAIL }).select("+passwordHash");
+
+            if (!existing) {
+                const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 10);
+                await User.create({
+                    email: ADMIN_EMAIL,
+                    passwordHash,
+                    role: "admin",
+                });
+                console.log(`✅ Seeded admin: ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
+            } else if (existing.role !== "admin") {
+                existing.role = "admin";
+                await existing.save();
+                console.log(`✅ Promoted to admin: ${ADMIN_EMAIL}`);
+            } else {
+                console.log(`✅ Admin exists: ${ADMIN_EMAIL}`);
+            }
+        } catch (e) {
+            console.warn("⚠️ Admin seed skipped:", e?.message || e);
+        }
+
         app.listen(PORT, () => {
             console.log(`✅ API listening on http://localhost:${PORT}`);
         });

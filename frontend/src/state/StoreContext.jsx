@@ -38,19 +38,26 @@ export function StoreProvider({ children }) {
     }, [search]);
 
     // ------- cart actions -------
-    function addToCart(id, qty = 1) {
-        if (!id) return; // 防御：避免 undefined
-        setCart((prev) => ({ ...prev, [id]: (prev[id] || 0) + qty }));
-    }
-
-    function setQty(id, qty) {
-        setCart((prev) => {
+    const addToCart = (id, delta = 1) => {
+        setCart(prev => {
             const next = { ...prev };
-            if (qty <= 0) delete next[id];
-            else next[id] = qty;
+            const cur = Number(next[id] || 0);
+            const val = Math.max(0, cur + delta);
+            if (val === 0) delete next[id];
+            else next[id] = val;
             return next;
         });
-    }
+    };
+
+    const setQty = (id, qty) => {
+        setCart(prev => {
+            const next = { ...prev };
+            const val = Math.max(0, Number(qty || 0));
+            if (val === 0) delete next[id];
+            else next[id] = val;
+            return next;
+        });
+    };
 
     function removeFromCart(id) {
         setCart((prev) => {

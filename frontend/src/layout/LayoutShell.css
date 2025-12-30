@@ -80,12 +80,15 @@
   opacity: 0.9;
 }
 
-/* 关键：中间区域居中放 modal */
+/* 主内容区：默认要“撑满宽度”，不能居中缩起来 */
 .content {
   background: #f3f4f6;
-  display: grid;
-  place-items: center;
   padding: 24px;
+}
+
+/* 让 Outlet 里面的页面占满可用宽度（.page 会自己限制 max-width） */
+.content>* {
+  width: 100%;
 }
 
 .footer {

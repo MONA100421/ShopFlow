@@ -3,8 +3,21 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useMemo, useState } from "react";
 import { fetchProducts } from "../redux/productSlice";
 import { useStore } from "../state/StoreContext";
+import { isManager } from "../utils/auth";
+
+const PAGE_SIZE = 8;
+
+function getImg(p) {
+    return (
+        p?.image ||
+        p?.imageUrl ||
+        p?.img ||
+        "https://via.placeholder.com/600x400?text=No+Image"
+    );
+}
 
 export default function ProductsList() {
+    const manager = isManager();
     const dispatch = useDispatch();
 
     // Redux: products
@@ -12,69 +25,56 @@ export default function ProductsList() {
     const loading = useSelector((state) => state.products.loading);
     const error = useSelector((state) => state.products.error);
 
-    // StoreContext: cart + applied search
-    const { addToCart, search } = useStore();
+    // StoreContext: cart + search
+    const { cart, addToCart, setQty, search } = useStore();
 
-    // UI: sort
+    // UI: sort + pagination
     const [sortKey, setSortKey] = useState("last");
+    const [page, setPage] = useState(1);
 
-    // 1) 进入页面就拉产品（Mongo）
     useEffect(() => {
         dispatch(fetchProducts());
     }, [dispatch]);
 
-    // 2) 搜索变化时可选：滚到顶部（体验更像电商）
     useEffect(() => {
-        // 如果你不想滚动，删掉这段即可
-        window.scrollTo({ top: 0, behavior: "smooth" });
-    }, [search]);
+        // 搜索/排序变了就回到第一页
+        setPage(1);
+    }, [search, sortKey]);
 
-    // 3) filter + sort 合并成一个 memo 结果
     const viewList = useMemo(() => {
         const arr = Array.isArray(products) ? [...products] : [];
 
-        // --- filter ---
+        // filter
         const q = (search || "").trim().toLowerCase();
         const filtered = q
             ? arr.filter((p) => {
                 const name = String(p?.name || "").toLowerCase();
                 const desc = String(p?.description || "").toLowerCase();
                 const cat = String(p?.category || "").toLowerCase();
-                return (
-                    name.includes(q) ||
-                    desc.includes(q) ||
-                    cat.includes(q)
-                );
+                return name.includes(q) || desc.includes(q) || cat.includes(q);
             })
             : arr;
 
-        // --- sort ---
+        // sort
         const getPrice = (p) => {
             const n = Number(p?.price);
             return Number.isFinite(n) ? n : 0;
         };
-
         const getCreatedAt = (p) => {
-            // createdAt 可能缺失/无效，给 0
             const t = p?.createdAt ? new Date(p.createdAt).getTime() : 0;
             return Number.isFinite(t) ? t : 0;
         };
 
-        // 为了“稳定排序”（相同值时不乱跳），加 index
         const stable = filtered.map((p, idx) => ({ p, idx }));
-
         stable.sort((a, b) => {
             if (sortKey === "priceAsc") {
                 const diff = getPrice(a.p) - getPrice(b.p);
                 return diff !== 0 ? diff : a.idx - b.idx;
             }
-
             if (sortKey === "priceDesc") {
                 const diff = getPrice(b.p) - getPrice(a.p);
                 return diff !== 0 ? diff : a.idx - b.idx;
             }
-
-            // last added（新在前）
             const diff = getCreatedAt(b.p) - getCreatedAt(a.p);
             return diff !== 0 ? diff : a.idx - b.idx;
         });
@@ -82,32 +82,43 @@ export default function ProductsList() {
         return stable.map((x) => x.p);
     }, [products, sortKey, search]);
 
-    // 4) 渲染
+    // pagination
+    const totalPages = Math.max(1, Math.ceil(viewList.length / PAGE_SIZE));
+    const safePage = Math.min(page, totalPages);
+    const paged = useMemo(() => {
+        const start = (safePage - 1) * PAGE_SIZE;
+        return viewList.slice(start, start + PAGE_SIZE);
+    }, [viewList, safePage]);
+
     return (
         <div className="page">
+            {/* ===== Header ===== */}
             <div className="page-head">
-                <h1>Products</h1>
+                <h1 className="page-title">Products</h1>
 
                 <div className="page-actions">
                     <select
                         className="select"
                         value={sortKey}
                         onChange={(e) => setSortKey(e.target.value)}
+                        style={{ width: 220 }}
                     >
                         <option value="last">Last added</option>
                         <option value="priceAsc">Price: low to high</option>
                         <option value="priceDesc">Price: high to low</option>
                     </select>
 
-                    <Link className="btn primary" to="/add-product">
-                        Add Product
-                    </Link>
+                    {/* ✅ 只有 manager 才能看到 Add Product */}
+                    {manager && (
+                        <Link className="btn btn-primary" to="/management/products/new">
+                            Add Product
+                        </Link>
+                    )}
                 </div>
             </div>
 
-            {loading && (
-                <div style={{ textAlign: "center", marginTop: 40 }}>Loading...</div>
-            )}
+            {/* ===== 状态 ===== */}
+            {loading && <div style={{ textAlign: "center", marginTop: 40 }}>Loading...</div>}
 
             {!loading && error && (
                 <div style={{ textAlign: "center", marginTop: 40 }}>
@@ -117,46 +128,116 @@ export default function ProductsList() {
 
             {!loading && !error && viewList.length === 0 && (
                 <div style={{ textAlign: "center", marginTop: 40, opacity: 0.7 }}>
-                    {search?.trim()
-                        ? `No results for "${search}".`
-                        : "No products yet. Admin can add one."}
+                    {search?.trim() ? `No results for "${search}".` : "No products yet."}
                 </div>
             )}
 
-            {!loading && !error && viewList.length > 0 && (
-                <div className="products">
-                    {viewList.map((p) => {
-                        // 统一 id：Mongo 用 _id
-                        const pid = String(p?._id ?? p?.id ?? "");
+            {/* ===== 商品卡片 ===== */}
+            {!loading && !error && paged.length > 0 && (
+                <>
+                    <div className="grid">
+                        {paged.map((p) => {
+                            const pid = String(p?._id ?? p?.id ?? "");
+                            const qty = cart?.[pid] || 0;
 
-                        return (
-                            <div className="product-card" key={pid || `${p?.name}-${p?.price}`}>
-                                <div className="product-title">{p?.name || "(No name)"}</div>
+                            return (
+                                <div className="card product-card" key={pid || `${p?.name}-${p?.price}`}>
+                                    {/* ✅ 图片可点：去详情 */}
+                                    <Link to={`/products/${pid}`} className="product-thumb">
+                                        <img src={getImg(p)} alt={p?.name || "product"} />
+                                    </Link>
 
-                                <div className="product-price">
-                                    ${Number(p?.price || 0).toFixed(2)}
+                                    <div className="product-body">
+                                        {/* ✅ 名字可点：去详情（不影响 +/- / Edit） */}
+                                        <Link to={`/products/${pid}`} className="product-name">
+                                            {p?.name || "(No name)"}
+                                        </Link>
+
+                                        <div className="product-price">
+                                            ${Number(p?.price || 0).toFixed(2)}
+                                        </div>
+
+                                        <div className="row">
+                                            {/* 数量控制 */}
+                                            <div className="stepper">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        if (!pid) return;
+                                                        setQty(pid, Math.max(0, qty - 1));
+                                                    }}
+                                                    aria-label="decrease"
+                                                >
+                                                    –
+                                                </button>
+                                                <span>{qty}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        if (!pid) return;
+                                                        addToCart(pid, 1);
+                                                    }}
+                                                    aria-label="increase"
+                                                >
+                                                    +
+                                                </button>
+                                            </div>
+
+                                            {/* ✅ Edit：只给 manager */}
+                                            {manager && (
+                                                <Link className="btn" to={`/management/products/${pid}/edit`}>
+                                                    Edit
+                                                </Link>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
+                            );
+                        })}
+                    </div>
 
-                                <div className="product-actions">
-                                    <button
-                                        className="btn"
-                                        type="button"
-                                        onClick={() => {
-                                            if (!pid) return; // 防御：避免 undefined
-                                            addToCart(pid, 1);
-                                        }}
-                                    >
-                                        Add
-                                    </button>
+                    {/* ===== 分页 ===== */}
+                    {totalPages > 1 && (
+                        <div className="pagination">
+                            <div className="pg">
+                                <button disabled={safePage === 1} onClick={() => setPage(1)}>
+                                    «
+                                </button>
+                                <button
+                                    disabled={safePage === 1}
+                                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                                >
+                                    ‹
+                                </button>
 
-                                    <button className="btn ghost" type="button" disabled>
-                                        Edit
-                                    </button>
-                                </div>
+                                {Array.from({ length: totalPages })
+                                    .slice(0, 7)
+                                    .map((_, i) => {
+                                        const n = i + 1;
+                                        return (
+                                            <button
+                                                key={n}
+                                                className={n === safePage ? "active" : ""}
+                                                onClick={() => setPage(n)}
+                                            >
+                                                {n}
+                                            </button>
+                                        );
+                                    })}
+
+                                <button
+                                    disabled={safePage === totalPages}
+                                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                                >
+                                    ›
+                                </button>
+                                <button disabled={safePage === totalPages} onClick={() => setPage(totalPages)}>
+                                    »
+                                </button>
                             </div>
-                        );
-                    })}
-                </div>
+                        </div>
+                    )}
+                </>
             )}
         </div>
     );

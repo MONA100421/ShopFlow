@@ -1,4 +1,8 @@
-html, body { height: 100%; margin: 0; }
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
 
 .shell {
   min-height: 100vh;
@@ -9,8 +13,10 @@ html, body { height: 100%; margin: 0; }
 .content {
   flex: 1;
   background: #efefef;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   padding: 24px;
+}
+
+/* 让页面内容能撑满宽度（grid 才能变 4 列） */
+.content>* {
+  width: 100%;
 }
