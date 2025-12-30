@@ -1,61 +1,64 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import type { User } from "../types/User";
+import { loginAPI, LoginResponse } from "../services/authService";
+
+/* ========================
+   State Types
+======================== */
 
 interface AuthState {
-  user: User | null;
+  user: LoginResponse | null;
   isAuthenticated: boolean;
-  initialized: boolean;
-  status: "idle" | "loading" | "succeeded" | "failed";
+  loading: boolean;
   error: string | null;
+  initialized: boolean;
 }
+
+/* ========================
+   Initial State
+======================== */
 
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
-  initialized: false,
-  status: "idle",
+  loading: false,
   error: null,
+  initialized: false,
 };
 
-/* =========================
-   loginThunk（Mock）
-========================= */
+/* ========================
+   Thunk Payload
+======================== */
+
+interface LoginPayload {
+  email: string;
+  password: string;
+}
+
+/* ========================
+   Async Thunk (Login)
+======================== */
+
 export const loginThunk = createAsyncThunk<
-  User, // ✅ 成功回傳 User
-  { email: string; password: string }, // thunk argument type
+  LoginResponse,
+  LoginPayload,
   { rejectValue: string }
 >("auth/login", async ({ email, password }, { rejectWithValue }) => {
-  // mock delay
-  await new Promise((r) => setTimeout(r, 500));
+  try {
+    const user = await loginAPI(email, password);
 
-  // mock validation
-  if (!email || !password) {
-    return rejectWithValue("Email and password are required");
-  }
+    // ✅ side-effect 放在 thunk（業界標準）
+    localStorage.setItem("authUser", JSON.stringify(user));
 
-  // mock validation
-  const isAdmin = email.toLowerCase().includes("admin");
-
-  if (!email.includes("@")) {
+    return user;
+  } catch (err) {
     return rejectWithValue("Invalid email or password");
   }
-
-  // mock user data
-  const user: User = {
-    id: crypto.randomUUID(),
-    email,
-    role: isAdmin ? "admin" : "user",
-  };
-
-  // mock storing user in localStorage
-  localStorage.setItem("user", JSON.stringify(user));
-
-  return user;
 });
 
-/* =========================
+/* ========================
    Slice
-========================= */
+======================== */
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -63,37 +66,60 @@ const authSlice = createSlice({
     logout(state) {
       state.user = null;
       state.isAuthenticated = false;
-      state.status = "idle";
       state.error = null;
-      localStorage.removeItem("user");
+      state.initialized = true;
+
+      localStorage.removeItem("authUser");
     },
+
     restoreUser(state) {
-      const stored = localStorage.getItem("user");
+      const stored = localStorage.getItem("authUser");
+
       if (stored) {
         state.user = JSON.parse(stored);
         state.isAuthenticated = true;
+      } else {
+        state.user = null;
+        state.isAuthenticated = false;
       }
+
+      // ✅ 非常重要：Header / RequireAdmin 會用到
       state.initialized = true;
     },
   },
+
   extraReducers: (builder) => {
     builder
+      /* ===== login pending ===== */
       .addCase(loginThunk.pending, (state) => {
-        state.status = "loading";
+        state.loading = true;
         state.error = null;
       })
-      .addCase(loginThunk.fulfilled, (state, action: PayloadAction<User>) => {
-        state.user = action.payload;
-        state.isAuthenticated = true;
-        state.status = "succeeded";
-        state.initialized = true;
-      })
+
+      /* ===== login success ===== */
+      .addCase(
+        loginThunk.fulfilled,
+        (state, action: PayloadAction<LoginResponse>) => {
+          state.loading = false;
+          state.user = action.payload;
+          state.isAuthenticated = true;
+          state.error = null;
+          state.initialized = true;
+        }
+      )
+
+      /* ===== login failed ===== */
       .addCase(loginThunk.rejected, (state, action) => {
-        state.status = "failed";
+        state.loading = false;
         state.error = action.payload ?? "Login failed";
+        state.isAuthenticated = false;
       });
   },
 });
+
+/* ========================
+   Exports
+======================== */
 
 export const { logout, restoreUser } = authSlice.actions;
 export default authSlice.reducer;

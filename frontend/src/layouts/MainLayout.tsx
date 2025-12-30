@@ -2,19 +2,21 @@
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import type { RootState } from "../store/store";
+import type { RootState, AppDispatch } from "../store/store";
 import { logout } from "../store/authSlice";
 import CartDrawer from "../components/CartDrawer";
 
 export default function MainLayout() {
   const [cartOpen, setCartOpen] = useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
-  const { isAuthenticated } = useSelector(
+  // ===== Auth state =====
+  const { isAuthenticated, loading, error } = useSelector(
     (state: RootState) => state.auth
   );
 
+  // ===== Cart state =====
   const items = useSelector(
     (state: RootState) => state.cart.items
   );
@@ -46,14 +48,21 @@ export default function MainLayout() {
 
           {/* Right Actions */}
           <div className="header-actions">
-            {isAuthenticated ? (
-              <button className="header-btn" onClick={handleLogout}>
+            {!isAuthenticated ? (
+              <Link
+                to="/auth/login"
+                className={`header-btn ${loading ? "disabled" : ""}`}
+              >
+                {loading ? "Signing in..." : "Sign In"}
+              </Link>
+            ) : (
+              <button
+                className="header-btn"
+                onClick={handleLogout}
+                disabled={loading}
+              >
                 Sign Out
               </button>
-            ) : (
-              <Link to="/auth/login" className="header-btn">
-                Sign In
-              </Link>
             )}
 
             <button
@@ -70,6 +79,13 @@ export default function MainLayout() {
           </div>
         </div>
       </header>
+
+      {/* ================= Global Auth Error（UX 完整） ================= */}
+      {error && (
+        <div className="global-error">
+          {error}
+        </div>
+      )}
 
       {/* ================= Main ================= */}
       <main className="site-main">
