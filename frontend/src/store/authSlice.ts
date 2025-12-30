@@ -1,73 +1,99 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import type { User } from "../types/User";
 
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   initialized: boolean;
+  status: "idle" | "loading" | "succeeded" | "failed";
+  error: string | null;
 }
 
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
   initialized: false,
+  status: "idle",
+  error: null,
 };
 
+/* =========================
+   loginThunk（Mock）
+========================= */
+export const loginThunk = createAsyncThunk<
+  User, // ✅ 成功回傳 User
+  { email: string; password: string }, // thunk argument type
+  { rejectValue: string }
+>("auth/login", async ({ email, password }, { rejectWithValue }) => {
+  // mock delay
+  await new Promise((r) => setTimeout(r, 500));
+
+  // mock validation
+  if (!email || !password) {
+    return rejectWithValue("Email and password are required");
+  }
+
+  // mock validation
+  const isAdmin = email.toLowerCase().includes("admin");
+
+  if (!email.includes("@")) {
+    return rejectWithValue("Invalid email or password");
+  }
+
+  // mock user data
+  const user: User = {
+    id: crypto.randomUUID(),
+    email,
+    role: isAdmin ? "admin" : "user",
+  };
+
+  // mock storing user in localStorage
+  localStorage.setItem("user", JSON.stringify(user));
+
+  return user;
+});
+
+/* =========================
+   Slice
+========================= */
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    // ===============================
-    // Login success
-    // ===============================
-    loginSuccess(state, action: PayloadAction<User>) {
-      state.user = action.payload;
-      state.isAuthenticated = true;
-      state.initialized = true;
-
-      // persist to localStorage
-      localStorage.setItem("user", JSON.stringify(action.payload));
-    },
-
-    // ===============================
-    // Logout
-    // ===============================
     logout(state) {
       state.user = null;
       state.isAuthenticated = false;
-      state.initialized = true;
-
+      state.status = "idle";
+      state.error = null;
       localStorage.removeItem("user");
     },
-
-    // ===============================
-    // Restore user from localStorage
-    // (called once when app starts)
-    // ===============================
     restoreUser(state) {
-      const storedUser = localStorage.getItem("user");
-
-      if (storedUser) {
-        try {
-          state.user = JSON.parse(storedUser) as User;
-          state.isAuthenticated = true;
-        } catch {
-          // corrupted localStorage
-          localStorage.removeItem("user");
-          state.user = null;
-          state.isAuthenticated = false;
-        }
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        state.user = JSON.parse(stored);
+        state.isAuthenticated = true;
       }
-
       state.initialized = true;
     },
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(loginThunk.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(loginThunk.fulfilled, (state, action: PayloadAction<User>) => {
+        state.user = action.payload;
+        state.isAuthenticated = true;
+        state.status = "succeeded";
+        state.initialized = true;
+      })
+      .addCase(loginThunk.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload ?? "Login failed";
+      });
+  },
 });
 
-export const {
-  loginSuccess,
-  logout,
-  restoreUser,
-} = authSlice.actions;
-
+export const { logout, restoreUser } = authSlice.actions;
 export default authSlice.reducer;
