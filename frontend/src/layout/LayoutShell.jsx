@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, Outlet } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+
 
 import CartDrawer from "../components/CartDrawer";
 import { logout } from "../redux/slices/authSlice";
 import { setSearch } from "../redux/slices/uiSlice";
+import { removeFromCart, clearCart, setPromo } from "../redux/slices/cartSlice";
+import { fetchProducts } from "../redux/slices/productSlice";
 
 import "./LayoutShell.css";
 
@@ -29,6 +32,22 @@ export default function LayoutShell() {
         (sum, q) => sum + Number(q || 0),
         0
     );
+
+    useEffect(() => {
+        dispatch(fetchProducts());
+    }, [dispatch]);
+    
+    useEffect(() => {
+        if (!products.length) return;
+
+        const valid = new Set(products.map((p) => String(p._id || p.id)));
+
+        Object.keys(cartItems).forEach((id) => {
+            if (!valid.has(String(id))) {
+                dispatch(removeFromCart(id));
+            }
+        });
+    }, [dispatch, products, cartItems]);
 
     const subtotal = Object.entries(cartItems).reduce((sum, [id, qty]) => {
         const p = byId.get(String(id));
@@ -62,7 +81,16 @@ export default function LayoutShell() {
                             <button
                                 className="action"
                                 type="button"
-                                onClick={() => dispatch(logout())}
+                                onClick={() => {
+                                    dispatch(logout());
+                                    dispatch(clearCart());
+                                    dispatch(setPromo(""));
+                                    try {
+                                        localStorage.removeItem("sf_cart");
+                                        localStorage.removeItem("sf_promo");
+                                    } catch { }
+                                }}
+
                             >
                                 <span className="icon">👤</span>
                                 <span>Sign Out</span>

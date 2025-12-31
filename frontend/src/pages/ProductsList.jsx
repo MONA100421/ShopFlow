@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useMemo, useState } from "react";
 
 import { fetchProducts } from "../redux/slices/productSlice";
-import { addToCart, setQty } from "../redux/slices/cartSlice";
+import { addToCart } from "../redux/slices/cartSlice";
 
 const PAGE_SIZE = 8;
 
@@ -19,7 +19,7 @@ function getImg(p) {
 export default function ProductsList() {
     const dispatch = useDispatch();
 
-    // ✅ Manager 判定：优先 Redux（auth.user.role），没有就 fallback 到 localStorage（兼容旧后端/旧逻辑）
+    // ✅ Manager 判定：优先 Redux（auth.user.role）
     const role = useSelector((s) => String(s.auth?.user?.role || "").toLowerCase());
     const manager = role === "admin" || role === "manager";
 
@@ -31,12 +31,15 @@ export default function ProductsList() {
     // ✅ Redux: search（从 uiSlice 来）
     const search = useSelector((state) => state.ui.search || "");
 
-    // ✅ Redux: cart（从 cartSlice 来）
-    const cart = useSelector((state) => state.cart.items || {});
-
     // UI: sort + pagination
     const [sortKey, setSortKey] = useState("last");
     const [page, setPage] = useState(1);
+
+    // ✅ 每个商品一个“待加入数量”（Stepper 只改它，不再直接入购物车）
+    const [draftQtyMap, setDraftQtyMap] = useState({}); // { [pid]: number }
+    const getDraftQty = (pid) => Math.max(0, Number(draftQtyMap[pid] ?? 0)); 
+    const setDraftQty = (pid, next) =>
+        setDraftQtyMap((m) => ({ ...m, [pid]: Math.max(0, Number(next) || 0) }));
 
     useEffect(() => {
         dispatch(fetchProducts());
@@ -144,50 +147,70 @@ export default function ProductsList() {
                     <div className="grid">
                         {paged.map((p) => {
                             const pid = String(p?._id ?? p?.id ?? "");
-                            const qty = Number(cart?.[pid] || 0);
+                            const draftQty = pid ? getDraftQty(pid) : 0;
 
                             return (
                                 <div className="card product-card" key={pid || `${p?.name}-${p?.price}`}>
-                                    {/* ✅ 图片可点：去详情 */}
+                                    {/* 图片可点：去详情 */}
                                     <Link to={`/products/${pid}`} className="product-thumb">
                                         <img src={getImg(p)} alt={p?.name || "product"} />
                                     </Link>
 
                                     <div className="product-body">
-                                        {/* ✅ 名字可点：去详情（不影响 +/- / Edit） */}
+                                        {/* 名字可点：去详情 */}
                                         <Link to={`/products/${pid}`} className="product-name">
                                             {p?.name || "(No name)"}
                                         </Link>
 
-                                        <div className="product-price">
-                                            ${Number(p?.price || 0).toFixed(2)}
-                                        </div>
+                                        <div className="product-price">${Number(p?.price || 0).toFixed(2)}</div>
 
+                                        {/* ✅ Stepper + Add to cart + Edit（同一行） */}
                                         <div className="row">
-                                            {/* 数量控制 */}
+                                            {/* 数量控制：只选数量，不入购物车 */}
                                             <div className="stepper">
                                                 <button
                                                     type="button"
                                                     onClick={() => {
                                                         if (!pid) return;
-                                                        dispatch(setQty({ id: pid, qty: Math.max(0, qty - 1) }));
+                                                        setDraftQty(pid, draftQty - 1);
                                                     }}
                                                     aria-label="decrease"
                                                 >
                                                     –
                                                 </button>
-                                                <span>{qty}</span>
+
+                                                <span>{draftQty}</span>
+
                                                 <button
                                                     type="button"
                                                     onClick={() => {
                                                         if (!pid) return;
-                                                        dispatch(addToCart({ id: pid, delta: 1 }));
+                                                        setDraftQty(pid, draftQty + 1);
                                                     }}
                                                     aria-label="increase"
                                                 >
                                                     +
                                                 </button>
                                             </div>
+
+                                            {/* ✅ Add to cart：一次性加入选好的数量 */}
+                                            <button
+                                                type="button"
+                                                className="btn btn-primary"
+                                                disabled={!pid || draftQty <= 0}
+                                                onClick={() => {
+                                                    if (!pid) return;
+                                                    if (draftQty <= 0) return;
+
+                                                    // 一次性加 draftQty
+                                                    dispatch(addToCart({ id: pid, delta: draftQty }));
+
+                                                    // 加完重置为 1（可选）
+                                                    setDraftQty(pid, 1);
+                                                }}
+                                            >
+                                                Add to cart
+                                            </button>
 
                                             {/* ✅ Edit：只给 manager */}
                                             {manager && (
@@ -209,10 +232,7 @@ export default function ProductsList() {
                                 <button disabled={safePage === 1} onClick={() => setPage(1)}>
                                     «
                                 </button>
-                                <button
-                                    disabled={safePage === 1}
-                                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                                >
+                                <button disabled={safePage === 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
                                     ‹
                                 </button>
 

@@ -20,6 +20,7 @@ export default function AdminRoute({ children }) {
                 const role = String(data?.user?.role || "").toLowerCase();
                 if (role === "admin" || role === "manager") return setStatus("ok");
 
+                
                 setStatus("no");
             } catch {
                 setStatus("no");
