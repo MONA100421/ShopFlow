@@ -1,0 +1,331 @@
+/* =========================================================
+   Login Modal (Rectangle)
+   Figma: width 600 / height 528 / radius 10 / shadow
+========================================================= */
+
+.login-modal {
+    position: relative;
+
+    width: 600px;
+    height: 528px;
+
+    margin: 120px auto 0;
+
+    background: #ffffff;
+    border-radius: 10px;
+    border: 1px solid #cccccc;
+
+    box-shadow: 0px 5px 16px 1px rgba(229, 229, 229, 0.8);
+
+    padding: 24px 48px;
+
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+/* =========================================================
+   Close Button
+   Figma: 40x40 / padding 10
+========================================================= */
+
+.close-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+
+    width: 40px;
+    height: 40px;
+    padding: 10px;
+
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.close-icon {
+    display: block;
+    width: 20px;
+    height: 20px;
+    position: relative;
+}
+
+.close-icon::before,
+.close-icon::after {
+    content: "";
+    position: absolute;
+    top: 9px;
+    left: 0;
+    width: 20px;
+    height: 2px;
+    background: #373a3c;
+}
+
+.close-icon::before {
+    transform: rotate(45deg);
+}
+
+.close-icon::after {
+    transform: rotate(-45deg);
+}
+
+/* =========================================================
+   Header
+   Figma: width 379 / height 64 / gap 10 / padding 10
+========================================================= */
+
+.sign-in-header {
+    width: 379px;
+    height: 64px;
+
+    margin: 10px auto 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sign-in-title {
+    width: 359px;
+    height: 44px;
+
+    margin: 0;
+
+    font-family: "Inter", sans-serif;
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 138%;
+
+    text-align: center;
+    color: #111827;
+}
+
+/* =========================================================
+   Email / Password Groups
+========================================================= */
+
+.email-group,
+.password-group {
+    width: 504px;
+    height: 88px;
+
+    margin: 0 auto 24px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* =========================================================
+   Labels
+   Figma: font 16 / line-height 24 / color #6B7280
+========================================================= */
+
+.field-label {
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 24px;
+
+    color: #6b7280;
+}
+
+/* =========================================================
+   Form Control (Input Wrapper)
+   Figma: 504 x 56 / border 1px #CCC / radius 4
+========================================================= */
+
+.form-control {
+    width: 504px;
+    height: 56px;
+
+    border-radius: 4px;
+    border: 1px solid #cccccc;
+    background: #ffffff;
+
+    display: flex;
+    align-items: center;
+
+    box-sizing: border-box;
+}
+
+/* =========================================================
+   Input
+   Figma: text size 16 / color #111827
+========================================================= */
+
+.form-input {
+    flex: 1;
+
+    height: 24px;
+    margin-left: 12px;
+
+    border: none;
+    outline: none;
+    background: transparent;
+
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 24px;
+
+    color: #111827;
+}
+
+.form-input::placeholder {
+    color: #111827;
+}
+
+/* =========================================================
+   Password Control (Show button inside)
+========================================================= */
+
+.password-control {
+    position: relative;
+}
+
+.show-password {
+    width: 42px;
+    height: 24px;
+
+    margin-right: 12px;
+
+    background: transparent;
+    border: none;
+    cursor: pointer;
+
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 24px;
+
+    color: #6b7280;
+    text-decoration: underline;
+}
+
+/* =========================================================
+   Submit Button
+   Figma: width 503 / height 47 / radius 4
+========================================================= */
+
+.sign-in-btn {
+    width: 503px;
+    height: 47px;
+
+    margin: 32px auto 24px;
+
+    background: #5048e5;
+    border-radius: 4px;
+    border: none;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+}
+
+.sign-in-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.sign-in-text {
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 21px;
+
+    color: #ffffff;
+}
+
+/* =========================================================
+   Footer Links (Sign up / Forgot password)
+========================================================= */
+
+.auth-links {
+    width: 503px;
+    margin: 0 auto;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Left group */
+.signup-link {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.signup-text {
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 157%;
+
+    color: #6b7280;
+}
+
+/* Link */
+.link {
+    font-family: "Inter", sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 157%;
+
+    color: #5048e5;
+    cursor: pointer;
+    position: relative;
+}
+
+/* Underline (opacity 0.4 base, solid on hover) */
+.link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+
+    width: 100%;
+    height: 1px;
+
+    background: #5048e5;
+    opacity: 0.4;
+}
+
+.link:hover::after {
+    opacity: 1;
+}
+
+/* =========================================================
+   Error
+========================================================= */
+
+.auth-error {
+    width: 503px;
+    margin: -8px auto 8px;
+
+    font-size: 13px;
+    color: #dc2626;
+}
+
+/* =========================================================
+   Responsive (bonus, non-destructive)
+========================================================= */
+
+@media (max-width: 640px) {
+    .login-modal {
+        width: calc(100% - 32px);
+        height: auto;
+        padding: 24px;
+    }
+
+    .email-group,
+    .password-group,
+    .form-control,
+    .sign-in-btn,
+    .auth-links {
+        width: 100%;
+    }
+}
