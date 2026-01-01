@@ -1,14 +1,24 @@
 import { useParams } from "react-router-dom";
 import AuthForm from "../components/AuthForm";
 
-type AuthMode = "login" | "register" | "reset";
+/**
+ * All supported auth modes
+ */
+type AuthMode = "login" | "register" | "reset" | "reset-success";
 
 export default function AuthPage() {
-  const { mode } = useParams<{ mode: AuthMode }>();
+  const { mode } = useParams<{ mode?: string }>();
 
-  // Ensure mode is one of the expected values
+  /**
+   * Ensure mode is always valid
+   * Fallback to "login" for any unknown value
+   */
   const safeMode: AuthMode =
-    mode === "register" || mode === "reset" ? mode : "login";
+    mode === "register" ||
+    mode === "reset" ||
+    mode === "reset-success"
+      ? mode
+      : "login";
 
   return (
     <div className="container">

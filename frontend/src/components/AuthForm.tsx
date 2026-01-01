@@ -7,8 +7,10 @@ import { loginThunk, registerThunk } from "../store/authSlice";
 
 import "./AuthForm.css";
 
+type AuthMode = "login" | "register" | "reset" | "reset-success";
+
 interface AuthFormProps {
-  mode: "login" | "register" | "reset";
+  mode: AuthMode;
 }
 
 export default function AuthForm({ mode }: AuthFormProps) {
@@ -30,7 +32,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [showPassword, setShowPassword] = useState(false);
 
   /* =========================
-     Reset on mode change
+     Reset state on mode change
   ========================= */
 
   useEffect(() => {
@@ -43,7 +45,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   }, [mode]);
 
   /* =========================
-     Validation
+     Validation helpers
   ========================= */
 
   const validateEmail = (value: string) =>
@@ -53,31 +55,42 @@ export default function AuthForm({ mode }: AuthFormProps) {
     value.length >= 6 ? "" : "Invalid password input!";
 
   /* =========================
-     Submit
+     Submit handler
   ========================= */
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
 
+    // Email always required
     const emailErr = validateEmail(email);
-    const passwordErr = validatePassword(password);
-
     setEmailError(emailErr);
-    setPasswordError(passwordErr);
+    if (emailErr) return;
 
-    if (emailErr || passwordErr) return;
+    // Password only for login / register
+    if (mode !== "reset") {
+      const passwordErr = validatePassword(password);
+      setPasswordError(passwordErr);
+      if (passwordErr) return;
+    }
 
     try {
       setLoading(true);
 
-      if (mode === "register") {
-        await dispatch(registerThunk({ email, password })).unwrap();
-      } else {
+      if (mode === "login") {
         await dispatch(loginThunk({ email, password })).unwrap();
+        navigate("/");
       }
 
-      navigate("/");
+      if (mode === "register") {
+        await dispatch(registerThunk({ email, password })).unwrap();
+        navigate("/");
+      }
+
+      if (mode === "reset") {
+        // mock success → success page
+        navigate("/auth/reset-success");
+      }
     } catch {
       setFormError("Invalid email or password");
     } finally {
@@ -85,25 +98,67 @@ export default function AuthForm({ mode }: AuthFormProps) {
     }
   };
 
+  /* =========================
+     Reset Success Page
+  ========================= */
+
+  if (mode === "reset-success") {
+    return (
+      <div className="login-modal reset-success">
+        <button
+          className="close-btn"
+          onClick={() => navigate("/auth/login")}
+        >
+          <span className="close-icon" />
+        </button>
+
+        <div className="reset-icon">
+          <svg width="70" height="70" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 6V6.01L12 11L4 6.01V6H20ZM4 18V8L12 13L20 8V18H4Z"
+              fill="#5048E5"
+            />
+          </svg>
+        </div>
+
+        <p className="reset-success-text">
+          We have sent the update password link to your email, please check that！
+        </p>
+      </div>
+    );
+  }
+
+  /* =========================
+     Main Form
+  ========================= */
+
   return (
-    <div className="login-modal">
+    <div className={`login-modal ${mode === "reset" ? "reset-modal" : ""}`}>
+      {/* Close */}
       <button
         className="close-btn"
-        onClick={() => {
-          setFormError("");
-          navigate("/");
-        }}
+        onClick={() => navigate("/")}
       >
         <span className="close-icon" />
       </button>
 
+      {/* Header */}
       <div className="sign-in-header">
         <h2 className="sign-in-title">
-          {mode === "register"
+          {mode === "reset"
+            ? "Update your password"
+            : mode === "register"
             ? "Sign up an account"
             : "Sign in to your account"}
         </h2>
       </div>
+
+      {/* Reset description */}
+      {mode === "reset" && (
+        <p className="reset-desc">
+          Enter your email link, we will send you the recovery link
+        </p>
+      )}
 
       <form onSubmit={handleSubmit} noValidate>
         {/* Email */}
@@ -116,59 +171,73 @@ export default function AuthForm({ mode }: AuthFormProps) {
               value={email}
               autoComplete="email"
               onChange={(e) => {
-                setEmail(e.target.value);
-                if (mode === "register") {
-                  setEmailError(validateEmail(e.target.value));
+                const value = e.target.value;
+                setEmail(value);
+                if (mode !== "login") {
+                  setEmailError(validateEmail(value));
                 }
               }}
             />
           </div>
-          {emailError && <span className="field-error">{emailError}</span>}
-        </div>
-
-        {/* Password */}
-        <div className={`password-group ${passwordError ? "has-error" : ""}`}>
-          <label className="field-label">Password</label>
-          <div
-            className={`form-control password-control ${
-              passwordError ? "error" : ""
-            }`}
-          >
-            <input
-              className="form-input"
-              type={showPassword ? "text" : "password"}
-              value={password}
-              autoComplete={
-                mode === "register" ? "new-password" : "current-password"
-              }
-              onChange={(e) => {
-                setPassword(e.target.value);
-                if (mode === "register") {
-                  setPasswordError(validatePassword(e.target.value));
-                }
-              }}
-            />
-
-            <button
-              type="button"
-              className="show-password"
-              onClick={() => setShowPassword((v) => !v)}
-            >
-              {showPassword ? "Hide" : "Show"}
-            </button>
-          </div>
-          {passwordError && (
-            <span className="field-error">{passwordError}</span>
+          {emailError && (
+            <span className="field-error">{emailError}</span>
           )}
         </div>
 
+        {/* Password */}
+        {mode !== "reset" && (
+          <div className={`password-group ${passwordError ? "has-error" : ""}`}>
+            <label className="field-label">Password</label>
+            <div
+              className={`form-control password-control ${
+                passwordError ? "error" : ""
+              }`}
+            >
+              <input
+                className="form-input"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                autoComplete={
+                  mode === "register"
+                    ? "new-password"
+                    : "current-password"
+                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setPassword(value);
+                  if (mode === "register") {
+                    setPasswordError(validatePassword(value));
+                  }
+                }}
+              />
+              <button
+                type="button"
+                className="show-password"
+                onClick={() => setShowPassword((v) => !v)}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
+            {passwordError && (
+              <span className="field-error">{passwordError}</span>
+            )}
+          </div>
+        )}
+
+        {/* Form error */}
         {formError && <div className="auth-error">{formError}</div>}
 
+        {/* Submit */}
         <button className="sign-in-btn" disabled={loading}>
-          {mode === "register" ? "Create account" : "Sign In"}
+          {mode === "reset"
+            ? "Update password"
+            : mode === "register"
+            ? "Create account"
+            : "Sign In"}
         </button>
       </form>
 
+      {/* Footer */}
       <div className="auth-links">
         {mode === "register" ? (
           <div className="signup-link">
@@ -177,7 +246,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
               Sign in
             </span>
           </div>
-        ) : (
+        ) : mode === "login" ? (
           <>
             <div className="signup-link">
               <span className="signup-text">Don’t have an account?</span>
@@ -188,8 +257,20 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 Sign up
               </span>
             </div>
-            <span className="link">Forgot password?</span>
+            <span
+              className="link"
+              onClick={() => navigate("/auth/reset")}
+            >
+              Forgot password?
+            </span>
           </>
+        ) : (
+          <div className="signup-link">
+            <span className="signup-text">Back to</span>
+            <span className="link" onClick={() => navigate("/auth/login")}>
+              Sign in
+            </span>
+          </div>
         )}
       </div>
     </div>
