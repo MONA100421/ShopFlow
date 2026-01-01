@@ -80,7 +80,7 @@ export default function MainLayout() {
         </div>
       </header>
 
-      {/* ================= Global Auth Error（UX 完整） ================= */}
+      {/* ================= Global Auth Error ================= */}
       {error && (
         <div className="global-error">
           {error}
@@ -89,6 +89,11 @@ export default function MainLayout() {
 
       {/* ================= Main ================= */}
       <main className="site-main">
+        {/* 
+          IMPORTANT:
+          This is the ONLY container that pages should live in.
+          Pages must NOT define their own `.container`.
+        */}
         <div className="container">
           <Outlet context={{ setCartOpen }} />
         </div>

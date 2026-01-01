@@ -1,3 +1,4 @@
+import "./ProductCard.css";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -18,7 +19,6 @@ export default function ProductCard({
   onEdit,
 }: ProductCardProps) {
   const dispatch = useDispatch<AppDispatch>();
-
   const [quantity, setQuantity] = useState(1);
 
   const handleIncrease = () => {
@@ -36,42 +36,64 @@ export default function ProductCard({
         quantity,
       })
     );
-
     setQuantity(1);
   };
 
   return (
     <div className="product-card">
-      {/* Image */}
-      <Link to={`/products/${product.id}`} className="product-image">
+      {/* ================= Image ================= */}
+      <Link
+        to={`/products/${product.id}`}
+        className="product-image"
+      >
         {product.image ? (
-          <img src={product.image} alt={product.title} />
+          <img
+            src={product.image}
+            alt={product.title}
+          />
         ) : (
-          <div className="image-placeholder">No Image</div>
+          <div className="image-placeholder">
+            No Image
+          </div>
         )}
       </Link>
 
-      {/* Content */}
+      {/* ================= Content ================= */}
       <div className="product-content">
-        <h3 className="product-title">{product.title}</h3>
+        <h3 className="product-title">
+          {product.title}
+        </h3>
+
         <p className="product-price">
           ${product.price.toFixed(2)}
         </p>
 
-        {/* Quantity selector */}
+        {/* ================= Quantity ================= */}
         <div className="product-quantity">
-          <button type="button" onClick={handleDecrease}>
+          <button
+            type="button"
+            className="qty-btn"
+            onClick={handleDecrease}
+            aria-label="Decrease quantity"
+          >
             −
           </button>
 
-          <span>{quantity}</span>
+          <span className="quantity-value">
+            {quantity}
+          </span>
 
-          <button type="button" onClick={handleIncrease}>
+          <button
+            type="button"
+            className="qty-btn"
+            onClick={handleIncrease}
+            aria-label="Increase quantity"
+          >
             +
           </button>
         </div>
 
-        {/* Actions */}
+        {/* ================= Actions ================= */}
         <div className="product-actions">
           <button
             type="button"

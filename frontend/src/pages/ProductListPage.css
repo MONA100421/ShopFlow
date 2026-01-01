@@ -1,0 +1,272 @@
+/* =========================================================
+   Product Page Root
+========================================================= */
+
+.product-page {
+    width: 100%;
+    background: #f9fafb;
+    padding-bottom: 80px;
+}
+
+/* =========================================================
+   Page Header (Products + Actions)
+========================================================= */
+
+.product-header {
+    margin-top: 128px;
+    /* Figma: Top = 128 */
+    margin-bottom: 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* ✅ Products title (Figma H4)
+   ⚠️ selector 提高權重，避免被全域 h1 蓋掉
+*/
+.product-header .product-title {
+    margin: 0;
+
+    font-family: Inter, system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 138%;
+    letter-spacing: 0;
+
+    color: rgba(17, 24, 39, 1);
+    /* Text/Primary */
+}
+
+/* Right actions (Sort + Add Product) */
+.product-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* =========================================================
+   Sort Dropdown (Trigger)
+========================================================= */
+
+.sort-dropdown {
+    position: relative;
+}
+
+.sort-trigger {
+    width: 179px;
+    height: 40px;
+    padding: 0 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background: #ffffff;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+
+    font-family: Inter, system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: #565656;
+
+    cursor: pointer;
+}
+
+.sort-trigger:hover {
+    background: #fafafa;
+}
+
+.sort-caret {
+    width: 0;
+    height: 0;
+
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #565656;
+
+    transition: transform 0.2s ease;
+}
+
+.sort-caret.open {
+    transform: rotate(180deg);
+}
+
+/* =========================================================
+   Sort Dropdown Menu
+========================================================= */
+
+.sort-menu {
+    position: absolute;
+    top: 44px;
+    right: 0;
+
+    width: 180px;
+
+    background: #ffffff;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+
+    display: flex;
+    flex-direction: column;
+
+    z-index: 20;
+}
+
+.sort-item {
+    height: 25px;
+    padding: 0 12px 0 16px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background: transparent;
+    border: none;
+
+    cursor: pointer;
+}
+
+.sort-item:hover {
+    background: #f9fafb;
+}
+
+.sort-item-text {
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 25px;
+
+    color: #000000;
+}
+
+.sort-check-icon {
+    width: 12px;
+    height: 12px;
+}
+
+/* =========================================================
+   Add Product Button
+========================================================= */
+
+.add-product-btn {
+    width: 133px;
+    height: 40px;
+
+    background: #5048e5;
+    border-radius: 4px;
+    border: none;
+
+    font-family: Inter, system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 138%;
+
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.add-product-btn:hover {
+    opacity: 0.9;
+}
+
+/* =========================================================
+   Product Grid Container (White Card)
+========================================================= */
+
+.product-grid {
+    width: 100%;
+    min-height: 682px;
+
+    background: #ffffff;
+    border-radius: 4px;
+    border: 1px solid #cccccc;
+
+    padding: 24px;
+    box-sizing: border-box;
+
+    display: grid;
+
+    /* 一行固定 5 張卡 */
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+
+    /* 卡片高度對齊 Figma */
+    grid-auto-rows: 303px;
+
+    gap: 24px;
+}
+
+/* =========================================================
+   Empty / Loading / Error
+========================================================= */
+
+.product-empty {
+    width: 100%;
+    height: 682px;
+
+    background: #ffffff;
+    border-radius: 4px;
+    border: 1px solid #cccccc;
+}
+
+.loading-text,
+.error-text {
+    margin: 32px 0;
+
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 14px;
+}
+
+.loading-text {
+    color: #6b7280;
+}
+
+.error-text {
+    color: #fc5a44;
+}
+
+/* =========================================================
+   Pagination (Figma aligned)
+========================================================= */
+
+.pagination {
+    margin-top: 40px;
+
+    display: flex;
+    justify-content: flex-end;
+}
+
+.pagination-item {
+    width: 41px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #ffffff;
+    border: 1px solid #eceeef;
+
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+
+    color: #777777;
+    cursor: pointer;
+}
+
+.pagination-item+.pagination-item {
+    margin-left: -1px;
+}
+
+.pagination-item.active {
+    background: #5048e5;
+    border-color: #5048e5;
+    color: #ffffff;
+}
+
+.pagination-item.disabled {
+    color: #bbbbbb;
+    cursor: not-allowed;
+}

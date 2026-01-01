@@ -13,7 +13,7 @@ export default function ProductFormPage() {
   const product = id ? getProductById(id) : undefined;
 
   return (
-    <div className="container">
+    <div className="product-form-page">
       <h1>{id ? "Edit Product" : "Create Product"}</h1>
 
       <ProductForm

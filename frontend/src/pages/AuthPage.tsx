@@ -21,7 +21,7 @@ export default function AuthPage() {
       : "login";
 
   return (
-    <div className="container">
+    <div className="auth-page">
       <AuthForm mode={safeMode} />
     </div>
   );

@@ -41,7 +41,7 @@ export default function ProductDetailPage() {
   };
 
   return (
-    <div className="container">
+    <div className="product-detail-page">
       <h1>{product.title}</h1>
 
       {product.description && (
