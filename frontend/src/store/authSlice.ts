@@ -1,5 +1,9 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { loginAPI, LoginResponse } from "../services/authService";
+import {
+  loginAPI,
+  registerAPI,
+  LoginResponse,
+} from "../services/authService";
 
 /* ========================
    State Types
@@ -26,32 +30,50 @@ const initialState: AuthState = {
 };
 
 /* ========================
-   Thunk Payload
+   Payload Types
 ======================== */
 
-interface LoginPayload {
+interface AuthPayload {
   email: string;
   password: string;
 }
 
 /* ========================
-   Async Thunk (Login)
+   Thunks
 ======================== */
 
+/** -------- Login -------- */
 export const loginThunk = createAsyncThunk<
   LoginResponse,
-  LoginPayload,
+  AuthPayload,
   { rejectValue: string }
 >("auth/login", async ({ email, password }, { rejectWithValue }) => {
   try {
     const user = await loginAPI(email, password);
 
-    // ✅ side-effect 放在 thunk（業界標準）
     localStorage.setItem("authUser", JSON.stringify(user));
 
     return user;
   } catch (err) {
     return rejectWithValue("Invalid email or password");
+  }
+});
+
+/** -------- Register -------- */
+export const registerThunk = createAsyncThunk<
+  LoginResponse,
+  AuthPayload,
+  { rejectValue: string }
+>("auth/register", async ({ email, password }, { rejectWithValue }) => {
+  try {
+    const user = await registerAPI(email, password);
+
+
+    localStorage.setItem("authUser", JSON.stringify(user));
+
+    return user;
+  } catch (err) {
+    return rejectWithValue("Register failed");
   }
 });
 
@@ -62,6 +84,7 @@ export const loginThunk = createAsyncThunk<
 const authSlice = createSlice({
   name: "auth",
   initialState,
+
   reducers: {
     logout(state) {
       state.user = null;
@@ -83,20 +106,18 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
       }
 
-      // ✅ 非常重要：Header / RequireAdmin 會用到
       state.initialized = true;
     },
   },
 
   extraReducers: (builder) => {
     builder
-      /* ===== login pending ===== */
+
+      /* ===== Login ===== */
       .addCase(loginThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-
-      /* ===== login success ===== */
       .addCase(
         loginThunk.fulfilled,
         (state, action: PayloadAction<LoginResponse>) => {
@@ -107,11 +128,30 @@ const authSlice = createSlice({
           state.initialized = true;
         }
       )
-
-      /* ===== login failed ===== */
       .addCase(loginThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload ?? "Login failed";
+        state.isAuthenticated = false;
+      })
+
+      /* ===== Register ===== */
+      .addCase(registerThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        registerThunk.fulfilled,
+        (state, action: PayloadAction<LoginResponse>) => {
+          state.loading = false;
+          state.user = action.payload;
+          state.isAuthenticated = true;
+          state.error = null;
+          state.initialized = true;
+        }
+      )
+      .addCase(registerThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload ?? "Register failed";
         state.isAuthenticated = false;
       });
   },

@@ -26,7 +26,6 @@
 
 /* =========================================================
    Close Button
-   Figma: 40x40 / padding 10
 ========================================================= */
 
 .close-btn {
@@ -43,11 +42,14 @@
     cursor: pointer;
 }
 
+.close-btn:focus {
+    outline: none;
+}
+
 .close-icon {
-    display: block;
+    position: relative;
     width: 20px;
     height: 20px;
-    position: relative;
 }
 
 .close-icon::before,
@@ -56,6 +58,7 @@
     position: absolute;
     top: 9px;
     left: 0;
+
     width: 20px;
     height: 2px;
     background: #373a3c;
@@ -71,7 +74,6 @@
 
 /* =========================================================
    Header
-   Figma: width 379 / height 64 / gap 10 / padding 10
 ========================================================= */
 
 .sign-in-header {
@@ -91,7 +93,7 @@
 
     margin: 0;
 
-    font-family: "Inter", sans-serif;
+    font-family: Inter, system-ui, sans-serif;
     font-weight: 700;
     font-size: 32px;
     line-height: 138%;
@@ -101,28 +103,25 @@
 }
 
 /* =========================================================
-   Email / Password Groups
+   Groups
 ========================================================= */
 
 .email-group,
 .password-group {
     width: 504px;
-    height: 88px;
-
     margin: 0 auto 24px;
 
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    gap: 8px;
 }
 
 /* =========================================================
    Labels
-   Figma: font 16 / line-height 24 / color #6B7280
 ========================================================= */
 
 .field-label {
-    font-family: "Inter", sans-serif;
+    font-family: Inter, system-ui, sans-serif;
     font-weight: 400;
     font-size: 16px;
     line-height: 24px;
@@ -131,8 +130,7 @@
 }
 
 /* =========================================================
-   Form Control (Input Wrapper)
-   Figma: 504 x 56 / border 1px #CCC / radius 4
+   Form Control
 ========================================================= */
 
 .form-control {
@@ -145,26 +143,28 @@
 
     display: flex;
     align-items: center;
-
     box-sizing: border-box;
+}
+
+.form-control.error {
+    border-color: #fc5a44;
 }
 
 /* =========================================================
    Input
-   Figma: text size 16 / color #111827
 ========================================================= */
 
 .form-input {
     flex: 1;
-
     height: 24px;
+
     margin-left: 12px;
 
     border: none;
     outline: none;
     background: transparent;
 
-    font-family: "Inter", sans-serif;
+    font-family: Inter, system-ui, sans-serif;
     font-weight: 400;
     font-size: 16px;
     line-height: 24px;
@@ -177,35 +177,72 @@
 }
 
 /* =========================================================
-   Password Control (Show button inside)
+   Password Control
 ========================================================= */
 
 .password-control {
-    position: relative;
+    display: flex;
+    align-items: center;
 }
 
+/* =========================================================
+   Show / Hide Password (Figma exact)
+========================================================= */
+
 .show-password {
-    width: 42px;
-    height: 24px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 
     margin-right: 12px;
 
     background: transparent;
     border: none;
-    cursor: pointer;
+    padding: 0;
 
-    font-family: "Inter", sans-serif;
+    font-family: Inter, system-ui, sans-serif;
     font-weight: 400;
     font-size: 16px;
     line-height: 24px;
 
     color: #6b7280;
     text-decoration: underline;
+
+    cursor: pointer;
+}
+
+.show-password:hover {
+    color: #5048e5;
+}
+
+.show-password:focus {
+    outline: none;
+}
+
+/* optional eye icon placeholder */
+.eye-icon {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+}
+
+/* =========================================================
+   Error Text (Auto-check)
+========================================================= */
+
+.field-error {
+    align-self: flex-end;
+
+    font-family: Inter, system-ui, sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 157%;
+
+    color: #fc5a44;
 }
 
 /* =========================================================
    Submit Button
-   Figma: width 503 / height 47 / radius 4
 ========================================================= */
 
 .sign-in-btn {
@@ -231,7 +268,7 @@
 }
 
 .sign-in-text {
-    font-family: "Inter", sans-serif;
+    font-family: Inter, system-ui, sans-serif;
     font-weight: 600;
     font-size: 16px;
     line-height: 21px;
@@ -240,7 +277,7 @@
 }
 
 /* =========================================================
-   Footer Links (Sign up / Forgot password)
+   Footer Links
 ========================================================= */
 
 .auth-links {
@@ -252,7 +289,6 @@
     align-items: center;
 }
 
-/* Left group */
 .signup-link {
     display: flex;
     gap: 10px;
@@ -260,7 +296,7 @@
 }
 
 .signup-text {
-    font-family: "Inter", sans-serif;
+    font-family: Inter, system-ui, sans-serif;
     font-weight: 400;
     font-size: 14px;
     line-height: 157%;
@@ -268,9 +304,8 @@
     color: #6b7280;
 }
 
-/* Link */
 .link {
-    font-family: "Inter", sans-serif;
+    font-family: Inter, system-ui, sans-serif;
     font-weight: 500;
     font-size: 14px;
     line-height: 157%;
@@ -280,7 +315,6 @@
     position: relative;
 }
 
-/* Underline (opacity 0.4 base, solid on hover) */
 .link::after {
     content: "";
     position: absolute;
@@ -299,19 +333,7 @@
 }
 
 /* =========================================================
-   Error
-========================================================= */
-
-.auth-error {
-    width: 503px;
-    margin: -8px auto 8px;
-
-    font-size: 13px;
-    color: #dc2626;
-}
-
-/* =========================================================
-   Responsive (bonus, non-destructive)
+   Responsive (safe)
 ========================================================= */
 
 @media (max-width: 640px) {
@@ -328,4 +350,17 @@
     .auth-links {
         width: 100%;
     }
+}
+
+/* ===============================
+   Chrome Autofill Override
+=============================== */
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+    -webkit-text-fill-color: #111827 !important;
+    transition: background-color 9999s ease-in-out 0s;
 }

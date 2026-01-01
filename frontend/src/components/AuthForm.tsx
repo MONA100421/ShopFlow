@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import type { AppDispatch } from "../store/store";
-import { loginThunk } from "../store/authSlice";
+import { loginThunk, registerThunk } from "../store/authSlice";
 
 import "./AuthForm.css";
 
@@ -15,57 +15,71 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
+  /* =========================
+     State
+  ========================= */
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [formError, setFormError] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const titleMap = {
-    login: "Sign in to your account",
-    register: "Sign up an account",
-    reset: "Update your password",
-  };
+  /* =========================
+     Reset on mode change
+  ========================= */
 
-  const buttonTextMap = {
-    login: "Sign In",
-    register: "Register",
-    reset: "Update Password",
-  };
+  useEffect(() => {
+    setEmail("");
+    setPassword("");
+    setEmailError("");
+    setPasswordError("");
+    setFormError("");
+    setShowPassword(false);
+  }, [mode]);
+
+  /* =========================
+     Validation
+  ========================= */
+
+  const validateEmail = (value: string) =>
+    value.includes("@") ? "" : "Invalid email input!";
+
+  const validatePassword = (value: string) =>
+    value.length >= 6 ? "" : "Invalid password input!";
+
+  /* =========================
+     Submit
+  ========================= */
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError("");
 
-    if (!email.trim()) {
-      setError("Email is required");
-      return;
-    }
+    const emailErr = validateEmail(email);
+    const passwordErr = validatePassword(password);
 
-    if (mode !== "reset" && !password.trim()) {
-      setError("Password is required");
-      return;
-    }
+    setEmailError(emailErr);
+    setPasswordError(passwordErr);
 
-    setError("");
-
-    if (mode === "reset") {
-      navigate("/auth/login");
-      return;
-    }
+    if (emailErr || passwordErr) return;
 
     try {
       setLoading(true);
 
-      await dispatch(
-        loginThunk({
-          email,
-          password,
-        })
-      ).unwrap();
+      if (mode === "register") {
+        await dispatch(registerThunk({ email, password })).unwrap();
+      } else {
+        await dispatch(loginThunk({ email, password })).unwrap();
+      }
 
       navigate("/");
     } catch {
-      setError("Invalid email or password");
+      setFormError("Invalid email or password");
     } finally {
       setLoading(false);
     }
@@ -73,101 +87,111 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
   return (
     <div className="login-modal">
-      {/* Close button */}
       <button
-        type="button"
         className="close-btn"
-        onClick={() => navigate("/")}
+        onClick={() => {
+          setFormError("");
+          navigate("/");
+        }}
       >
         <span className="close-icon" />
       </button>
 
-      {/* Header */}
       <div className="sign-in-header">
-        <h2 className="sign-in-title">{titleMap[mode]}</h2>
+        <h2 className="sign-in-title">
+          {mode === "register"
+            ? "Sign up an account"
+            : "Sign in to your account"}
+        </h2>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        {/* Email group */}
-        <div className="email-group">
+      <form onSubmit={handleSubmit} noValidate>
+        {/* Email */}
+        <div className={`email-group ${emailError ? "has-error" : ""}`}>
           <label className="field-label">Email</label>
-
-          <div className="form-control">
+          <div className={`form-control ${emailError ? "error" : ""}`}>
             <input
-              type="email"
               className="form-input"
-              placeholder="you@example.com"
+              type="email"
               value={email}
-              disabled={loading}
-              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (mode === "register") {
+                  setEmailError(validateEmail(e.target.value));
+                }
+              }}
             />
           </div>
+          {emailError && <span className="field-error">{emailError}</span>}
         </div>
 
-        {/* Password group */}
-        {mode !== "reset" && (
-          <div className="password-group">
-            <label className="field-label">Password</label>
+        {/* Password */}
+        <div className={`password-group ${passwordError ? "has-error" : ""}`}>
+          <label className="field-label">Password</label>
+          <div
+            className={`form-control password-control ${
+              passwordError ? "error" : ""
+            }`}
+          >
+            <input
+              className="form-input"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              autoComplete={
+                mode === "register" ? "new-password" : "current-password"
+              }
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (mode === "register") {
+                  setPasswordError(validatePassword(e.target.value));
+                }
+              }}
+            />
 
-            <div className="form-control password-control">
-              <input
-                type={showPassword ? "text" : "password"}
-                className="form-input"
-                placeholder="••••••••••••••••"
-                value={password}
-                disabled={loading}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-
-              <button
-                type="button"
-                className="show-password"
-                onClick={() => setShowPassword((prev) => !prev)}
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
-            </div>
+            <button
+              type="button"
+              className="show-password"
+              onClick={() => setShowPassword((v) => !v)}
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
           </div>
-        )}
+          {passwordError && (
+            <span className="field-error">{passwordError}</span>
+          )}
+        </div>
 
-        {/* Error */}
-        {error && <div className="auth-error">{error}</div>}
+        {formError && <div className="auth-error">{formError}</div>}
 
-        {/* Submit button */}
-        <button
-          type="submit"
-          className="sign-in-btn"
-          disabled={loading}
-        >
-          <span className="sign-in-text">
-            {loading ? "Please wait..." : buttonTextMap[mode]}
-          </span>
+        <button className="sign-in-btn" disabled={loading}>
+          {mode === "register" ? "Create account" : "Sign In"}
         </button>
       </form>
 
-      {/* Footer links */}
-      {mode === "login" && (
-        <div className="auth-links">
+      <div className="auth-links">
+        {mode === "register" ? (
           <div className="signup-link">
-            <span className="signup-text">
-              Don’t have an account?
-            </span>
-            <span
-              className="link"
-              onClick={() => navigate("/auth/register")}
-            >
-              Sign up
+            <span className="signup-text">Already have an account</span>
+            <span className="link" onClick={() => navigate("/auth/login")}>
+              Sign in
             </span>
           </div>
-
-          <span
-            className="link forgot-password"
-            onClick={() => navigate("/auth/reset")}
-          >
-            Forgot password?
-          </span>
-        </div>
-      )}
+        ) : (
+          <>
+            <div className="signup-link">
+              <span className="signup-text">Don’t have an account?</span>
+              <span
+                className="link"
+                onClick={() => navigate("/auth/register")}
+              >
+                Sign up
+              </span>
+            </div>
+            <span className="link">Forgot password?</span>
+          </>
+        )}
+      </div>
     </div>
   );
 }
