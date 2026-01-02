@@ -4,19 +4,22 @@ body {
   margin: 0;
 }
 
+/* 外层：全宽背景 */
 .shell {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  background: var(--bg);
+  width: 100%;
 }
 
+/* 新增：统一的内容容器（限宽居中） */
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 16px;
+}
 .content {
   flex: 1;
   background: #efefef;
   padding: 24px;
-}
-
-/* 让页面内容能撑满宽度（grid 才能变 4 列） */
-.content>* {
-  width: 100%;
 }

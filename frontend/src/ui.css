@@ -7,7 +7,7 @@
   --nav: #0b1220;
   --primary: #4f46e5;
   --primary2: #4338ca;
-  --shadow: 0 10px 30px rgba(2, 6, 23, .08);
+  --shadow: 0 10px 30px rgba(2, 6, 23, 0.08);
   --radius: 12px;
 }
 
@@ -59,8 +59,8 @@ body {
 .input:focus,
 .select:focus,
 .textarea:focus {
-  border-color: rgba(79, 70, 229, .7);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, .12);
+  border-color: rgba(79, 70, 229, 0.7);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
 }
 
 /* 按钮（关键） */
@@ -85,7 +85,7 @@ body {
 }
 
 .btn:disabled {
-  opacity: .6;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
@@ -170,31 +170,42 @@ body {
   margin-bottom: 10px;
 }
 
+/* ===============================
+   ✅ FIX: Product card action row
+   目标：manager 多了 Edit 也永远对齐，不被挤出去
+   =============================== */
 .row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start; /* ✅ 关键：不要 space-between */
   gap: 10px;
+  flex-wrap: nowrap;
 }
 
+/* 数量 stepper：固定宽度，不被压扁 */
 .stepper {
   display: inline-flex;
   border: 1px solid var(--line);
   border-radius: 8px;
   overflow: hidden;
+
   height: 28px;
+  flex: 0 0 78px; /* ✅ 固定宽度 */
 }
 
 .stepper button {
-  width: 30px;
+  width: 26px;
+  height: 28px;
   border: 0;
+  padding: 0;
   background: var(--primary);
   color: #fff;
   cursor: pointer;
 }
 
 .stepper span {
-  width: 34px;
+  width: 26px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -202,6 +213,32 @@ body {
   background: #fff;
 }
 
+/* Add to cart：吃掉剩余空间 */
+.row .btn,
+.row .add-to-cart {
+  flex: 1 1 auto;
+  min-width: 120px;
+  height: 28px; /* 与 stepper 同高更整齐 */
+  padding: 0 12px;
+}
+
+/* Edit：固定宽度，永远给它留位置（class 叫 edit-btn 时生效） */
+.row .edit-btn,
+.row .btn-edit {
+  flex: 0 0 64px;
+  height: 28px;
+  padding: 0 10px;
+}
+
+/* 如果 Edit 不是 btn，而是 Link/button 默认样式，也兜住 */
+.row a.edit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+/* Pagination */
 .pagination {
   display: flex;
   justify-content: flex-end;
@@ -229,7 +266,7 @@ body {
 }
 
 .pg button:disabled {
-  opacity: .5;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -314,9 +351,6 @@ body {
     flex-direction: column;
   }
 }
-
-
-
 
 .image-preview-box {
   margin-top: 14px;

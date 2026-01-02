@@ -1,0 +1,61 @@
+.modal-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.25);
+  display: grid;
+  place-items: center;
+  z-index: 2000;
+  padding: 24px;
+}
+
+.modal-card {
+  width: min(600px, 92vw);
+  height: min(528px, 80vh);
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.18);
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.modal-x {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  cursor: pointer;
+  opacity: 0.7;
+}
+.modal-x:hover {
+  opacity: 1;
+}
+
+.modal-body {
+  width: 100%;
+  padding: 24px;
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+}
+
+.modal-icon {
+  color: #4f46e5;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.modal-msg {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  max-width: 420px;
+  line-height: 1.4;
+}

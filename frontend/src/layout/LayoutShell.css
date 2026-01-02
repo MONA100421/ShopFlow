@@ -1,142 +1,235 @@
+/* LayoutShell.css
+   ✅ 目标：
+   1) Header 固定顶部
+   2) Footer 固定底部（或贴底）
+   3) 右上角 Sign In / Cart 永远在右侧（不跑左边、不换行）
+   4) Search（如果你以后加）在中间自适应，不挤爆布局
+*/
+
 :root {
   --topbar-h: 64px;
   --footer-h: 64px;
   --page-pad: 24px;
+
+  --bg: #f3f4f6;
+  --card: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+
+  --brand: #111827;
+  --brand-2: #0b1220;
+
+  --shadow: 0 10px 30px rgba(17, 24, 39, 0.12);
+  --radius: 14px;
 }
 
 * {
   box-sizing: border-box;
 }
 
-/* ✅ 外壳：不再用 grid 来固定 header/footer（因为它们 fixed） */
 .shell {
   min-height: 100vh;
-  background: #f3f4f6;
+  background: var(--bg);
+  color: var(--text);
 }
 
-/* ✅ Header：永远固定在顶部 */
+/* =========================
+   Header (Fixed)
+========================= */
 .topbar {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-
   height: var(--topbar-h);
-  background: #111827;
-  color: white;
-
-  display: flex;
-  align-items: center;
-
-  z-index: 1000;
+  background: linear-gradient(180deg, var(--brand), var(--brand-2));
+  color: #fff;
+  z-index: 50;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
-/* Header 内部：flex + 可换行 */
 .topbar-inner {
-  width: min(1200px, 92vw);
-  margin: 0 auto;
-  padding: 14px 16px;
-
+  height: 100%;
   display: flex;
   align-items: center;
-  gap: 12px;
 
-  flex-wrap: wrap;
+  /* ✅ 不要让东西掉到下一行 */
+  flex-wrap: nowrap;
+
+  /* ✅ 顶栏内容居中版心（你不想要版心就删掉 max-width/margin） */
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  padding: 0 24px;
+  gap: 18px;
 }
 
+/* 左侧品牌 */
 .brand {
   display: flex;
   align-items: baseline;
-  gap: 8px;
-  font-weight: 700;
-  flex-shrink: 0;
+  gap: 10px;
+  white-space: nowrap;
 }
 
 .brand-main {
-  font-size: 26px;
-  line-height: 1;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
 }
 
 .brand-sub {
   font-size: 12px;
-  opacity: 0.9;
-  font-weight: 600;
-  line-height: 1;
+  font-weight: 700;
+  opacity: 0.8;
+  transform: translateY(-1px);
 }
 
-/* Search：中间弹性区域 */
+/* =========================
+   Search (可选：你有就生效，没有也不影响)
+========================= */
 .search {
   position: relative;
   display: flex;
   align-items: center;
 
+  /* ✅ 中间弹性区域：两边不会被挤掉 */
   flex: 1;
   min-width: 0;
-  /* ✅ 关键：允许 search 真的变小，不挤掉右侧按钮 */
+
+  /* 如果你希望搜索框居中而不是贴左，打开下面两行 */
+  /* justify-content: center; */
 }
 
-/* 输入框不要撑爆布局 */
 .search-input {
   width: 100%;
   max-width: 560px;
-  /* 桌面最大宽度 */
-  padding: 10px 40px 10px 14px;
+  padding: 10px 44px 10px 14px;
 
-  border-radius: 4px;
-  border: none;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   outline: none;
 
   font-size: 14px;
+  color: #111827;
+
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+
+  /* ✅ 防止 input 把布局撑爆 */
+  min-width: 0;
 }
 
-.search-icon {
+.search-input::placeholder {
+  color: rgba(17, 24, 39, 0.55);
+}
+
+.search-svg {
   position: absolute;
   right: 18px;
-  opacity: 0.65;
-  font-size: 14px;
+  width: 18px;
+  height: 18px;
+  opacity: 0.55;
+  pointer-events: none;
 }
 
-/* 右侧按钮区：永远保持一行、永不被挤没 */
+/* =========================
+   Right Actions (永远贴右)
+========================= */
 .top-actions {
+  /* ✅ 核心：推到最右侧（比 space-between 稳得多，不会“全变”） */
+  margin-left: auto;
+
   display: flex;
   align-items: center;
   gap: 18px;
 
-  font-size: 14px;
-  font-weight: 600;
-
   flex-shrink: 0;
-  flex-wrap: nowrap;
-  /* ✅ 不要在 actions 内换行 */
   white-space: nowrap;
-  /* ✅ 文本也不要换行 */
 }
 
-.action {
-  display: flex;
+/* 统一 Link / button 的“无白底”外观 */
+.action-btn {
+  -webkit-appearance: none;
+  appearance: none;
+
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.action-btn:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.action-btn:active {
+  transform: translateY(0px);
+}
+
+.action-ico {
+  width: 26px;
+  height: 26px;
+  display: block;
   opacity: 0.95;
 }
 
-.icon {
-  opacity: 0.9;
+.action-text {
+  opacity: 0.95;
 }
 
-/* ✅ 主内容：给 header/footer 让出空间（否则会被遮挡） */
+/* Badge */
+.badge {
+  margin-left: 6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* =========================
+   Main Content
+========================= */
 .content {
-  background: #f3f4f6;
+  /* ✅ 给固定 header/footer 留空间 */
+  padding-top: calc(var(--topbar-h) + 18px);
+  padding-bottom: calc(var(--footer-h) + 18px);
 
-  padding: var(--page-pad);
-  padding-top: calc(var(--page-pad) + var(--topbar-h));
-  padding-bottom: calc(var(--page-pad) + var(--footer-h));
+  /* 页面左右留白 */
+  padding-left: var(--page-pad);
+  padding-right: var(--page-pad);
+
+  /* 内容区域最大宽度 */
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.content>* {
-  width: 100%;
-}
-
-/* ✅ Footer：永远固定在底部 */
+/* =========================
+   Footer
+========================= */
 .footer {
   position: fixed;
   left: 0;
@@ -144,102 +237,114 @@
   bottom: 0;
 
   height: var(--footer-h);
-  background: #111827;
-  color: #e5e7eb;
-
-  display: flex;
-  align-items: center;
-
-  z-index: 999;
+  background: linear-gradient(180deg, var(--brand-2), var(--brand));
+  color: rgba(255, 255, 255, 0.9);
+  z-index: 40;
 }
 
 .footer-inner {
-  width: min(1200px, 92vw);
+  height: 100%;
+  max-width: 1200px;
   margin: 0 auto;
 
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 
-  font-size: 13px;
+  padding: 0 24px;
+}
+
+.footer-copy {
+  font-size: 12px;
+  opacity: 0.9;
+  white-space: nowrap;
+}
+
+.footer-social {
+  display: flex;
+  align-items: center;
   gap: 12px;
 }
 
-.footer-icons {
-  display: flex;
-  gap: 12px;
+.social-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.social-btn:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.social-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
   opacity: 0.95;
 }
 
 .footer-links {
   display: flex;
+  align-items: center;
   gap: 16px;
+  white-space: nowrap;
 }
 
 .footer-links a {
-  color: #e5e7eb;
+  color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
+  font-size: 12px;
 }
 
 .footer-links a:hover {
-  text-decoration: underline;
+  color: #fff;
 }
 
-/* ✅ 手机端：header 变两行，需要更高的 topbar 高度 */
-@media (max-width: 640px) {
-  :root {
-    --topbar-h: 96px;
-    /* 两行 header 的高度 */
-    --footer-h: 72px;
-    /* footer 稍微高一点更好点按 */
-    --page-pad: 16px;
-  }
-
+/* =========================
+   Responsive
+========================= */
+@media (max-width: 820px) {
   .topbar-inner {
-    width: min(1200px, 96vw);
-    padding: 10px 12px;
-    gap: 8px;
+    padding: 0 14px;
+    gap: 12px;
   }
 
-  /* 第一行：brand 占满，让 actions 靠右 */
-  .brand {
-    width: 100%;
+  .content {
+    padding-left: 14px;
+    padding-right: 14px;
   }
 
-  .brand-main {
-    font-size: 20px;
-  }
-
-  /* 搜索框整行 */
-  .search {
-    width: 100%;
-    order: 3;
-    min-width: 0;
-  }
-
-  .search-input {
-    max-width: none;
-  }
-
-  /* actions 放在第一行右侧 */
-  .top-actions {
-    order: 2;
-    margin-left: auto;
-
-    gap: 10px;
-    font-size: 12px;
-  }
-
-  .action {
-    gap: 6px;
-  }
-
-  /* footer 小屏：链接太多就隐藏，只保留图标+版权 */
-  .footer-links {
+  /* 小屏时把文字收起来，只留图标更稳 */
+  .action-text {
     display: none;
   }
 
+  .search-input {
+    max-width: 420px;
+  }
+
   .footer-inner {
-    font-size: 12px;
+    padding: 0 14px;
+  }
+
+  .footer-links {
+    display: none; /* 小屏隐藏 links，避免挤爆 */
+  }
+}
+
+@media (max-width: 520px) {
+  /* 极小屏：搜索也隐藏，保证右上角按钮不崩 */
+  .search {
+    display: none;
   }
 }
