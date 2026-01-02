@@ -275,3 +275,23 @@ body {
 .footer-links a:hover {
   opacity: 1;
 }
+
+/* =========================================================
+   Header Logo Responsive Text (SAFE)
+========================================================= */
+
+/* Desktop default */
+.header-logo-short {
+  display: none;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .header-logo-full {
+    display: none;
+  }
+
+  .header-logo-short {
+    display: inline;
+  }
+}
