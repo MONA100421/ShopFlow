@@ -59,10 +59,8 @@ body {
   color: white;
 }
 
-/* ❗ 不用 space-between，避免透明區塊壓住 search */
 .header-inner {
   height: 72px;
-
   display: flex;
   align-items: center;
   gap: 24px;
@@ -87,33 +85,27 @@ body {
 }
 
 /* ===============================
-   Header Search（重點區）
+   Header Search
 ================================ */
 
 .header-search {
   flex: 1;
-  /* 中間撐開 */
   display: flex;
   justify-content: center;
-
   position: relative;
   z-index: 10;
-  /* 🔑 保證在最上層可點 */
 }
 
 .search-input-wrapper {
   position: relative;
   width: 100%;
   max-width: 528px;
-  /* Figma 寬度 */
 }
 
 .search-input {
   width: 100%;
   height: 40px;
-
   padding: 0 44px 0 14px;
-  /* 右邊留 icon */
 
   border-radius: 6px;
   border: none;
@@ -132,67 +124,105 @@ body {
   box-shadow: 0 0 0 2px rgba(80, 72, 229, 0.35);
 }
 
-/* 放大鏡 icon */
 .search-icon {
   position: absolute;
   right: 14px;
   top: 50%;
   transform: translateY(-50%);
-
   width: 18px;
   height: 18px;
   opacity: 0.6;
-
   pointer-events: none;
-  /* 🔑 永遠不擋 input */
 }
 
 /* ===============================
-   Header Right Actions
+   Header Right Actions (Figma)
 ================================ */
 
 .header-actions {
   flex-shrink: 0;
-  /* 🔑 不壓 search */
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 28px;
 }
 
-.header-btn {
+/* --- User (Sign In / Sign Out) --- */
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
   background: none;
   border: none;
   color: white;
   font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
   text-decoration: none;
 }
 
-.header-btn.disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.header-user:hover {
+  opacity: 0.85;
 }
 
-.cart-btn {
-  position: relative;
+.user-icon {
+  width: 22px;
+  height: 22px;
+}
+
+/* --- Cart --- */
+
+/* Cart button */
+.header-cart {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
   background: none;
   border: none;
-  font-size: 20px;
   color: white;
   cursor: pointer;
+}
+
+/* Icon wrapper = badge 的定位基準 */
+.cart-icon-wrapper {
+  position: relative;
+  width: 26px;
+  height: 26px;
+}
+
+/* Cart icon */
+.cart-icon {
+  width: 26px;
+  height: 26px;
 }
 
 .cart-badge {
   position: absolute;
   top: -6px;
-  right: -8px;
+  right: -6px;
+
+  min-width: 18px;
+  height: 18px;
 
   background-color: #ef4444;
   color: white;
-  font-size: 11px;
 
-  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 600;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   border-radius: 999px;
+}
+
+/* Total price */
+.cart-total {
+  font-size: 16px;
+  font-weight: 600;
 }
 
 /* ===============================
@@ -225,11 +255,9 @@ body {
 
 .footer-inner {
   height: 72px;
-
   display: flex;
   justify-content: space-between;
   align-items: center;
-
   font-size: 14px;
 }
 
