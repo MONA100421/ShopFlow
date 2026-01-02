@@ -1,9 +1,6 @@
 import "./ProductListPage.css";
-import { useEffect, useState, useRef } from "react";
-import {
-  useNavigate,
-  useSearchParams,
-} from "react-router-dom";
+import { useEffect, useState, useRef, useMemo } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import ProductCard from "../components/ProductCard";
@@ -27,6 +24,18 @@ const SORT_OPTIONS: { key: SortKey; label: string }[] = [
 const ITEMS_PER_PAGE = 10;
 
 /* =========================
+   Utils
+========================= */
+
+// 🔑 關鍵：統一字串正規化（中文非常重要）
+function normalizeText(text: string) {
+  return text
+    .normalize("NFC") // Unicode 正規化
+    .toLowerCase()
+    .trim();
+}
+
+/* =========================
    Component
 ========================= */
 
@@ -37,8 +46,8 @@ export default function ProductListPage() {
 
   /* ===== URL Search ===== */
   const [searchParams] = useSearchParams();
-  const keyword =
-    searchParams.get("q")?.toLowerCase().trim() || "";
+  const rawKeyword = searchParams.get("q") ?? "";
+  const keyword = normalizeText(rawKeyword);
 
   /* ===== Redux state ===== */
   const { list, loading, error } = useSelector(
@@ -61,7 +70,7 @@ export default function ProductListPage() {
     dispatch(fetchProducts());
   }, [dispatch]);
 
-  // Close sort dropdown when clicking outside
+  // Close dropdown
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (
@@ -75,18 +84,28 @@ export default function ProductListPage() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Reset page when sort or search changes
+  // Reset page when search or sort changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [sortBy, keyword]);
+  }, [keyword, sortBy]);
 
   /* =========================
-     Filter (Search)
+     Filter (Search) ✅ 中文版
   ========================= */
 
-  const filteredList = list.filter((product) =>
-    product.title.toLowerCase().includes(keyword)
-  );
+  const filteredList = useMemo(() => {
+    if (!keyword) return list;
+
+    return list.filter((product) => {
+      const title = normalizeText(product.title);
+      const desc = normalizeText(product.description ?? "");
+
+      return (
+        title.includes(keyword) ||
+        desc.includes(keyword)
+      );
+    });
+  }, [list, keyword]);
 
   /* =========================
      Sorting
@@ -122,69 +141,51 @@ export default function ProductListPage() {
   return (
     <div className="product-page">
       <div className="container">
-        {/* =========================
-            Page Header
-        ========================= */}
         <div className="product-header">
           <h1 className="product-title">Products</h1>
 
           <div className="product-header-actions">
-            {/* ===== Sort Dropdown ===== */}
-            <div
-              className="sort-dropdown"
-              ref={dropdownRef}
-            >
+            {/* Sort */}
+            <div className="sort-dropdown" ref={dropdownRef}>
               <button
                 className="sort-trigger"
                 type="button"
                 onClick={() => setOpen((v) => !v)}
               >
                 <span>{currentLabel}</span>
-                <span
-                  className={`sort-caret ${
-                    open ? "open" : ""
-                  }`}
-                />
+                <span className={`sort-caret ${open ? "open" : ""}`} />
               </button>
 
               {open && (
                 <div className="sort-menu">
-                  {SORT_OPTIONS.map(
-                    ({ key, label }) => (
-                      <button
-                        key={key}
-                        type="button"
-                        className="sort-item"
-                        onClick={() => {
-                          setSortBy(key);
-                          setOpen(false);
-                        }}
-                      >
-                        <span className="sort-item-text">
-                          {label}
-                        </span>
-
-                        {sortBy === key && (
-                          <img
-                            src={checkRightIcon}
-                            alt="selected"
-                            className="sort-check-icon"
-                          />
-                        )}
-                      </button>
-                    )
-                  )}
+                  {SORT_OPTIONS.map(({ key, label }) => (
+                    <button
+                      key={key}
+                      type="button"
+                      className="sort-item"
+                      onClick={() => {
+                        setSortBy(key);
+                        setOpen(false);
+                      }}
+                    >
+                      <span className="sort-item-text">{label}</span>
+                      {sortBy === key && (
+                        <img
+                          src={checkRightIcon}
+                          alt="selected"
+                          className="sort-check-icon"
+                        />
+                      )}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
 
-            {/* ===== Add Product ===== */}
             {isAdmin && (
               <button
                 className="add-product-btn"
-                onClick={() =>
-                  navigate("/products/new")
-                }
+                onClick={() => navigate("/products/new")}
               >
                 Add Product
               </button>
@@ -192,24 +193,13 @@ export default function ProductListPage() {
           </div>
         </div>
 
-        {/* =========================
-            Content
-        ========================= */}
-        {loading && (
-          <p className="loading-text">Loading...</p>
-        )}
-        {error && (
-          <p className="error-text">{error}</p>
-        )}
+        {/* Content */}
+        {loading && <p className="loading-text">Loading...</p>}
+        {error && <p className="error-text">{error}</p>}
 
         {!loading && pagedList.length === 0 ? (
           <div className="product-empty">
-            <p
-              style={{
-                textAlign: "center",
-                color: "#6b7280",
-              }}
-            >
+            <p style={{ textAlign: "center", color: "#6b7280" }}>
               No products found
             </p>
           </div>
@@ -222,9 +212,7 @@ export default function ProductListPage() {
                   product={product}
                   isAdmin={isAdmin}
                   onEdit={(id) =>
-                    navigate(
-                      `/products/${id}/edit`
-                    )
+                    navigate(`/products/${id}/edit`)
                   }
                 />
               ))}
@@ -233,51 +221,35 @@ export default function ProductListPage() {
             {totalPages > 1 && (
               <div className="pagination">
                 <button
-                  className={`pagination-item ${
-                    currentPage === 1
-                      ? "disabled"
-                      : ""
-                  }`}
+                  className={`pagination-item ${currentPage === 1 ? "disabled" : ""}`}
                   onClick={() =>
-                    currentPage > 1 &&
-                    setCurrentPage(
-                      currentPage - 1
-                    )
+                    currentPage > 1 && setCurrentPage(currentPage - 1)
                   }
                 >
                   «
                 </button>
 
-                {Array.from(
-                  { length: totalPages },
-                  (_, i) => i + 1
-                ).map((page) => (
-                  <button
-                    key={page}
-                    className={`pagination-item ${
-                      page === currentPage
-                        ? "active"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      setCurrentPage(page)
-                    }
-                  >
-                    {page}
-                  </button>
-                ))}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      className={`pagination-item ${
+                        page === currentPage ? "active" : ""
+                      }`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  )
+                )}
 
                 <button
                   className={`pagination-item ${
-                    currentPage === totalPages
-                      ? "disabled"
-                      : ""
+                    currentPage === totalPages ? "disabled" : ""
                   }`}
                   onClick={() =>
                     currentPage < totalPages &&
-                    setCurrentPage(
-                      currentPage + 1
-                    )
+                    setCurrentPage(currentPage + 1)
                   }
                 >
                   »
