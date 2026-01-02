@@ -20,13 +20,13 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
   const dispatch = useDispatch();
   const items = useSelector((state: RootState) => state.cart.items);
 
-  /** 折扣碼輸入框的值（只是文字，不代表生效） */
+  /** 折扣碼輸入框文字 */
   const [discountInput, setDiscountInput] = useState("");
 
-  /** 是否真的套用折扣（Figma 是按 Apply 才生效） */
+  /** 是否已成功套用折扣 */
   const [discountApplied, setDiscountApplied] = useState(false);
 
-  /* ================= 計算金額 ================= */
+  /* ================= 金額計算 ================= */
 
   const subtotal = items.reduce(
     (sum, item) => sum + item.product.price * item.quantity,
@@ -34,12 +34,10 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
   );
 
   const tax = subtotal * 0.1;
-
   const discount = discountApplied ? DISCOUNT_AMOUNT : 0;
-
   const total = Math.max(subtotal + tax - discount, 0);
 
-  /* ================= 鎖住背景滾動 ================= */
+  /* ================= 鎖背景滾動 ================= */
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -50,7 +48,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
 
   if (!open) return null;
 
-  /* ================= Apply 折扣 ================= */
+  /* ================= 折扣套用 ================= */
 
   const handleApplyDiscount = () => {
     if (discountInput.trim().toUpperCase() === DISCOUNT_CODE) {
@@ -82,12 +80,11 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
 
           {items.map((item) => (
             <div key={item.product.id} className="drawer-item">
-              {/* ===== Thumbnail / No Image ===== */}
+              {/* Thumbnail */}
               {item.product.image ? (
                 <img
                   src={item.product.image}
                   alt={item.product.title}
-                  className="drawer-item-img"
                 />
               ) : (
                 <div className="drawer-item-img placeholder">
@@ -95,23 +92,22 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                 </div>
               )}
 
-              {/* ===== Content ===== */}
+              {/* Content */}
               <div className="drawer-item-content">
-                {/* top */}
+                {/* Top row */}
                 <div className="drawer-item-top">
                   <span className="drawer-item-name">
                     {item.product.title}
                   </span>
                   <span className="drawer-item-price">
-                    ${item.product.price.toFixed(2)}
+                    ${(item.product.price * item.quantity).toFixed(2)}
                   </span>
                 </div>
 
-                {/* bottom */}
+                {/* Bottom row */}
                 <div className="drawer-item-bottom">
                   <div className="drawer-item-actions">
                     <button
-                      className="qty-btn"
                       onClick={() =>
                         dispatch(
                           decreaseQuantity(item.product.id)
@@ -126,7 +122,6 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                     </span>
 
                     <button
-                      className="qty-btn"
                       onClick={() =>
                         dispatch(
                           increaseQuantity(item.product.id)
@@ -165,14 +160,9 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                 onChange={(e) =>
                   setDiscountInput(e.target.value)
                 }
-                placeholder={DISCOUNT_CODE}
-                className="discount-input"
               />
 
-              <button
-                className="discount-apply-btn"
-                onClick={handleApplyDiscount}
-              >
+              <button onClick={handleApplyDiscount}>
                 Apply
               </button>
             </div>

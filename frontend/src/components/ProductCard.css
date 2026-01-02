@@ -102,24 +102,28 @@
     margin-top: 4px;
 }
 
-/* − / + buttons */
-.product-quantity button {
-    width: 26px;
-    height: 26px;
+.product-quantity .qty-btn {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    border-radius: 4px;
+    font-size: 16px;
+    line-height: 1;
+    color: #111827;
+    cursor: pointer;
 
     display: flex;
     align-items: center;
     justify-content: center;
+}
 
-    border-radius: 4px;
-    border: none;
+.product-quantity .qty-btn:hover {
+    background: #f3f4f6;
+}
 
+.product-quantity .qty-btn:active {
     background: #e5e7eb;
-    color: #374151;
-
-    font-size: 14px;
-    line-height: 1;
-    cursor: pointer;
 }
 
 /* quantity number */
