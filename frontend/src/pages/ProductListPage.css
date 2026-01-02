@@ -180,18 +180,15 @@
     min-height: 682px;
 
     background: #ffffff;
-    border-radius: 4px;
-    border: 1px solid #cccccc;
-
     padding: 24px;
     box-sizing: border-box;
 
     display: grid;
 
-    /* 一行固定 5 張卡 */
+    /* ⭐ 一行固定 5 張卡（你現在畫面） */
     grid-template-columns: repeat(5, minmax(0, 1fr));
 
-    /* 卡片高度對齊 Figma */
+    /* ⭐ 卡片高度對齊 ProductCard */
     grid-auto-rows: 303px;
 
     gap: 24px;

@@ -1,6 +1,9 @@
 import "./ProductListPage.css";
 import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import {
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import ProductCard from "../components/ProductCard";
@@ -32,6 +35,12 @@ export default function ProductListPage() {
   const dispatch = useDispatch<AppDispatch>();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  /* ===== URL Search ===== */
+  const [searchParams] = useSearchParams();
+  const keyword =
+    searchParams.get("q")?.toLowerCase().trim() || "";
+
+  /* ===== Redux state ===== */
   const { list, loading, error } = useSelector(
     (state: RootState) => state.products
   );
@@ -39,6 +48,7 @@ export default function ProductListPage() {
   const { user } = useSelector((state: RootState) => state.auth);
   const isAdmin = user?.role === "admin";
 
+  /* ===== Local state ===== */
   const [sortBy, setSortBy] = useState<SortKey>("last");
   const [open, setOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -51,7 +61,7 @@ export default function ProductListPage() {
     dispatch(fetchProducts());
   }, [dispatch]);
 
-  // Close dropdown when clicking outside
+  // Close sort dropdown when clicking outside
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (
@@ -65,15 +75,24 @@ export default function ProductListPage() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  // Reset page when sort or search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [sortBy]);
+  }, [sortBy, keyword]);
+
+  /* =========================
+     Filter (Search)
+  ========================= */
+
+  const filteredList = list.filter((product) =>
+    product.title.toLowerCase().includes(keyword)
+  );
 
   /* =========================
      Sorting
   ========================= */
 
-  const sortedList = [...list].sort((a, b) => {
+  const sortedList = [...filteredList].sort((a, b) => {
     if (sortBy === "price-asc") return a.price - b.price;
     if (sortBy === "price-desc") return b.price - a.price;
     return 0;
@@ -83,7 +102,9 @@ export default function ProductListPage() {
      Pagination
   ========================= */
 
-  const totalPages = Math.ceil(sortedList.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(
+    sortedList.length / ITEMS_PER_PAGE
+  );
 
   const pagedList = sortedList.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -91,7 +112,8 @@ export default function ProductListPage() {
   );
 
   const currentLabel =
-    SORT_OPTIONS.find((o) => o.key === sortBy)?.label ?? "Last added";
+    SORT_OPTIONS.find((o) => o.key === sortBy)?.label ??
+    "Last added";
 
   /* =========================
      Render
@@ -99,7 +121,6 @@ export default function ProductListPage() {
 
   return (
     <div className="product-page">
-      {/* 🔑 關鍵：Container */}
       <div className="container">
         {/* =========================
             Page Header
@@ -109,39 +130,50 @@ export default function ProductListPage() {
 
           <div className="product-header-actions">
             {/* ===== Sort Dropdown ===== */}
-            <div className="sort-dropdown" ref={dropdownRef}>
+            <div
+              className="sort-dropdown"
+              ref={dropdownRef}
+            >
               <button
                 className="sort-trigger"
                 type="button"
                 onClick={() => setOpen((v) => !v)}
               >
                 <span>{currentLabel}</span>
-                <span className={`sort-caret ${open ? "open" : ""}`} />
+                <span
+                  className={`sort-caret ${
+                    open ? "open" : ""
+                  }`}
+                />
               </button>
 
               {open && (
                 <div className="sort-menu">
-                  {SORT_OPTIONS.map(({ key, label }) => (
-                    <button
-                      key={key}
-                      type="button"
-                      className="sort-item"
-                      onClick={() => {
-                        setSortBy(key);
-                        setOpen(false);
-                      }}
-                    >
-                      <span className="sort-item-text">{label}</span>
+                  {SORT_OPTIONS.map(
+                    ({ key, label }) => (
+                      <button
+                        key={key}
+                        type="button"
+                        className="sort-item"
+                        onClick={() => {
+                          setSortBy(key);
+                          setOpen(false);
+                        }}
+                      >
+                        <span className="sort-item-text">
+                          {label}
+                        </span>
 
-                      {sortBy === key && (
-                        <img
-                          src={checkRightIcon}
-                          alt="selected"
-                          className="sort-check-icon"
-                        />
-                      )}
-                    </button>
-                  ))}
+                        {sortBy === key && (
+                          <img
+                            src={checkRightIcon}
+                            alt="selected"
+                            className="sort-check-icon"
+                          />
+                        )}
+                      </button>
+                    )
+                  )}
                 </div>
               )}
             </div>
@@ -150,7 +182,9 @@ export default function ProductListPage() {
             {isAdmin && (
               <button
                 className="add-product-btn"
-                onClick={() => navigate("/products/new")}
+                onClick={() =>
+                  navigate("/products/new")
+                }
               >
                 Add Product
               </button>
@@ -161,11 +195,24 @@ export default function ProductListPage() {
         {/* =========================
             Content
         ========================= */}
-        {loading && <p className="loading-text">Loading...</p>}
-        {error && <p className="error-text">{error}</p>}
+        {loading && (
+          <p className="loading-text">Loading...</p>
+        )}
+        {error && (
+          <p className="error-text">{error}</p>
+        )}
 
         {!loading && pagedList.length === 0 ? (
-          <div className="product-empty" />
+          <div className="product-empty">
+            <p
+              style={{
+                textAlign: "center",
+                color: "#6b7280",
+              }}
+            >
+              No products found
+            </p>
+          </div>
         ) : (
           <>
             <div className="product-grid">
@@ -174,7 +221,11 @@ export default function ProductListPage() {
                   key={product.id}
                   product={product}
                   isAdmin={isAdmin}
-                  onEdit={(id) => navigate(`/products/${id}/edit`)}
+                  onEdit={(id) =>
+                    navigate(
+                      `/products/${id}/edit`
+                    )
+                  }
                 />
               ))}
             </div>
@@ -183,36 +234,50 @@ export default function ProductListPage() {
               <div className="pagination">
                 <button
                   className={`pagination-item ${
-                    currentPage === 1 ? "disabled" : ""
+                    currentPage === 1
+                      ? "disabled"
+                      : ""
                   }`}
                   onClick={() =>
-                    currentPage > 1 && setCurrentPage(currentPage - 1)
+                    currentPage > 1 &&
+                    setCurrentPage(
+                      currentPage - 1
+                    )
                   }
                 >
                   «
                 </button>
 
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (page) => (
-                    <button
-                      key={page}
-                      className={`pagination-item ${
-                        page === currentPage ? "active" : ""
-                      }`}
-                      onClick={() => setCurrentPage(page)}
-                    >
-                      {page}
-                    </button>
-                  )
-                )}
+                {Array.from(
+                  { length: totalPages },
+                  (_, i) => i + 1
+                ).map((page) => (
+                  <button
+                    key={page}
+                    className={`pagination-item ${
+                      page === currentPage
+                        ? "active"
+                        : ""
+                    }`}
+                    onClick={() =>
+                      setCurrentPage(page)
+                    }
+                  >
+                    {page}
+                  </button>
+                ))}
 
                 <button
                   className={`pagination-item ${
-                    currentPage === totalPages ? "disabled" : ""
+                    currentPage === totalPages
+                      ? "disabled"
+                      : ""
                   }`}
                   onClick={() =>
                     currentPage < totalPages &&
-                    setCurrentPage(currentPage + 1)
+                    setCurrentPage(
+                      currentPage + 1
+                    )
                   }
                 >
                   »
