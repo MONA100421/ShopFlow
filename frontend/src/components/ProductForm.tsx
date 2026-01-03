@@ -1,32 +1,24 @@
 import { useState } from "react";
+import type { Product } from "../types/Product";
 import "./ProductForm.css";
 
 interface ProductFormProps {
-  onSubmit?: (product: ProductData) => void;
-}
-
-interface ProductData {
-  name: string;
-  description: string;
-  category: string;
-  price: number;
-  stock: number;
-  imageUrl: string;
+  onSubmit?: (product: Omit<Product, "id">) => void;
 }
 
 export default function ProductForm({ onSubmit }: ProductFormProps) {
   /* ===============================
-     Form State
+     Form State（對齊 Product）
   =============================== */
 
-  const [name, setName] = useState("");
+  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("Category1");
   const [price, setPrice] = useState<number | "">("");
   const [stock, setStock] = useState<number | "">("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [image, setImage] = useState("");
 
-  /* Image preview state */
+  /* Image preview */
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
 
@@ -35,13 +27,13 @@ export default function ProductForm({ onSubmit }: ProductFormProps) {
   =============================== */
 
   const handlePreview = () => {
-    if (!imageUrl.trim()) {
+    if (!image.trim()) {
       setPreviewUrl(null);
       setImageError(false);
       return;
     }
 
-    setPreviewUrl(imageUrl);
+    setPreviewUrl(image);
     setImageError(false);
   };
 
@@ -49,26 +41,21 @@ export default function ProductForm({ onSubmit }: ProductFormProps) {
     e.preventDefault();
 
     /* 基本驗證 */
-    if (!name || !category || price === "" || stock === "") {
+    if (!title || price === "" || stock === "") {
       alert("Please fill in all required fields.");
       return;
     }
 
-    const productData: ProductData = {
-      name,
+    const productData: Omit<Product, "id"> = {
+      title,
       description,
       category,
       price: Number(price),
       stock: Number(stock),
-      imageUrl,
+      image,
     };
 
-    console.log("Add Product:", productData);
-
     onSubmit?.(productData);
-
-    /* 可選：送出後清空 */
-    // resetForm();
   };
 
   /* ===============================
@@ -83,8 +70,8 @@ export default function ProductForm({ onSubmit }: ProductFormProps) {
           <label className="form-label">Product name</label>
           <input
             className="form-control"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
           />
         </div>
 
@@ -147,8 +134,8 @@ export default function ProductForm({ onSubmit }: ProductFormProps) {
               <input
                 className="form-control"
                 placeholder="http://"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
+                value={image}
+                onChange={(e) => setImage(e.target.value)}
               />
               <button
                 type="button"
