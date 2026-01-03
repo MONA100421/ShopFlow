@@ -70,6 +70,12 @@
     margin-bottom: 16px;
 }
 
+/* 只給 Stock + Image Link 用 */
+.form-row--stock-image {
+    grid-template-columns: 180px 1fr;
+}
+
+
 /* =========================================================
    Inputs
 ========================================================= */
@@ -104,9 +110,14 @@
 ========================================================= */
 
 .textarea {
-    height: 120px;
+    min-height: 120px;
     padding: 12px;
-    resize: none;
+
+    resize: vertical;
+
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 20px;
 }
 
 /* =========================================================
@@ -155,7 +166,7 @@
 
 .image-preview {
     width: 100%;
-    height: 180px;
+    height: 300px;
 
     margin-top: 8px;
     margin-bottom: 24px;

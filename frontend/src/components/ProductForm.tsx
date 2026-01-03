@@ -91,16 +91,16 @@ export default function ProductForm({
             <label className="form-label">Price</label>
             <input
               type="number"
+              step="0.01"
               className="form-control"
               value={price}
               onChange={(e) => setPrice(Number(e.target.value))}
-              min={0}
             />
           </div>
         </div>
 
         {/* ===== Stock + Image Link ===== */}
-        <div className="form-row">
+        <div className="form-row form-row--stock-image">
           <div className="form-group">
             <label className="form-label">In Stock Quantity</label>
             <input
@@ -116,9 +116,9 @@ export default function ProductForm({
             <label className="form-label">Add Image Link</label>
             <div className="image-input-wrapper">
               <input
+                type="text"
                 className="form-control"
-                value={image}
-                onChange={(e) => setImage(e.target.value)}
+                placeholder="http://"
               />
               <button
                 type="button"
