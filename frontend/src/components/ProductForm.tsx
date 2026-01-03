@@ -5,12 +5,14 @@ import "./ProductForm.css";
 interface ProductFormProps {
   initialData?: ProductFormData;
   onSubmit: (data: ProductFormData) => void;
+  onDelete?: () => void;
   submitLabel?: string;
 }
 
 export default function ProductForm({
   initialData,
   onSubmit,
+  onDelete,
   submitLabel = "Add Product",
 }: ProductFormProps) {
   /* ===============================
@@ -73,10 +75,22 @@ export default function ProductForm({
       category,
       price: Number(price),
       stock: Number(stock),
-      image: image || undefined,
+      image: image.trim() ? image : undefined,
     };
 
     onSubmit(formData);
+  };
+
+  const handleDelete = () => {
+    if (!onDelete) return;
+
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this product? This action cannot be undone."
+    );
+
+    if (confirmed) {
+      onDelete();
+    }
   };
 
   /* ===============================
@@ -187,10 +201,22 @@ export default function ProductForm({
           )}
         </div>
 
-        {/* Submit */}
-        <button type="submit" className="submit-btn">
-          {submitLabel}
-        </button>
+        {/* Actions */}
+        <div className="form-actions">
+          {onDelete && (
+            <button
+              type="button"
+              className="delete-btn"
+              onClick={handleDelete}
+            >
+              Delete
+            </button>
+          )}
+
+          <button type="submit" className="submit-btn">
+            {submitLabel}
+          </button>
+        </div>
       </div>
     </form>
   );

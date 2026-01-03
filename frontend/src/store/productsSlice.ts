@@ -1,9 +1,13 @@
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import {
+  createSlice,
+  createAsyncThunk,
+  PayloadAction,
+} from "@reduxjs/toolkit";
 import type { Product } from "../types/Product";
 import { getProducts } from "../services/productService";
 
 /* ======================================================
-   Async thunk：取得商品（目前走 localStorage / mock）
+   Async thunk：取得商品（localStorage / mock）
 ====================================================== */
 export const fetchProducts = createAsyncThunk<Product[]>(
   "products/fetchProducts",
@@ -23,7 +27,7 @@ interface ProductsState {
 }
 
 /* ======================================================
-   localStorage helpers（非常關鍵）
+   localStorage helpers（關鍵）
 ====================================================== */
 const STORAGE_KEY = "products";
 
@@ -44,7 +48,7 @@ const saveProductsToStorage = (products: Product[]) => {
    Initial State
 ====================================================== */
 const initialState: ProductsState = {
-  list: loadProductsFromStorage(), // 🔑 重新整理不會消失
+  list: loadProductsFromStorage(), // 🔑 Reload 不會消失
   loading: false,
   error: null,
 };
@@ -58,20 +62,10 @@ const productsSlice = createSlice({
 
   reducers: {
     /* ===============================
-       Add Product（你現在最需要）
+       Add Product
     =============================== */
     addProduct: (state, action: PayloadAction<Product>) => {
       state.list.push(action.payload);
-      saveProductsToStorage(state.list);
-    },
-
-    /* ===============================
-       Remove Product
-    =============================== */
-    removeProduct: (state, action: PayloadAction<string>) => {
-      state.list = state.list.filter(
-        (product) => product.id !== action.payload
-      );
       saveProductsToStorage(state.list);
     },
 
@@ -88,6 +82,16 @@ const productsSlice = createSlice({
         saveProductsToStorage(state.list);
       }
     },
+
+    /* ===============================
+       Delete Product
+    =============================== */
+    deleteProduct: (state, action: PayloadAction<string>) => {
+      state.list = state.list.filter(
+        (product) => product.id !== action.payload
+      );
+      saveProductsToStorage(state.list);
+    },
   },
 
   extraReducers: (builder) => {
@@ -101,9 +105,9 @@ const productsSlice = createSlice({
         state.loading = false;
 
         /**
-         * ⚠️ 關鍵設計說明：
-         * 若 localStorage 已有資料，不要覆蓋
-         * 避免 Add Product 後又被 fetch 清掉
+         * ⚠️ 關鍵設計：
+         * localStorage 有資料時，不覆蓋
+         * 避免 Add / Edit / Delete 後被 fetch 清掉
          */
         if (state.list.length === 0) {
           state.list = action.payload;
@@ -119,9 +123,12 @@ const productsSlice = createSlice({
 });
 
 /* ======================================================
-   Exports
+   Exports（⚠️ 一定是 named export）
 ====================================================== */
-export const { addProduct, removeProduct, updateProduct } =
-  productsSlice.actions;
+export const {
+  addProduct,
+  updateProduct,
+  deleteProduct,
+} = productsSlice.actions;
 
 export default productsSlice.reducer;

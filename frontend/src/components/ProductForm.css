@@ -14,10 +14,8 @@
 
 .product-form-card {
     width: 660px;
-    /* 🔑 Figma 寬度 */
-    height: 839px;
-    /* 🔑 Figma 高度 */
-
+    min-height: 839px;
+    /* ✅ 改成 min-height，避免內容多時被截 */
     display: flex;
     flex-direction: column;
 
@@ -54,11 +52,10 @@
 .form-group.full {
     width: 100%;
     margin-bottom: 16px;
-    /* 🔑 Figma spacing */
 }
 
 /* =========================================================
-   Row Layout (兩欄，穩定不爆)
+   Row Layout (Two Columns)
 ========================================================= */
 
 .form-row {
@@ -70,11 +67,10 @@
     margin-bottom: 16px;
 }
 
-/* 只給 Stock + Image Link 用 */
+/* Stock + Image */
 .form-row--stock-image {
     grid-template-columns: 180px 1fr;
 }
-
 
 /* =========================================================
    Inputs
@@ -121,7 +117,7 @@
 }
 
 /* =========================================================
-   Image Input + Preview Button（疊在 input 內）
+   Image Input + Preview Button
 ========================================================= */
 
 .image-input-wrapper {
@@ -131,7 +127,6 @@
 
 .image-input-wrapper .form-control {
     padding-right: 96px;
-    /* 🔑 給 Preview 按鈕空間 */
 }
 
 .preview-btn {
@@ -161,7 +156,7 @@
 }
 
 /* =========================================================
-   Image Preview（置中、虛線）
+   Image Preview
 ========================================================= */
 
 .image-preview {
@@ -186,6 +181,7 @@
     font-size: 14px;
 
     box-sizing: border-box;
+    overflow: hidden;
 }
 
 .image-preview img {
@@ -202,8 +198,41 @@
 }
 
 /* =========================================================
-   Submit Button（貼底，與 Figma 一致）
+   Actions (Submit + Delete)
 ========================================================= */
+
+.form-actions {
+    margin-top: auto;
+    /* ✅ 關鍵：按鈕貼底 */
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+/* Delete */
+
+.delete-btn {
+    height: 40px;
+    padding: 0 20px;
+
+    background: #ffffff;
+    color: #dc2626;
+
+    border: 1px solid #dc2626;
+    border-radius: 4px;
+
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.delete-btn:hover {
+    background: #fef2f2;
+}
+
+/* Submit */
 
 .submit-btn {
     height: 40px;
@@ -220,7 +249,6 @@
     font-weight: 600;
 
     cursor: pointer;
-
 }
 
 .submit-btn:hover {
@@ -228,41 +256,40 @@
 }
 
 /* =========================================================
-   Responsive（手機版全寬）
+   Responsive
 ========================================================= */
 
 @media (max-width: 640px) {
 
-    /* 表單置中改為滿版 */
     .product-form {
         padding: 0 16px;
     }
 
-    /* 卡片滿版，不鎖 Figma 高度 */
     .product-form-card {
         width: 100%;
-        height: auto;
+        min-height: auto;
         padding: 24px;
     }
 
-    /* 所有 row 改成單欄 */
     .form-row,
     .form-row--stock-image {
         grid-template-columns: 1fr;
     }
 
-    /* textarea 初始高度稍微小一點 */
     .textarea {
         min-height: 100px;
     }
 
-    /* Image preview 不要太高 */
     .image-preview {
         height: 220px;
     }
 
-    /* Submit button 變滿版（後台 UX 常見） */
-    .submit-btn {
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .submit-btn,
+    .delete-btn {
         width: 100%;
     }
 }
