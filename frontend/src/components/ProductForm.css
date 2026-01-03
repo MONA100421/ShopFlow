@@ -1,0 +1,217 @@
+/* =========================================================
+   Form Wrapper
+========================================================= */
+
+.product-form {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+/* =========================================================
+   Card (Figma: 660 × 839)
+========================================================= */
+
+.product-form-card {
+    width: 660px;
+    /* 🔑 Figma 寬度 */
+    height: 839px;
+    /* 🔑 Figma 高度 */
+
+    display: flex;
+    flex-direction: column;
+
+    background: #ffffff;
+    padding: 32px;
+
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* =========================================================
+   Labels
+========================================================= */
+
+.form-label {
+    margin-bottom: 6px;
+
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+/* =========================================================
+   Groups
+========================================================= */
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.form-group.full {
+    width: 100%;
+    margin-bottom: 16px;
+    /* 🔑 Figma spacing */
+}
+
+/* =========================================================
+   Row Layout (兩欄，穩定不爆)
+========================================================= */
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+/* =========================================================
+   Inputs
+========================================================= */
+
+.form-control {
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+
+    box-sizing: border-box;
+
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 14px;
+    color: #111827;
+}
+
+.form-control::placeholder {
+    color: #9ca3af;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #4f46e5;
+}
+
+/* =========================================================
+   Textarea
+========================================================= */
+
+.textarea {
+    height: 120px;
+    padding: 12px;
+    resize: none;
+}
+
+/* =========================================================
+   Image Input + Preview Button（疊在 input 內）
+========================================================= */
+
+.image-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.image-input-wrapper .form-control {
+    padding-right: 96px;
+    /* 🔑 給 Preview 按鈕空間 */
+}
+
+.preview-btn {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    transform: translateY(-50%);
+
+    height: 32px;
+    padding: 0 14px;
+
+    background: #4f46e5;
+    color: #ffffff;
+
+    border: none;
+    border-radius: 4px;
+
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.preview-btn:hover {
+    opacity: 0.9;
+}
+
+/* =========================================================
+   Image Preview（置中、虛線）
+========================================================= */
+
+.image-preview {
+    width: 100%;
+    height: 180px;
+
+    margin-top: 8px;
+    margin-bottom: 24px;
+
+    border: 1px dashed #d1d5db;
+    border-radius: 4px;
+
+    background: #f9fafb;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+    color: #9ca3af;
+    font-size: 14px;
+
+    box-sizing: border-box;
+}
+
+.image-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.placeholder-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 8px;
+    opacity: 0.6;
+}
+
+/* =========================================================
+   Submit Button（貼底，與 Figma 一致）
+========================================================= */
+
+.submit-btn {
+    height: 40px;
+    padding: 0 24px;
+
+    background: #4f46e5;
+    color: #ffffff;
+
+    border: none;
+    border-radius: 4px;
+
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+}
+
+.submit-btn:hover {
+    opacity: 0.9;
+}
