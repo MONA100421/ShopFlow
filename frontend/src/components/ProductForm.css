@@ -226,3 +226,43 @@
 .submit-btn:hover {
     opacity: 0.9;
 }
+
+/* =========================================================
+   Responsive（手機版全寬）
+========================================================= */
+
+@media (max-width: 640px) {
+
+    /* 表單置中改為滿版 */
+    .product-form {
+        padding: 0 16px;
+    }
+
+    /* 卡片滿版，不鎖 Figma 高度 */
+    .product-form-card {
+        width: 100%;
+        height: auto;
+        padding: 24px;
+    }
+
+    /* 所有 row 改成單欄 */
+    .form-row,
+    .form-row--stock-image {
+        grid-template-columns: 1fr;
+    }
+
+    /* textarea 初始高度稍微小一點 */
+    .textarea {
+        min-height: 100px;
+    }
+
+    /* Image preview 不要太高 */
+    .image-preview {
+        height: 220px;
+    }
+
+    /* Submit button 變滿版（後台 UX 常見） */
+    .submit-btn {
+        width: 100%;
+    }
+}
