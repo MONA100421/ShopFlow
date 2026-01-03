@@ -134,6 +134,19 @@ export default function LayoutShell() {
             <span className="brand-sub">Chuwa</span>
           </div>
 
+          {/* ✅ Search bar */}
+          <div className="search">
+            <div className="search-box">
+              <input
+                className="search-input"
+                value={search}
+                onChange={(e) => dispatch(setSearch(e.target.value))}
+                placeholder="Search products..."
+              />
+              <img className="search-icon" src={searchIcon} alt="search" />
+            </div>
+          </div>
+
           <div className="top-actions">
             {token ? (
               <button className="action-btn" type="button" onClick={doLogout}>
@@ -166,6 +179,7 @@ export default function LayoutShell() {
         <Outlet />
       </main>
 
+      {/* ✅ Cart drawer */}
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
 
       <footer className="footer">

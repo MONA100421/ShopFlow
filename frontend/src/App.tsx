@@ -17,12 +17,25 @@ import EditProduct from "./pages/EditProduct";
 
 import AdminRoute from "./components/AdminRoute";
 
-// ✅ 保护：必须登录（token 存在）
+/** ✅ 与 AdminRoute/authSlice 一致：清洗 token，避免 Bearer/引号/空格污染 */
+function getCleanToken(): string {
+  const raw = localStorage.getItem("token") || "";
+  return String(raw)
+    .replace(/^Bearer\s+/i, "")
+    .trim()
+    .replace(/^"(.+)"$/, "$1");
+}
+
+// ✅ 保护：必须登录（token 存在且看起来像 JWT）
 type RequireAuthProps = { children: ReactNode };
 
 function RequireAuth({ children }: RequireAuthProps) {
-  const token = localStorage.getItem("token");
-  if (!token) return <Navigate to="/signin" replace />;
+  const token = getCleanToken();
+
+  // 可选：更严格一点，避免 token=undefined/xxx 这种假值
+  const looksLikeJwt = token.split(".").length === 3;
+
+  if (!token || !looksLikeJwt) return <Navigate to="/signin" replace />;
   return <>{children}</>;
 }
 
@@ -31,8 +44,8 @@ export default function App() {
     <Routes>
       {/* LayoutShell 里必须有 <Outlet /> 才能渲染子路由 */}
       <Route element={<LayoutShell />}>
-        {/* 默认入口 */}
-        <Route path="/" element={<Navigate to="/signin" replace />} />
+        {/* 默认入口：先看商品列表 */}
+        <Route path="/" element={<Navigate to="/products" replace />} />
 
         {/* Auth */}
         <Route path="/signin" element={<SignIn />} />
@@ -79,8 +92,8 @@ export default function App() {
           }
         />
 
-        {/* fallback */}
-        <Route path="*" element={<Navigate to="/signin" replace />} />
+        {/* fallback：回到商品列表 */}
+        <Route path="*" element={<Navigate to="/products" replace />} />
       </Route>
     </Routes>
   );

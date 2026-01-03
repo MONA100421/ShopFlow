@@ -24,14 +24,14 @@ export default function AuthForm({ mode }: Props) {
   const [showPwd, setShowPwd] = useState(false);
   const [touched, setTouched] = useState({ email: false, password: false });
 
-  // ✅ 登录成功后自动跳转（你之前缺的就是这个）
+  // 登录成功后自动跳转
   useEffect(() => {
     if (mode === "signin" && token) {
       nav("/products", { replace: true });
     }
   }, [token, mode, nav]);
 
-  // 清错误：输入时/切换页时更友好
+  // 组件卸载时清理错误
   useEffect(() => {
     return () => {
       dispatch(clearAuthError());
@@ -56,20 +56,18 @@ export default function AuthForm({ mode }: Props) {
 
   const canSubmit = !emailError && !passwordError && email && password;
 
-  const submitSignin = async (role: "user" | "manager") => {
+  // ✅ 唯一的 submitSignin（不再重复声明）
+  const submitSignin = async () => {
     setTouched({ email: true, password: true });
     dispatch(clearAuthError());
 
     if (!canSubmit) return;
 
-    // ✅ 关键：unwrap 才能 catch 到 rejected（否则你觉得“没反应”）
     try {
-      await (dispatch(signin({ email, password, role }) as any).unwrap?.() ??
-        dispatch(signin({ email, password, role }) as any));
-      // 跳转在 useEffect(token) 里统一做
-    } catch (e) {
-      // error 已经进 redux 了，这里不用再做
-      console.error(e);
+      await dispatch(signin({ email, password })).unwrap();
+      nav("/products", { replace: true });
+    } catch (err) {
+      console.error("signin failed", err);
     }
   };
 
@@ -80,12 +78,10 @@ export default function AuthForm({ mode }: Props) {
     if (!canSubmit) return;
 
     try {
-      await (dispatch(signup({ email, password }) as any).unwrap?.() ??
-        dispatch(signup({ email, password }) as any));
-      // 注册成功后去登录页
+      await dispatch(signup({ email, password })).unwrap();
       nav("/signin", { replace: true });
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error("signup failed", err);
     }
   };
 
@@ -116,7 +112,6 @@ export default function AuthForm({ mode }: Props) {
         {/* PASSWORD */}
         <div className="field">
           <label>Password</label>
-
           <div className="pw-row">
             <input
               type={showPwd ? "text" : "password"}
@@ -133,11 +128,10 @@ export default function AuthForm({ mode }: Props) {
               {showPwd ? "Hide" : "Show"}
             </button>
           </div>
-
           {passwordError && <div className="field-error">{passwordError}</div>}
         </div>
 
-        {/* ✅ 后端/登录错误提示（红字） */}
+        {/* 后端错误 */}
         {authError && <div className="field-error">{String(authError)}</div>}
 
         {/* ACTION BUTTONS */}
@@ -147,18 +141,19 @@ export default function AuthForm({ mode }: Props) {
               type="button"
               className="btn-primary"
               disabled={authLoading}
-              onClick={() => submitSignin("user")}
+              onClick={submitSignin}
             >
-              Sign in as User
+              Sign in
             </button>
 
             <button
               type="button"
               className="btn-primary"
               disabled={authLoading}
-              onClick={() => submitSignin("manager")}
+              onClick={submitSignin}
+              title="Access depends on your server-side role"
             >
-              Sign in as Manager
+              Sign in (Manager)
             </button>
           </div>
         )}

@@ -1,7 +1,8 @@
+// frontend/src/components/AdminRoute.tsx
 import { useEffect, useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { API_BASE } from "../config";
 import type { ReactNode } from "react";
+import { API_BASE } from "../config";
 
 type Status = "loading" | "ok" | "no";
 
@@ -9,80 +10,99 @@ type AdminRouteProps = {
   children: ReactNode;
 };
 
-function getRoleFromJwt(token: string | null): string {
-  if (!token) return "";
+/** 统一读取并清洗 token */
+function getCleanToken(): string {
+  const raw = localStorage.getItem("token") || "";
+  return raw
+    .replace(/^Bearer\s+/i, "")
+    .trim()
+    .replace(/^"(.+)"$/, "$1");
+}
+
+/** 从 JWT payload 里取 role（仅作乐观判断） */
+function getRoleFromJwt(token: string): string {
   try {
-    const parts = token.split(".");
-    if (parts.length !== 3) return "";
-    // JWT payload is base64url; atob generally works for normal base64,
-    // but many tokens are compatible enough. We keep it simple & safe.
-    const payload = JSON.parse(atob(parts[1]));
-    return String(payload?.role || "").toLowerCase();
+    const [, payload] = token.split(".");
+    if (!payload) return "";
+    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const json = JSON.parse(atob(base64));
+    return String(json?.role || "").toLowerCase();
   } catch {
     return "";
   }
 }
 
 export default function AdminRoute({ children }: AdminRouteProps) {
-  const token = localStorage.getItem("token");
+  const [token, setToken] = useState<string>(() => getCleanToken());
+  const [status, setStatus] = useState<Status>("loading");
 
-  // ✅ 1) 快速本地判定：先不依赖后端 /me，避免“点了没反应”
+  /** 同步 token（支持同 tab / 跨 tab） */
+  useEffect(() => {
+    const sync = () => setToken(getCleanToken());
+    sync();
+    window.addEventListener("storage", sync);
+    const t = window.setInterval(sync, 500);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.clearInterval(t);
+    };
+  }, []);
+
+  /** 本地 role 乐观判断（只用于“别卡住 UI”） */
   const localOk = useMemo(() => {
+    if (!token) return false;
     const role = getRoleFromJwt(token);
     return role === "admin" || role === "manager";
   }, [token]);
 
-  // ✅ 2) 初始状态：如果本地能判断 ok，就直接 ok；否则 loading 再去问后端
-  const [status, setStatus] = useState<Status>(() => {
-    if (!token) return "no";
-    return localOk ? "ok" : "loading";
-  });
-
   useEffect(() => {
-    // token 变了，先同步一次状态
+    // ① 没 token：直接拒绝
     if (!token) {
       setStatus("no");
       return;
     }
-    if (localOk) {
-      // 本地已 ok，就先放行，不阻塞 UI
-      setStatus("ok");
-    } else {
-      setStatus("loading");
-    }
 
-    // ✅ 3) 仍然向后端验证（兜底安全），但不再让 UI 卡死
+    // ② 先乐观放行，避免“点了没反应”
+    if (localOk) setStatus("ok");
+    else setStatus("loading");
+
+    // ③ 后端兜底校验（但绝不在这里 logout）
     (async () => {
       try {
         const resp = await fetch(`${API_BASE}/api/auth/me`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
 
-        const data: any = await resp.json().catch(() => ({}));
+        // ❗关键点：401 不立刻踢人，只在确认角色不符时拒绝
         if (!resp.ok) {
-          // 如果本地都不 ok，那就拒绝
-          if (!localOk) setStatus("no");
+          // 如果本地判断 OK，就继续放行（防止误杀）
+          if (localOk) return;
+          setStatus("no");
           return;
         }
 
+        const data = await resp.json().catch(() => ({}));
         const role = String(data?.user?.role || "").toLowerCase();
         const ok = role === "admin" || role === "manager";
-
         setStatus(ok ? "ok" : "no");
       } catch {
-        // 网络失败：本地 ok 就继续放行；本地不 ok 才拒绝
+        // 网络异常：只要本地 OK，就不踢
         if (!localOk) setStatus("no");
       }
     })();
   }, [token, localOk]);
 
-  // ✅ 关键：不要再 return null 造成“点击没反应”
-  // 如果本地 ok，直接渲染 children（已在初始状态处理）
-  if (status === "no") return <Navigate to="/signin" replace />;
+  if (status === "loading") {
+    return (
+      <div style={{ padding: 16, opacity: 0.7 }}>Checking permission…</div>
+    );
+  }
 
-  // loading 时给一个极轻的占位，不改变布局（也可以换成 null，但你会觉得没反应）
-  if (status === "loading")
-    return <div style={{ padding: 16, opacity: 0.7 }}>Loading...</div>;
+  if (status === "no") {
+    return <Navigate to="/signin" replace />;
+  }
 
   return <>{children}</>;
 }

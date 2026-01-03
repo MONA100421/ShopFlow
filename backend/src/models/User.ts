@@ -1,3 +1,4 @@
+// backend/src/models/User.ts
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
@@ -12,11 +13,11 @@ const userSchema = new mongoose.Schema(
     passwordHash: {
       type: String,
       required: true,
-      select: false, // 默认查询不返回 hash（更安全）
+      select: false,
     },
     role: {
       type: String,
-      enum: ["admin", "regular"],
+      enum: ["admin", "manager", "regular"], // ✅ 加上 manager
       default: "regular",
     },
   },

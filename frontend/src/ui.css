@@ -112,7 +112,7 @@ body {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 16px;
 }
 
@@ -170,104 +170,86 @@ body {
   margin-bottom: 10px;
 }
 
-/* ===============================
-   ✅ FIX: Product card action row
-   目标：manager 多了 Edit 也永远对齐，不被挤出去
-   =============================== */
-.row {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start; /* ✅ 关键：不要 space-between */
+/* ========= Action row（stepper + add + edit）========= */
+/* ✅ 只影响 product card 底部那一行，避免误伤顶部搜索行 */
+.product-card .row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr; /* stepper / add / edit 均分 */
   gap: 10px;
-  flex-wrap: nowrap;
+  align-items: center;
 }
 
-/* 数量 stepper：固定宽度，不被压扁 */
-.stepper {
-  display: inline-flex;
+/* 三个格子里的控件都撑满（只在 product-card 内） */
+.product-card .row .stepper,
+.product-card .row .add-to-cart,
+.product-card .row .btn,
+.product-card .row .edit-btn,
+.product-card .row .btn-edit {
+  width: 100%;
+  height: 28px;
+  min-width: 0;
+}
+
+/* ========= Stepper：仅在 product-card 内 ========= */
+.product-card .stepper {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr; /* - / 数字 / + */
   border: 1px solid var(--line);
   border-radius: 8px;
   overflow: hidden;
-
-  height: 28px;
-  flex: 0 0 78px; /* ✅ 固定宽度 */
+  background: #fff;
 }
 
-.stepper button {
-  width: 26px;
+.product-card .stepper button {
+  width: auto;
   height: 28px;
   border: 0;
   padding: 0;
   background: var(--primary);
   color: #fff;
   cursor: pointer;
+  font-size: 14px;
+  line-height: 28px;
 }
 
-.stepper span {
-  width: 26px;
+.product-card .stepper span {
+  width: auto;
   height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
+  font-weight: 800;
+  font-size: 13px;
   background: #fff;
+  color: #111827;
 }
 
-/* Add to cart：吃掉剩余空间 */
-.row .btn,
-.row .add-to-cart {
-  flex: 1 1 auto;
-  min-width: 120px;
-  height: 28px; /* 与 stepper 同高更整齐 */
-  padding: 0 12px;
-}
-
-/* Edit：固定宽度，永远给它留位置（class 叫 edit-btn 时生效） */
-.row .edit-btn,
-.row .btn-edit {
-  flex: 0 0 64px;
-  height: 28px;
-  padding: 0 10px;
-}
-
-/* 如果 Edit 不是 btn，而是 Link/button 默认样式，也兜住 */
-.row a.edit-btn {
+/* 如果 Edit 是 <a> 或 <Link>，兜底居中（仅 product-card） */
+.product-card .row a.edit-btn,
+.product-card .row a.btn-edit {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   text-decoration: none;
 }
 
-/* Pagination */
-.pagination {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 18px;
-}
-
-.pg {
-  display: inline-flex;
-  border: 1px solid var(--line);
-  border-radius: 10px;
+/* ===============================
+   FIX 1) Product card action buttons text overflow
+   只影响产品卡片底部那一行（stepper/add/edit）
+   =============================== */
+.product-card .row .btn,
+.product-card .row .add-to-cart,
+.product-card .row .edit-btn,
+.product-card .row .btn-edit {
+  font-size: 12px;
+  line-height: 28px;
+  padding: 0 10px;
+  white-space: nowrap;
   overflow: hidden;
-}
-
-.pg button {
-  border: 0;
-  background: #fff;
-  height: 36px;
-  width: 40px;
-  cursor: pointer;
-}
-
-.pg button.active {
-  background: var(--primary);
-  color: #fff;
-}
-
-.pg button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  text-overflow: ellipsis;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* =========================
@@ -373,4 +355,47 @@ body {
 .image-preview-text {
   color: #9ca3af;
   font-size: 14px;
+}
+
+/* ===============================
+   FIX 2) Pagination UI (恢复样式)
+   =============================== */
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.pg {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(2, 6, 23, 0.06);
+}
+
+.pg button {
+  border: 0;
+  background: transparent;
+  height: 34px;
+  min-width: 36px;
+  padding: 0 10px;
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pg button:hover:not(:disabled) {
+  background: rgba(79, 70, 229, 0.08);
+}
+
+.pg button.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+.pg button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useMemo, useState } from "react";
 import type { RootState, AppDispatch } from "../redux/store";
@@ -6,7 +6,7 @@ import type { RootState, AppDispatch } from "../redux/store";
 import { fetchProducts } from "../redux/slices/productSlice";
 import { addToCart } from "../redux/slices/cartSlice";
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 10;
 
 // --- 宽松类型（slice 还是 JS，TS 先止血） ---
 type ProductLike = {
@@ -35,13 +35,43 @@ function getImg(p?: ProductLike) {
   );
 }
 
+// ✅ base64url -> json（兼容 - _ 和 padding）
+function decodeJwtPayload(token: string): any | null {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+
+    let base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const pad = base64.length % 4;
+    if (pad) base64 += "=".repeat(4 - pad);
+
+    const json = atob(base64);
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+function getRoleFromToken(token: string | null): string {
+  if (!token) return "";
+  const payload = decodeJwtPayload(token);
+  return String(payload?.role || "").toLowerCase();
+}
+
 export default function ProductsList() {
   const dispatch = useDispatch<AppDispatch>();
   const dispatchAny: any = dispatch;
+  const nav = useNavigate();
 
-  // ✅ Manager 判定：优先 Redux（auth.user.role）
+  // ✅ token（用于“按钮点击时”的兜底判断：没有 token 就直接去 signin）
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
+  // ✅ Manager 判定：优先 Redux（auth.user.role），再用 JWT 兜底
   const auth = useSelector((s: RootState) => (s as any).auth);
-  const role = String(auth?.user?.role ?? auth?.role ?? "").toLowerCase();
+  const reduxRole = String(auth?.user?.role ?? auth?.role ?? "").toLowerCase();
+  const jwtRole = useMemo(() => getRoleFromToken(token), [token]);
+  const role = reduxRole || jwtRole;
   const manager = role === "admin" || role === "manager";
 
   // ✅ Redux: products
@@ -67,7 +97,7 @@ export default function ProductsList() {
   // ✅ 每个商品一个“待加入数量”
   const [draftQtyMap, setDraftQtyMap] = useState<DraftQtyMap>({});
   const getDraftQty = (pid: string) =>
-    Math.max(0, Number(draftQtyMap[pid] ?? 0));
+    Math.max(0, Number(draftQtyMap[pid] ?? 1));
   const setDraftQty = (pid: string, next: number) =>
     setDraftQtyMap((m) => ({ ...m, [pid]: Math.max(0, Number(next) || 0) }));
 
@@ -130,6 +160,26 @@ export default function ProductsList() {
     return viewList.slice(start, start + PAGE_SIZE);
   }, [viewList, safePage]);
 
+  // ✅ 统一处理：manager 按钮点击（避免“点了没反应/跳了又回来”）
+  const goCreate = () => {
+    // 没 token：直接去登录（由登录流程拿新 token）
+    if (!token) {
+      nav("/signin", { replace: false });
+      return;
+    }
+    // 有 token：去管理路由，让 RequireAuth/AdminRoute 做最终判定
+    nav("/management/products/new");
+  };
+
+  const goEdit = (pid: string) => {
+    if (!pid) return;
+    if (!token) {
+      nav("/signin", { replace: false });
+      return;
+    }
+    nav(`/management/products/${pid}/edit`);
+  };
+
   return (
     <div className="page">
       {/* ===== Header ===== */}
@@ -150,9 +200,13 @@ export default function ProductsList() {
 
           {/* ✅ 只有 manager 才能看到 Add Product */}
           {manager && (
-            <Link className="btn btn-primary" to="/management/products/new">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={goCreate}
+            >
               Add Product
-            </Link>
+            </button>
           )}
         </div>
       </div>
@@ -240,20 +294,21 @@ export default function ProductsList() {
 
                           dispatchAny(addToCart({ id: pid, delta: draftQty }));
 
-                          // 加完重置为 1（可选）
+                          // 加完重置为 1（保持你原来的行为）
                           setDraftQty(pid, 1);
                         }}
                       >
-                        Add to cart
+                        Add
                       </button>
 
                       {manager && (
-                        <Link
+                        <button
+                          type="button"
                           className="btn"
-                          to={`/management/products/${pid}/edit`}
+                          onClick={() => goEdit(pid)}
                         >
                           Edit
-                        </Link>
+                        </button>
                       )}
                     </div>
                   </div>
@@ -266,10 +321,6 @@ export default function ProductsList() {
           {totalPages > 1 && (
             <div className="pagination">
               <div className="pg">
-                <button disabled={safePage === 1} onClick={() => setPage(1)}>
-                  «
-                </button>
-
                 <button
                   disabled={safePage === 1}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
@@ -297,13 +348,6 @@ export default function ProductsList() {
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 >
                   ›
-                </button>
-
-                <button
-                  disabled={safePage === totalPages}
-                  onClick={() => setPage(totalPages)}
-                >
-                  »
                 </button>
               </div>
             </div>

@@ -87,24 +87,27 @@
 }
 
 /* =========================
-   Search (可选：你有就生效，没有也不影响)
+   Search
 ========================= */
 .search {
-  position: relative;
   display: flex;
   align-items: center;
-
-  /* ✅ 中间弹性区域：两边不会被挤掉 */
   flex: 1;
   min-width: 0;
+  justify-content: center;
+}
 
-  /* 如果你希望搜索框居中而不是贴左，打开下面两行 */
-  /* justify-content: center; */
+/* ✅ 新增：输入框+图标的“真实宽度容器”，图标相对它定位 */
+.search-box {
+  position: relative;
+  width: 100%;
+  max-width: 560px; /* ✅ 控制整体宽度 */
+  min-width: 0;
 }
 
 .search-input {
   width: 100%;
-  max-width: 560px;
+  max-width: none; /* ✅ 交给 search-box 控宽，避免双重限制 */
   padding: 10px 44px 10px 14px;
 
   border-radius: 10px;
@@ -117,7 +120,6 @@
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(10px);
 
-  /* ✅ 防止 input 把布局撑爆 */
   min-width: 0;
 }
 
@@ -125,13 +127,16 @@
   color: rgba(17, 24, 39, 0.55);
 }
 
-.search-svg {
+.search-icon {
   position: absolute;
   right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
   width: 18px;
   height: 18px;
   opacity: 0.55;
   pointer-events: none;
+  z-index: 2;
 }
 
 /* =========================

@@ -5,12 +5,20 @@ import {
 } from "@reduxjs/toolkit";
 import { API_BASE } from "../../config";
 
-// ✅ 简单 token 读写（先不搞太复杂）
 const TOKEN_KEY = "token";
+
+/* ================= 工具函数 ================= */
+
+function cleanToken(raw: string): string {
+  return String(raw || "")
+    .replace(/^Bearer\s+/i, "")
+    .trim()
+    .replace(/^"(.+)"$/, "$1");
+}
 
 function readToken(): string {
   try {
-    return localStorage.getItem(TOKEN_KEY) || "";
+    return cleanToken(localStorage.getItem(TOKEN_KEY) || "");
   } catch {
     return "";
   }
@@ -18,19 +26,33 @@ function readToken(): string {
 
 function writeToken(token: string): void {
   try {
-    if (token) localStorage.setItem(TOKEN_KEY, token);
+    const t = cleanToken(token);
+    if (t) localStorage.setItem(TOKEN_KEY, t);
     else localStorage.removeItem(TOKEN_KEY);
   } catch {
     // ignore
   }
 }
 
-// --- Types ---
+/** 兼容各种后端返回结构 */
+function extractToken(data: any): string {
+  const cand =
+    data?.token ??
+    data?.accessToken ??
+    data?.jwt ??
+    data?.data?.token ??
+    data?.data?.accessToken ??
+    "";
+  return cleanToken(String(cand || ""));
+}
+
+/* ================= 类型 ================= */
+
 export type AuthUser = {
   role?: string;
   email?: string;
   name?: string;
-  [k: string]: any; // 兼容后端返回的其他字段
+  [k: string]: any;
 } | null;
 
 export type AuthState = {
@@ -38,12 +60,12 @@ export type AuthState = {
   user: AuthUser;
   loading: boolean;
   error: string;
+  checked: boolean; // ⭐ 关键：是否已通过 /me 校验
 };
 
 export type SigninArgs = {
   email: string;
   password: string;
-  role: "user" | "manager";
 };
 
 export type SignupArgs = {
@@ -56,7 +78,8 @@ export type AuthResult = {
   user: AuthUser;
 };
 
-// ✅ 登录
+/* ================= Thunks ================= */
+
 export const signin = createAsyncThunk<
   AuthResult,
   SigninArgs,
@@ -70,20 +93,30 @@ export const signin = createAsyncThunk<
     });
 
     const data: any = await resp.json().catch(() => ({}));
-    if (!resp.ok) return rejectWithValue(data?.message || "Login failed");
+    if (!resp.ok) {
+      return rejectWithValue(data?.message || "Login failed");
+    }
 
-    const token = String(data?.token || "");
-    if (!token) return rejectWithValue("No token returned from server");
+    const token = extractToken(data);
+    if (!token) {
+      return rejectWithValue(
+        `No token returned from server. Keys: ${Object.keys(data || {}).join(
+          ", "
+        )}`
+      );
+    }
 
     writeToken(token);
 
-    return { token, user: (data?.user ?? null) as AuthUser };
+    return {
+      token,
+      user: (data?.user ?? data?.data?.user ?? null) as AuthUser,
+    };
   } catch (e: any) {
     return rejectWithValue(e?.message || "Login failed");
   }
 });
 
-// ✅ 注册（如果你后端有 signup）
 export const signup = createAsyncThunk<
   AuthResult,
   SignupArgs,
@@ -97,23 +130,30 @@ export const signup = createAsyncThunk<
     });
 
     const data: any = await resp.json().catch(() => ({}));
-    if (!resp.ok) return rejectWithValue(data?.message || "Signup failed");
+    if (!resp.ok) {
+      return rejectWithValue(data?.message || "Signup failed");
+    }
 
-    // 有的 signup 会直接给 token；没有也没关系
-    const token = String(data?.token || "");
+    const token = extractToken(data);
     if (token) writeToken(token);
 
-    return { token, user: (data?.user ?? null) as AuthUser };
+    return {
+      token,
+      user: (data?.user ?? data?.data?.user ?? null) as AuthUser,
+    };
   } catch (e: any) {
     return rejectWithValue(e?.message || "Signup failed");
   }
 });
+
+/* ================= Slice ================= */
 
 const initialState: AuthState = {
   token: readToken(),
   user: null,
   loading: false,
   error: "",
+  checked: false, // ⭐ 初始：还没通过 /me
 };
 
 const authSlice = createSlice({
@@ -124,13 +164,16 @@ const authSlice = createSlice({
       state.token = "";
       state.user = null;
       state.error = "";
+      state.checked = false;
       writeToken("");
     },
     clearAuthError(state) {
       state.error = "";
     },
-    setUser(state, action: PayloadAction<AuthUser>) {
+    /** ⭐ AdminRoute 在 /me 成功后调用 */
+    setAuthChecked(state, action: PayloadAction<AuthUser>) {
       state.user = action.payload ?? null;
+      state.checked = true;
     },
   },
   extraReducers: (b) => {
@@ -140,12 +183,17 @@ const authSlice = createSlice({
     });
     b.addCase(signin.fulfilled, (state, action) => {
       state.loading = false;
-      state.token = action.payload?.token || "";
-      state.user = action.payload?.user ?? null;
+      state.token = cleanToken(action.payload.token || "");
+      state.user = action.payload.user ?? null;
+      state.checked = false; // ⭐ 等待 /me 校验
     });
     b.addCase(signin.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload || "Login failed";
+      state.token = "";
+      state.user = null;
+      state.checked = false;
+      writeToken("");
     });
 
     b.addCase(signup.pending, (state) => {
@@ -154,9 +202,12 @@ const authSlice = createSlice({
     });
     b.addCase(signup.fulfilled, (state, action) => {
       state.loading = false;
-      // signup 不一定返回 token；返回就更新，否则沿用现有 token
-      state.token = action.payload?.token || state.token;
-      state.user = action.payload?.user ?? state.user;
+      const token = cleanToken(action.payload.token || "");
+      if (token) {
+        state.token = token;
+        state.user = action.payload.user ?? null;
+        state.checked = false;
+      }
     });
     b.addCase(signup.rejected, (state, action) => {
       state.loading = false;
@@ -165,5 +216,10 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearAuthError, setUser } = authSlice.actions;
+export const {
+  logout,
+  clearAuthError,
+  setAuthChecked, // ⭐ 新增
+} = authSlice.actions;
+
 export default authSlice.reducer;
