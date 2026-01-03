@@ -1,14 +1,20 @@
-import { useState } from "react";
-import type { Product } from "../types/Product";
+import { useEffect, useState } from "react";
+import type { ProductFormData } from "../types/ProductFormData";
 import "./ProductForm.css";
 
 interface ProductFormProps {
-  onSubmit?: (product: Omit<Product, "id">) => void;
+  initialData?: ProductFormData;
+  onSubmit: (data: ProductFormData) => void;
+  submitLabel?: string;
 }
 
-export default function ProductForm({ onSubmit }: ProductFormProps) {
+export default function ProductForm({
+  initialData,
+  onSubmit,
+  submitLabel = "Add Product",
+}: ProductFormProps) {
   /* ===============================
-     Form State（對齊 Product）
+     Form State
   =============================== */
 
   const [title, setTitle] = useState("");
@@ -21,6 +27,22 @@ export default function ProductForm({ onSubmit }: ProductFormProps) {
   /* Image preview */
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
+
+  /* ===============================
+     Sync initialData (Edit mode)
+  =============================== */
+
+  useEffect(() => {
+    if (!initialData) return;
+
+    setTitle(initialData.title);
+    setDescription(initialData.description);
+    setCategory(initialData.category);
+    setPrice(initialData.price);
+    setStock(initialData.stock);
+    setImage(initialData.image ?? "");
+    setPreviewUrl(initialData.image ?? null);
+  }, [initialData]);
 
   /* ===============================
      Handlers
@@ -40,22 +62,21 @@ export default function ProductForm({ onSubmit }: ProductFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    /* 基本驗證 */
     if (!title || price === "" || stock === "") {
       alert("Please fill in all required fields.");
       return;
     }
 
-    const productData: Omit<Product, "id"> = {
+    const formData: ProductFormData = {
       title,
       description,
       category,
       price: Number(price),
       stock: Number(stock),
-      image,
+      image: image || undefined,
     };
 
-    onSubmit?.(productData);
+    onSubmit(formData);
   };
 
   /* ===============================
@@ -168,7 +189,7 @@ export default function ProductForm({ onSubmit }: ProductFormProps) {
 
         {/* Submit */}
         <button type="submit" className="submit-btn">
-          Add Product
+          {submitLabel}
         </button>
       </div>
     </form>
