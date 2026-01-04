@@ -34,6 +34,7 @@
 
 /* =========================================================
    Card (Figma: 1323 × 682)
+   ✅ 修正：避免商品被擠出畫面
 ========================================================= */
 
 .product-detail-page .product-detail-card {
@@ -41,7 +42,8 @@
     min-height: 682px;
 
     display: grid;
-    grid-template-columns: 662px 1fr;
+    /* 🔑 關鍵修正：不要鎖死 662px */
+    grid-template-columns: minmax(420px, 662px) 1fr;
     gap: 60px;
 
     background: #ffffff;
@@ -57,7 +59,8 @@
 ========================================================= */
 
 .product-detail-page .product-detail-image {
-    width: 662px;
+    width: 100%;
+    max-width: 662px;
     height: 597px;
 
     background: #f3f4f6;
@@ -71,8 +74,8 @@
 }
 
 .product-detail-page .product-detail-image img {
-    width: 100%;
-    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
 }
 
@@ -83,6 +86,8 @@
 .product-detail-page .product-detail-info {
     display: flex;
     flex-direction: column;
+    min-width: 0;
+    /* 🔑 防止 grid 子元素撐爆 */
 }
 
 /* Category */
@@ -107,6 +112,10 @@
     font-weight: 700;
     line-height: 138%;
     color: #535353;
+
+    /* 🔑 關鍵修正：長標題不撐爆 */
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 /* Price */
@@ -132,6 +141,9 @@
     font-weight: 500;
     line-height: 138%;
     color: #6b7280;
+
+    /* 🔑 關鍵修正：長描述不擠版 */
+    word-break: break-word;
 }
 
 /* =========================================================
@@ -270,7 +282,6 @@
     }
 
     .product-detail-page .product-detail-image {
-        width: 100%;
         height: 360px;
     }
 
