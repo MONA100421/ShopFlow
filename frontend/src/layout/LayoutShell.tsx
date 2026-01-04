@@ -131,10 +131,11 @@ export default function LayoutShell() {
   <div className="shell">
     <header className="topbar">
       <div className="topbar-inner">
-        <div className="brand">
+        <Link to="/products" className="brand">
           <span className="brand-main">Management</span>
           <span className="brand-sub">Chuwa</span>
-        </div>
+        </Link>
+
 
         {/* ✅ Search bar */}
         <div className="search">

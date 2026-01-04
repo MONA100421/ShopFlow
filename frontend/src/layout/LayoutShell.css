@@ -66,12 +66,21 @@
 }
 
 /* 左侧品牌 */
+
 .brand {
   display: flex;
   align-items: baseline;
   gap: 10px;
   white-space: nowrap;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
+
+.brand:hover {
+  opacity: 0.85;
+  transform: translateY(-0.5px);
+}
+
 
 .brand-main {
   font-size: 20px;
@@ -85,6 +94,21 @@
   opacity: 0.8;
   transform: translateY(-1px);
 }
+
+.brand {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* 防止已访问 / 悬停变色 */
+.brand:visited,
+.brand:hover,
+.brand:active {
+  color: inherit;
+  text-decoration: none;
+}
+
 
 /* =========================
    Search

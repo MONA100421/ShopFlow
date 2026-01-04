@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "../redux/store";
@@ -53,6 +54,19 @@ export default function ProductDetail() {
   const auth = useSelector((s: RootState) => (s as any).auth);
   const role = String(auth?.user?.role ?? auth?.role ?? "").toLowerCase();
   const manager = role === "admin" || role === "manager";
+
+    const [draftQty, setDraftQty] = useState<number>(1);
+
+  const stockNum = Number(product?.stock ?? 0);
+  const outOfStock = Number.isFinite(stockNum) ? stockNum <= 0 : false;
+  const cap = Math.max(1, stockNum || 1);
+
+  // 当切换商品/加载完成时：缺货显示 0，有货默认 1
+  useEffect(() => {
+    if (!product) return;
+    setDraftQty(outOfStock ? 0 : 1);
+  }, [product, outOfStock]);
+
 
   // load product
   useEffect(() => {
@@ -145,24 +159,55 @@ export default function ProductDetail() {
                 {product?.description || "No description."}
               </div>
 
-              <div style={{ display: "flex", gap: 12 }}>
-                <button
-                  className="btn btn-primary"
-                  type="button"
-                  disabled={Number(product?.stock ?? 1) <= 0}
-                  onClick={() =>
-                    dispatchAny(addToCart({ id: String(id), delta: 1 }))
-                  }
+                <div
+                  className="detail-actions"
+                  style={{ display: "flex", gap: 12, alignItems: "center" }}
                 >
-                  Add To Cart {qty ? `(${qty})` : ""}
-                </button>
+                  {/* ✅ 数量选择器（复用你 ProductsList 的 stepper 样式） */}
+             <div className="stepper">
+                      <button
+                        type="button"
+                        aria-label="decrease"
+                        disabled={outOfStock || draftQty <= 1}
+                        onClick={() => setDraftQty((q) => Math.max(1, q - 1))}
+                      >
+                        –
+                      </button>
 
-                {manager && (
-                  <Link className="btn" to={`/management/products/${id}/edit`}>
-                    Edit
-                  </Link>
-                )}
-              </div>
+                      <span>{draftQty}</span>
+
+                      <button
+                        type="button"
+                        aria-label="increase"
+                        disabled={outOfStock || draftQty >= cap}
+                        onClick={() => setDraftQty((q) => Math.min(cap, q + 1))}
+                      >
+                        +
+                      </button>
+                    </div>
+
+                  <button
+                    className="btn btn-primary"
+                    type="button"
+                    disabled={outOfStock || draftQty <= 0}
+                    onClick={() => {
+                      if (!id) return;
+                      if (outOfStock || draftQty <= 0) return;
+
+                      dispatchAny(addToCart({ id: String(id), delta: draftQty }));
+                      setDraftQty(1); // ✅ 加完重置为 1
+                    }}
+                  >
+                    Add To Cart {qty ? `(${qty})` : ""}
+                  </button>
+
+                  {manager && (
+                    <Link className="btn" to={`/management/products/${id}/edit`}>
+                      Edit
+                    </Link>
+                  )}
+                </div>
+
             </div>
           </div>
         </div>

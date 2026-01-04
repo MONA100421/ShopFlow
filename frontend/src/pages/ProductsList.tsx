@@ -180,7 +180,7 @@ export default function ProductsList() {
     nav(`/management/products/${pid}/edit`);
   };
 
-  return (
+   return (
     <div className="page">
       {/* ===== Header ===== */}
       <div className="page-head">
@@ -234,17 +234,37 @@ export default function ProductsList() {
           <div className="grid">
             {paged.map((p) => {
               const pid = String(p?._id ?? p?.id ?? "");
-              const draftQty = pid ? getDraftQty(pid) : 0;
+
+              // ✅ 库存判定
+              const stockNum = Number(p?.stock ?? 0);
+              const outOfStock = Number.isFinite(stockNum)
+                ? stockNum <= 0
+                : false;
+
+              // ✅ UI 上的待加入数量：
+              // - 缺货直接显示 0
+              // - 有货时不允许超过库存
+              const rawDraft = pid ? getDraftQty(pid) : 0;
+              const draftQty = outOfStock
+                ? 0
+                : Math.max(1, Math.min(rawDraft, Math.max(1, stockNum || 1)));
 
               return (
                 <div
                   className="card product-card"
                   key={pid || `${p?.name}-${p?.price}`}
                 >
-                  {/* 图片可点：去详情 */}
-                  <Link to={`/products/${pid}`} className="product-thumb">
-                    <img src={getImg(p)} alt={p?.name || "product"} />
-                  </Link>
+                  {/* ✅ 图片可点：去详情 + 角标叠在图片上 */}
+                  <div className="product-thumb-wrap">
+                    <Link to={`/products/${pid}`} className="product-thumb">
+                      <img src={getImg(p)} alt={p?.name || "product"} />
+                    </Link>
+
+                    {/* ✅ 只保留这一处 Out of Stock（叠在图片上） */}
+                    {outOfStock && (
+                      <span className="badge-out badge-abs">Out of Stock</span>
+                    )}
+                  </div>
 
                   <div className="product-body">
                     {/* 名字可点：去详情 */}
@@ -252,18 +272,21 @@ export default function ProductsList() {
                       {p?.name || "(No name)"}
                     </Link>
 
+                    {/* ✅ 价格：保持原来逻辑，不在白区重复渲染 Out of Stock */}
                     <div className="product-price">
                       ${Number(p?.price || 0).toFixed(2)}
                     </div>
 
-                    {/* ✅ Stepper + Add to cart + Edit */}
+                    {/* ✅ Stepper + Add to cart + Edit（保持你原逻辑，只加禁用条件） */}
                     <div className="row">
                       <div className="stepper">
                         <button
                           type="button"
+                          disabled={outOfStock || !pid || draftQty <= 1}
                           onClick={() => {
                             if (!pid) return;
-                            setDraftQty(pid, draftQty - 1);
+                            if (outOfStock) return;
+                            setDraftQty(pid, Math.max(1, draftQty - 1));
                           }}
                           aria-label="decrease"
                         >
@@ -274,9 +297,16 @@ export default function ProductsList() {
 
                         <button
                           type="button"
+                          disabled={
+                            outOfStock ||
+                            !pid ||
+                            draftQty >= Math.max(1, stockNum || 1)
+                          }
                           onClick={() => {
                             if (!pid) return;
-                            setDraftQty(pid, draftQty + 1);
+                            if (outOfStock) return;
+                            const cap = Math.max(1, stockNum || 1);
+                            setDraftQty(pid, Math.min(cap, draftQty + 1));
                           }}
                           aria-label="increase"
                         >
@@ -287,9 +317,10 @@ export default function ProductsList() {
                       <button
                         type="button"
                         className="btn btn-primary"
-                        disabled={!pid || draftQty <= 0}
+                        disabled={!pid || outOfStock || draftQty <= 0}
                         onClick={() => {
                           if (!pid) return;
+                          if (outOfStock) return;
                           if (draftQty <= 0) return;
 
                           dispatchAny(addToCart({ id: pid, delta: draftQty }));
