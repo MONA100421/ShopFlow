@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import type { AppDispatch } from "../store/store";
 import { loginThunk, registerThunk } from "../store/authSlice";
 
+import emailSendIcon from "../assets/mdi_email-send-outline.svg";
+
 import "./AuthForm.css";
 
 type AuthMode = "login" | "register" | "reset" | "reset-success";
@@ -62,12 +64,10 @@ export default function AuthForm({ mode }: AuthFormProps) {
     e.preventDefault();
     setFormError("");
 
-    // Email always required
     const emailErr = validateEmail(email);
     setEmailError(emailErr);
     if (emailErr) return;
 
-    // Password only for login / register
     if (mode !== "reset") {
       const passwordErr = validatePassword(password);
       setPasswordError(passwordErr);
@@ -88,7 +88,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
       }
 
       if (mode === "reset") {
-        // mock success → success page
         navigate("/auth/reset-success");
       }
     } catch {
@@ -113,16 +112,16 @@ export default function AuthForm({ mode }: AuthFormProps) {
         </button>
 
         <div className="reset-icon">
-          <svg width="70" height="70" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 6V6.01L12 11L4 6.01V6H20ZM4 18V8L12 13L20 8V18H4Z"
-              fill="#5048E5"
-            />
-          </svg>
+          <img
+            src={emailSendIcon}
+            alt="Email sent"
+            width={70}
+            height={70}
+          />
         </div>
 
         <p className="reset-success-text">
-          We have sent the update password link to your email, please check that！
+          We have sent the update password link to your email, please check it!
         </p>
       </div>
     );
@@ -134,7 +133,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
   return (
     <div className={`login-modal ${mode === "reset" ? "reset-modal" : ""}`}>
-      {/* Close */}
       <button
         className="close-btn"
         onClick={() => navigate("/")}
@@ -142,7 +140,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
         <span className="close-icon" />
       </button>
 
-      {/* Header */}
       <div className="sign-in-header">
         <h2 className="sign-in-title">
           {mode === "reset"
@@ -153,7 +150,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
         </h2>
       </div>
 
-      {/* Reset description */}
       {mode === "reset" && (
         <p className="reset-desc">
           Enter your email link, we will send you the recovery link
@@ -179,9 +175,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
               }}
             />
           </div>
-          {emailError && (
-            <span className="field-error">{emailError}</span>
-          )}
+          {emailError && <span className="field-error">{emailError}</span>}
         </div>
 
         {/* Password */}
@@ -198,9 +192,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 autoComplete={
-                  mode === "register"
-                    ? "new-password"
-                    : "current-password"
+                  mode === "register" ? "new-password" : "current-password"
                 }
                 onChange={(e) => {
                   const value = e.target.value;
@@ -224,10 +216,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
           </div>
         )}
 
-        {/* Form error */}
         {formError && <div className="auth-error">{formError}</div>}
 
-        {/* Submit */}
         <button className="sign-in-btn" disabled={loading}>
           {mode === "reset"
             ? "Update password"
@@ -237,7 +227,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
         </button>
       </form>
 
-      {/* Footer */}
       <div className="auth-links">
         {mode === "register" ? (
           <div className="signup-link">

@@ -1,32 +1,59 @@
-/* ================= Overlay ================= */
+/* =========================================================
+   Overlay (SAFE)
+========================================================= */
+
 .cart-overlay {
   position: fixed;
   inset: 0;
+
   background: rgba(0, 0, 0, 0.45);
   z-index: 1000;
+
   display: flex;
   justify-content: flex-end;
 }
 
-/* ================= Drawer ================= */
+/* =========================================================
+   Drawer (🔥 Mobile SAFE)
+========================================================= */
+
+/*
+  重點：
+  - 不用 height: 100vh（手機網址列會炸）
+  - 用 min-height + max-height
+*/
+
 .cart-drawer {
   width: 544px;
-  height: 100vh;
+  max-width: 100vw;
+
+  min-height: 100vh;
+  max-height: 100dvh;
+  /* ✅ 新版 mobile viewport */
+
   background: #ffffff;
+
   display: flex;
   flex-direction: column;
+
   box-shadow: -6px 0 20px rgba(0, 0, 0, 0.18);
 }
 
-/* ================= Header ================= */
+/* =========================================================
+   Header
+========================================================= */
+
 .drawer-header {
   height: 72px;
+  padding: 0 24px;
+
   background: #5048e5;
   color: #ffffff;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+
   flex-shrink: 0;
 }
 
@@ -39,59 +66,88 @@
 .drawer-close {
   background: none;
   border: none;
+
   color: #ffffff;
   font-size: 22px;
   cursor: pointer;
 }
 
-/* ================= Items ================= */
+/* =========================================================
+   Items (🔥 Scroll Core)
+========================================================= */
+
+/*
+  Drawer 內唯一 scroll 區域
+*/
+
 .drawer-items {
   flex: 1;
+
   overflow-y: auto;
+  overflow-x: hidden;
+
   padding: 24px;
+
+  -webkit-overflow-scrolling: touch;
+  /* ✅ iOS 必加 */
 }
 
 .drawer-empty {
-  text-align: center;
-  color: #6b7280;
   margin-top: 48px;
+  text-align: center;
+
   font-size: 15px;
+  color: #6b7280;
 }
 
-/* ================= Item ================= */
+/* =========================================================
+   Item
+========================================================= */
+
 .drawer-item {
   display: flex;
   gap: 16px;
+
   padding: 16px 0;
   border-bottom: 1px solid #e5e7eb;
+
   align-items: flex-start;
 }
 
 /* Thumbnail / Placeholder */
+
 .drawer-item img,
 .drawer-item-img {
   width: 64px;
   height: 64px;
-  object-fit: cover;
+
   border-radius: 8px;
+  object-fit: cover;
+
   flex-shrink: 0;
+
   background: #f3f4f6;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   font-size: 12px;
   color: #9ca3af;
 }
 
 /* Content */
+
 .drawer-item-content {
   flex: 1;
+
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
 /* Top row */
+
 .drawer-item-top {
   display: flex;
   justify-content: space-between;
@@ -108,10 +164,12 @@
   font-size: 15px;
   font-weight: 600;
   color: #5048e5;
+
   white-space: nowrap;
 }
 
-/* Bottom row: qty + remove */
+/* Bottom row */
+
 .drawer-item-bottom {
   display: flex;
   justify-content: space-between;
@@ -119,6 +177,7 @@
 }
 
 /* Quantity controls */
+
 .drawer-item-actions {
   display: flex;
   align-items: center;
@@ -128,12 +187,16 @@
 .drawer-item-actions button {
   width: 24px;
   height: 24px;
+
   border: 1px solid #d1d5db;
   background: #ffffff;
   border-radius: 4px;
+
   font-size: 14px;
   color: #111827;
+
   cursor: pointer;
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -146,16 +209,22 @@
 .drawer-qty {
   min-width: 24px;
   text-align: center;
+
   font-size: 14px;
   font-weight: 500;
 }
 
 /* Remove */
+
 .drawer-remove {
   font-size: 13px;
   color: #6b7280;
+
   cursor: pointer;
   white-space: nowrap;
+
+  background: none;
+  border: none;
 }
 
 .drawer-remove:hover {
@@ -163,25 +232,35 @@
   text-decoration: underline;
 }
 
-/* ================= Footer ================= */
+/* =========================================================
+   Footer
+========================================================= */
+
 .drawer-footer {
   padding: 24px;
-  border-top: 1px solid #e5e7eb;
+
   background: #ffffff;
+  border-top: 1px solid #e5e7eb;
+
   flex-shrink: 0;
 }
 
-/* ================= Discount ================= */
+/* =========================================================
+   Discount
+========================================================= */
+
 .drawer-discount {
   margin-bottom: 16px;
 }
 
 .drawer-discount label {
   display: block;
+
+  margin-bottom: 6px;
+
   font-size: 14px;
   font-weight: 500;
   color: #6b7280;
-  margin-bottom: 6px;
 }
 
 .drawer-discount-row {
@@ -192,12 +271,15 @@
 .drawer-discount input {
   flex: 1;
   height: 40px;
+
   padding: 0 12px;
+
   border: 1px solid #d1d5db;
   border-radius: 4px;
+
   font-size: 14px;
-  background: #ffffff;
   color: #374151;
+  background: #ffffff;
 }
 
 .drawer-discount input::placeholder {
@@ -207,23 +289,31 @@
 .drawer-discount button {
   width: 92px;
   height: 40px;
+
   background: #5048e5;
   color: #ffffff;
+
   border: none;
   border-radius: 4px;
+
   font-weight: 600;
   cursor: pointer;
 }
 
-/* ================= Summary ================= */
+/* =========================================================
+   Summary
+========================================================= */
+
 .drawer-summary {
   margin-top: 12px;
 }
 
-.drawer-summary > div {
+.drawer-summary>div {
   display: flex;
   justify-content: space-between;
+
   margin-bottom: 10px;
+
   font-size: 14px;
   color: #374151;
 }
@@ -234,15 +324,22 @@
   color: #111827;
 }
 
-/* ================= Checkout ================= */
+/* =========================================================
+   Checkout
+========================================================= */
+
 .drawer-checkout-btn {
   width: 100%;
+
   margin-top: 20px;
   padding: 14px 16px;
+
   background: #5048e5;
   color: #ffffff;
+
   border: none;
   border-radius: 6px;
+
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;

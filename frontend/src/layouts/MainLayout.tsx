@@ -15,21 +15,36 @@ import userIcon from "../assets/carbon_user-certification.svg";
 import cartIcon from "../assets/carbon_shopping-cart.svg";
 
 export default function MainLayout() {
+  /* ================= State ================= */
+
   const [cartOpen, setCartOpen] = useState(false);
+
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  /* ===== Search state (中文輸入法安全) ===== */
+  /* ================= Search (IME Safe) ================= */
+
   const [value, setValue] = useState(searchParams.get("q") || "");
   const [isComposing, setIsComposing] = useState(false);
 
-  /* ===== Auth ===== */
+  const commitSearch = (v: string) => {
+    navigate(v ? `/?q=${encodeURIComponent(v)}` : "/");
+  };
+
+  /* ================= Auth ================= */
+
   const { isAuthenticated } = useSelector(
     (state: RootState) => state.auth
   );
 
-  /* ===== Cart ===== */
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/auth/login");
+  };
+
+  /* ================= Cart ================= */
+
   const items = useSelector((state: RootState) => state.cart.items);
 
   const totalQuantity = items.reduce(
@@ -42,32 +57,19 @@ export default function MainLayout() {
     0
   );
 
-  const totalAmount = items.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0
-  );
-
-
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate("/auth/login");
-  };
-
-  const commitSearch = (v: string) => {
-    navigate(v ? `/?q=${encodeURIComponent(v)}` : "/");
-  };
+  /* ================= Render ================= */
 
   return (
     <div className="app">
       {/* ================= Header ================= */}
       <header className="site-header">
         <div className="container header-inner">
-          {/* ===== Logo ===== */}
+          {/* Logo */}
           <Link to="/" className="header-logo">
             Management <span>Chuwa</span>
           </Link>
 
-          {/* ===== Search ===== */}
+          {/* Search */}
           <div className="header-search">
             <div className="search-input-wrapper">
               <input
@@ -79,7 +81,7 @@ export default function MainLayout() {
                   setIsComposing(false);
                   const v = e.currentTarget.value;
                   setValue(v);
-                  commitSearch(v); // 中文組字完成才搜尋
+                  commitSearch(v); // 中文組字完成後才搜尋
                 }}
                 onChange={(e) => {
                   const v = e.target.value;
@@ -96,9 +98,9 @@ export default function MainLayout() {
             </div>
           </div>
 
-          {/* ===== Right Actions (Figma 對齊) ===== */}
+          {/* Right Actions */}
           <div className="header-actions">
-            {/* --- User --- */}
+            {/* User */}
             {!isAuthenticated ? (
               <Link to="/auth/login" className="header-user">
                 <img
@@ -110,6 +112,7 @@ export default function MainLayout() {
               </Link>
             ) : (
               <button
+                type="button"
                 className="header-user"
                 onClick={handleLogout}
               >
@@ -122,16 +125,28 @@ export default function MainLayout() {
               </button>
             )}
 
-            {/* --- Cart --- */}
-            <button className="header-cart" onClick={() => setCartOpen(true)}>
+            {/* Cart */}
+            <button
+              type="button"
+              className="header-cart"
+              onClick={() => setCartOpen(true)}
+            >
               <span className="cart-icon-wrapper">
-                <img src={cartIcon} alt="Cart" className="cart-icon" />
+                <img
+                  src={cartIcon}
+                  alt="Cart"
+                  className="cart-icon"
+                />
                 {totalQuantity > 0 && (
-                  <span className="cart-badge">{totalQuantity}</span>
+                  <span className="cart-badge">
+                    {totalQuantity}
+                  </span>
                 )}
               </span>
 
-              <span className="cart-total">${totalPrice.toFixed(2)}</span>
+              <span className="cart-total">
+                ${totalPrice.toFixed(2)}
+              </span>
             </button>
           </div>
         </div>

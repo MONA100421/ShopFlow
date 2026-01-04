@@ -16,17 +16,24 @@ interface CartDrawerProps {
 const DISCOUNT_CODE = "20 DOLLAR OFF";
 const DISCOUNT_AMOUNT = 20;
 
-export default function CartDrawer({ open, onClose }: CartDrawerProps) {
+export default function CartDrawer({
+  open,
+  onClose,
+}: CartDrawerProps) {
+  /* ================= Redux ================= */
+
   const dispatch = useDispatch();
-  const items = useSelector((state: RootState) => state.cart.items);
+  const items = useSelector(
+    (state: RootState) => state.cart.items
+  );
 
-  /** 折扣碼輸入框文字 */
+  /* ================= Local State ================= */
+
   const [discountInput, setDiscountInput] = useState("");
+  const [discountApplied, setDiscountApplied] =
+    useState(false);
 
-  /** 是否已成功套用折扣 */
-  const [discountApplied, setDiscountApplied] = useState(false);
-
-  /* ================= 金額計算 ================= */
+  /* ================= Price Calculation ================= */
 
   const subtotal = items.reduce(
     (sum, item) => sum + item.product.price * item.quantity,
@@ -37,26 +44,36 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
   const discount = discountApplied ? DISCOUNT_AMOUNT : 0;
   const total = Math.max(subtotal + tax - discount, 0);
 
-  /* ================= 鎖背景滾動 ================= */
+  /* ================= Scroll Control (🔥 SAFE) ================= */
 
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
+    if (open) {
+      /* 只鎖 Y 軸，避免手機 Safari 永久鎖死 */
+      document.body.style.overflowY = "hidden";
+    } else {
+      document.body.style.overflowY = "auto";
+    }
+
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflowY = "auto";
     };
   }, [open]);
 
   if (!open) return null;
 
-  /* ================= 折扣套用 ================= */
+  /* ================= Discount ================= */
 
   const handleApplyDiscount = () => {
-    if (discountInput.trim().toUpperCase() === DISCOUNT_CODE) {
+    if (
+      discountInput.trim().toUpperCase() === DISCOUNT_CODE
+    ) {
       setDiscountApplied(true);
     } else {
       setDiscountApplied(false);
     }
   };
+
+  /* ================= Render ================= */
 
   return (
     <div className="cart-overlay" onClick={onClose}>
@@ -66,8 +83,14 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
       >
         {/* ================= Header ================= */}
         <header className="drawer-header">
-          <h2 className="drawer-title">Cart ({items.length})</h2>
-          <button className="drawer-close" onClick={onClose}>
+          <h2 className="drawer-title">
+            Cart ({items.length})
+          </h2>
+          <button
+            type="button"
+            className="drawer-close"
+            onClick={onClose}
+          >
             ✕
           </button>
         </header>
@@ -75,11 +98,16 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
         {/* ================= Items ================= */}
         <section className="drawer-items">
           {items.length === 0 && (
-            <div className="drawer-empty">Your cart is empty</div>
+            <div className="drawer-empty">
+              Your cart is empty
+            </div>
           )}
 
           {items.map((item) => (
-            <div key={item.product.id} className="drawer-item">
+            <div
+              key={item.product.id}
+              className="drawer-item"
+            >
               {/* Thumbnail */}
               {item.product.image ? (
                 <img
@@ -94,23 +122,29 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
 
               {/* Content */}
               <div className="drawer-item-content">
-                {/* Top row */}
+                {/* Top */}
                 <div className="drawer-item-top">
                   <span className="drawer-item-name">
                     {item.product.title}
                   </span>
                   <span className="drawer-item-price">
-                    ${(item.product.price * item.quantity).toFixed(2)}
+                    $
+                    {(
+                      item.product.price * item.quantity
+                    ).toFixed(2)}
                   </span>
                 </div>
 
-                {/* Bottom row */}
+                {/* Bottom */}
                 <div className="drawer-item-bottom">
                   <div className="drawer-item-actions">
                     <button
+                      type="button"
                       onClick={() =>
                         dispatch(
-                          decreaseQuantity(item.product.id)
+                          decreaseQuantity(
+                            item.product.id
+                          )
                         )
                       }
                     >
@@ -122,9 +156,12 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                     </span>
 
                     <button
+                      type="button"
                       onClick={() =>
                         dispatch(
-                          increaseQuantity(item.product.id)
+                          increaseQuantity(
+                            item.product.id
+                          )
                         )
                       }
                     >
@@ -132,16 +169,19 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                     </button>
                   </div>
 
-                  <span
+                  <button
+                    type="button"
                     className="drawer-remove"
                     onClick={() =>
                       dispatch(
-                        removeFromCart(item.product.id)
+                        removeFromCart(
+                          item.product.id
+                        )
                       )
                     }
                   >
                     Remove
-                  </span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -150,7 +190,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
 
         {/* ================= Footer ================= */}
         <footer className="drawer-footer">
-          {/* ===== Discount ===== */}
+          {/* Discount */}
           <div className="drawer-discount">
             <label>Apply Discount Code</label>
 
@@ -160,19 +200,25 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                 onChange={(e) =>
                   setDiscountInput(e.target.value)
                 }
+                placeholder="Enter code"
               />
 
-              <button onClick={handleApplyDiscount}>
+              <button
+                type="button"
+                onClick={handleApplyDiscount}
+              >
                 Apply
               </button>
             </div>
           </div>
 
-          {/* ===== Summary ===== */}
+          {/* Summary */}
           <div className="drawer-summary">
             <div>
               <span>Subtotal</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span>
+                ${subtotal.toFixed(2)}
+              </span>
             </div>
 
             <div>
@@ -183,7 +229,10 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
             {discountApplied && (
               <div>
                 <span>Discount</span>
-                <span>- ${DISCOUNT_AMOUNT.toFixed(2)}</span>
+                <span>
+                  - $
+                  {DISCOUNT_AMOUNT.toFixed(2)}
+                </span>
               </div>
             )}
 
@@ -193,7 +242,10 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
             </div>
           </div>
 
-          <button className="drawer-checkout-btn">
+          <button
+            type="button"
+            className="drawer-checkout-btn"
+          >
             Continue to checkout
           </button>
         </footer>
