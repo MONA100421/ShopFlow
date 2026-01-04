@@ -60,19 +60,31 @@ export default function MainLayout() {
     0
   );
 
-  /* ================= Render ================= */
-
   return (
     <div className="app">
       {/* ================= Header ================= */}
       <header className="site-header">
         <div className="container header-inner">
-          {/* Logo */}
-          <Link to="/" className="header-logo">
+          {/* ===== Logo ===== */}
+
+          {/* Desktop logo */}
+          <Link
+            to="/"
+            className="header-logo header-logo-full"
+          >
             Management <span>Chuwa</span>
           </Link>
 
-          {/* Search */}
+          {/* Mobile logo (Figma aligned) */}
+          <Link
+            to="/"
+            className="header-logo header-logo-short"
+          >
+            <span className="logo-m">M</span>
+            <span className="logo-text">Chuwa</span>
+          </Link>
+
+          {/* ===== Search ===== */}
           <div className="header-search">
             <div className="search-input-wrapper">
               <input
@@ -101,11 +113,19 @@ export default function MainLayout() {
             </div>
           </div>
 
-          {/* Right Actions */}
+          {/* ===== Right Actions ===== */}
           <div className="header-actions">
+            {/* User */}
             {!isAuthenticated ? (
-              <Link to="/auth/login" className="header-user">
-                <img src={userIcon} alt="user" className="user-icon" />
+              <Link
+                to="/auth/login"
+                className="header-user"
+              >
+                <img
+                  src={userIcon}
+                  alt="user"
+                  className="user-icon"
+                />
                 <span>Sign In</span>
               </Link>
             ) : (
@@ -114,7 +134,11 @@ export default function MainLayout() {
                 className="header-user"
                 onClick={handleLogout}
               >
-                <img src={userIcon} alt="user" className="user-icon" />
+                <img
+                  src={userIcon}
+                  alt="user"
+                  className="user-icon"
+                />
                 <span>Sign Out</span>
               </button>
             )}
@@ -126,7 +150,11 @@ export default function MainLayout() {
               onClick={() => setCartOpen(true)}
             >
               <span className="cart-icon-wrapper">
-                <img src={cartIcon} alt="Cart" className="cart-icon" />
+                <img
+                  src={cartIcon}
+                  alt="Cart"
+                  className="cart-icon"
+                />
                 {totalQuantity > 0 && (
                   <span className="cart-badge">
                     {totalQuantity}
@@ -152,25 +180,34 @@ export default function MainLayout() {
       {/* ================= Footer ================= */}
       <footer className="site-footer">
         <div className="container footer-inner">
-          {/* 桌機第一個：copyright（DOM 不動） */}
           <span className="footer-left">
             © 2022 All Rights Reserved.
           </span>
 
-          {/* 桌機中間：icons */}
           <div className="footer-social">
-            <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://www.youtube.com"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <img src={youtubeIcon} alt="YouTube" />
             </a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://twitter.com"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <img src={twitterIcon} alt="Twitter" />
             </a>
-            <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://www.facebook.com"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <img src={facebookIcon} alt="Facebook" />
             </a>
           </div>
 
-          {/* 桌機右側：links */}
           <div className="footer-links">
             <a href="#">Contact us</a>
             <a href="#">Privacy Policies</a>
