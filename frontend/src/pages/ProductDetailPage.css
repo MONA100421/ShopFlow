@@ -34,7 +34,6 @@
 
 /* =========================================================
    Card (Figma: 1323 × 682)
-   ✅ 修正：避免商品被擠出畫面
 ========================================================= */
 
 .product-detail-page .product-detail-card {
@@ -42,7 +41,6 @@
     min-height: 682px;
 
     display: grid;
-    /* 🔑 關鍵修正：不要鎖死 662px */
     grid-template-columns: minmax(420px, 662px) 1fr;
     gap: 60px;
 
@@ -135,7 +133,7 @@
 }
 
 /* =========================================================
-   Out of Stock Badge (Figma Group 19)
+   Out of Stock Badge
 ========================================================= */
 
 .product-detail-page .out-of-stock-badge {
@@ -336,7 +334,12 @@
     }
 }
 
+/* =========================================================
+   Mobile – ONLY image full visible (no side effects)
+========================================================= */
+
 @media (max-width: 640px) {
+
     .product-detail-page .product-detail-page-title {
         margin-top: 96px;
         font-size: 28px;
@@ -355,5 +358,17 @@
     .product-detail-page .add-to-cart-btn,
     .product-detail-page .back-btn {
         width: 100%;
+    }
+
+    /* 🔑 關鍵：手機商品圖完整顯示 */
+    .product-detail-page .product-detail-image {
+        height: auto;
+        aspect-ratio: 1 / 1;
+    }
+
+    .product-detail-page .product-detail-image img {
+        height: auto;
+        max-height: 100%;
+        object-fit: contain;
     }
 }
