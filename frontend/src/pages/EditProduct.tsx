@@ -27,10 +27,21 @@ export default function EditProduct() {
   // ✅ 迁移期“万能 dispatch”：专门给 JS thunk 用（写一次，后面都用它）
   const dispatchAny: any = dispatch;
 
-  // ✅ auth：做权限保护（兼容 JS slice 结构不确定的情况）
-  const auth = useSelector((s: RootState) => (s as any).auth);
-  const role = String(auth?.user?.role ?? auth?.role ?? "").toLowerCase();
-  const isManager = role === "admin" || role === "manager";
+const auth = useSelector((s: RootState) => (s as any).auth);
+const reduxRole = String(auth?.user?.role ?? auth?.role ?? "").toLowerCase();
+
+const token = typeof window !== "undefined" ? localStorage.getItem("token") || "" : "";
+const jwtRole = (() => {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1] || ""));
+    return String(payload?.role || "").toLowerCase();
+  } catch {
+    return "";
+  }
+})();
+
+const role = reduxRole || jwtRole;
+const isManager = role === "admin" || role === "manager";
 
   // ✅ products：读当前 product + loading/error
   const current = useSelector(
@@ -52,8 +63,10 @@ export default function EditProduct() {
 
   // 1) 权限保护
   useEffect(() => {
-    if (!isManager) nav("/signin");
-  }, [isManager, nav]);
+  // ✅ role 为空时不要立刻跳，等 AdminRoute /me 校验
+  if (!role) return;
+  if (!isManager) nav("/signin");
+}, [role, isManager, nav]);
 
   // 2) load product
   useEffect(() => {
