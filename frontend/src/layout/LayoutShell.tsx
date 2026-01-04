@@ -13,6 +13,7 @@ import searchIcon from "../assets/search.svg";
 import facebookIcon from "../assets/facebook.svg";
 import twitterIcon from "../assets/twitter.svg";
 import youtubeIcon from "../assets/youtube.svg";
+import UserCertifiedIcon from "../assets/carbon_user-certification.svg";
 
 import "./LayoutShell.css";
 
@@ -66,6 +67,7 @@ function CartIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export default function LayoutShell() {
+  const isSignedIn = Boolean(localStorage.getItem("token"));
   const dispatch = useDispatch<AppDispatch>();
 
   const token = useSelector((s: RootState) => (s as any).auth?.token || "");
@@ -125,101 +127,121 @@ export default function LayoutShell() {
     }
   };
 
-  return (
-    <div className="shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="brand">
-            <span className="brand-main">Management</span>
-            <span className="brand-sub">Chuwa</span>
+ return (
+  <div className="shell">
+    <header className="topbar">
+      <div className="topbar-inner">
+        <div className="brand">
+          <span className="brand-main">Management</span>
+          <span className="brand-sub">Chuwa</span>
+        </div>
+
+        {/* ✅ Search bar */}
+        <div className="search">
+          <div className="search-box">
+            <input
+              className="search-input"
+              value={search}
+              onChange={(e) => dispatch(setSearch(e.target.value))}
+              placeholder="Search products..."
+            />
+            <img className="search-icon" src={searchIcon} alt="search" />
           </div>
+        </div>
 
-          {/* ✅ Search bar */}
-          <div className="search">
-            <div className="search-box">
-              <input
-                className="search-input"
-                value={search}
-                onChange={(e) => dispatch(setSearch(e.target.value))}
-                placeholder="Search products..."
-              />
-              <img className="search-icon" src={searchIcon} alt="search" />
-            </div>
-          </div>
-
-          <div className="top-actions">
-            {token ? (
-              <button className="action-btn" type="button" onClick={doLogout}>
-                <UserIcon className="action-ico" />
-                <span className="action-text">Sign Out</span>
-              </button>
-            ) : (
-              <Link className="action-btn" to="/signin">
-                <UserIcon className="action-ico" />
-                <span className="action-text">Sign In</span>
-              </Link>
-            )}
-
+        <div className="top-actions">
+          {token ? (
             <button
               className="action-btn"
               type="button"
-              onClick={() => setCartOpen(true)}
+              onClick={doLogout}
+              style={{ display: "flex", alignItems: "center", gap: 8 }}
             >
-              <CartIcon className="action-ico" />
-              <span className="action-text">
-                ${Number(subtotal || 0).toFixed(2)}
-              </span>
-              {cartCount > 0 && <span className="badge">{cartCount}</span>}
+              {/* ✅ 登录态只显示一个图标：带星 */}
+              {isSignedIn ? (
+                <img
+                  src={UserCertifiedIcon}
+                  alt="certified"
+                  className="action-ico"
+                  style={{ width: 22, height: 22 }}
+                />
+              ) : (
+                <UserIcon className="action-ico" />
+              )}
+
+              <span className="action-text">Sign Out</span>
             </button>
-          </div>
+          ) : (
+            <Link
+              className="action-btn"
+              to="/signin"
+              style={{ display: "flex", alignItems: "center", gap: 8 }}
+            >
+              <UserIcon className="action-ico" />
+              <span className="action-text">Sign In</span>
+            </Link>
+          )}
+
+          <button
+            className="action-btn"
+            type="button"
+            onClick={() => setCartOpen(true)}
+          >
+            <CartIcon className="action-ico" />
+            <span className="action-text">
+              ${Number(subtotal || 0).toFixed(2)}
+            </span>
+            {cartCount > 0 && <span className="badge">{cartCount}</span>}
+          </button>
         </div>
-      </header>
+      </div>
+    </header>
 
-      <main className="content">
-        <Outlet />
-      </main>
+    <main className="content">
+      <Outlet />
+    </main>
 
-      {/* ✅ Cart drawer */}
-      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+    {/* ✅ Cart drawer */}
+    <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
 
-      <footer className="footer">
-        <div className="footer-inner">
-          <div className="footer-copy">©2022 All Rights Reserved.</div>
+    <footer className="footer">
+      <div className="footer-inner">
+        <div className="footer-copy">©2022 All Rights Reserved.</div>
 
-          <div className="footer-social">
-            <a
-              className="social-btn"
-              href="https://youtube.com"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <img className="social-icon" src={youtubeIcon} alt="YouTube" />
-            </a>
-            <a
-              className="social-btn"
-              href="https://twitter.com"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <img className="social-icon" src={twitterIcon} alt="Twitter" />
-            </a>
-            <a
-              className="social-btn"
-              href="https://facebook.com"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <img className="social-icon" src={facebookIcon} alt="Facebook" />
-            </a>
-          </div>
-
-          <div className="footer-links">
-            <a href="#">Contact us</a>
-            <a href="#">Privacy Policy</a>
-            <a href="#">Help</a>
-          </div>
+        <div className="footer-social">
+          <a
+            className="social-btn"
+            href="https://youtube.com"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <img className="social-icon" src={youtubeIcon} alt="YouTube" />
+          </a>
+          <a
+            className="social-btn"
+            href="https://twitter.com"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <img className="social-icon" src={twitterIcon} alt="Twitter" />
+          </a>
+          <a
+            className="social-btn"
+            href="https://facebook.com"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <img className="social-icon" src={facebookIcon} alt="Facebook" />
+          </a>
         </div>
-      </footer>
-    </div>
-  );
+
+        <div className="footer-links">
+          <a href="#">Contact us</a>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Help</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+);
 }
