@@ -14,7 +14,6 @@
 
 .product-header {
     margin-top: 128px;
-    /* Figma: Top = 128 */
     margin-bottom: 24px;
 
     display: flex;
@@ -22,9 +21,8 @@
     justify-content: space-between;
 }
 
-/* ✅ Products title (Figma H4)
-   ⚠️ selector 提高權重，避免被全域 h1 蓋掉
-*/
+/* Products title (Figma H4) */
+
 .product-header .product-title {
     margin: 0;
 
@@ -35,10 +33,10 @@
     letter-spacing: 0;
 
     color: rgba(17, 24, 39, 1);
-    /* Text/Primary */
 }
 
 /* Right actions (Sort + Add Product) */
+
 .product-header-actions {
     display: flex;
     align-items: center;
@@ -185,10 +183,10 @@
 
     display: grid;
 
-    /* ⭐ 一行固定 5 張卡（你現在畫面） */
+    /* Desktop default: 5 cards */
     grid-template-columns: repeat(5, minmax(0, 1fr));
 
-    /* ⭐ 卡片高度對齊 ProductCard */
+    /* Align with ProductCard */
     grid-auto-rows: 303px;
 
     gap: 24px;
@@ -266,4 +264,66 @@
 .pagination-item.disabled {
     color: #bbbbbb;
     cursor: not-allowed;
+}
+
+/* =========================================================
+   Responsive Layout (核心優化)
+========================================================= */
+
+/* ≤1280px : 4 columns */
+@media (max-width: 1280px) {
+    .product-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+/* ≤1024px : 3 columns + header vertical */
+@media (max-width: 1024px) {
+    .product-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .product-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .product-header-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+/* ≤768px : 2 columns */
+@media (max-width: 768px) {
+    .product-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* ≤640px : mobile */
+@media (max-width: 640px) {
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .product-header {
+        margin-top: 96px;
+    }
+
+    .product-header .product-title {
+        font-size: 28px;
+    }
+
+    .product-header-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .sort-trigger,
+    .add-product-btn {
+        width: 100%;
+    }
 }
