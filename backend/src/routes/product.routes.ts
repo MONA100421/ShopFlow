@@ -16,16 +16,44 @@ router.get("/", async (req, res) => {
 });
 
 // ✅ GET /api/products/:id  详情（给 EditProduct 加载用）
+// GET /api/products/:id
 router.get("/:id", async (req, res) => {
-    try {
-        const p = await Product.findById(req.params.id);
-        if (!p) return res.status(404).json({ message: "Product not found" });
-        return res.json(p);
-    } catch (err) {
-        console.error("GET /products/:id error:", err);
-        return res.status(400).json({ message: "Invalid product id" });
+  try {
+    const p = await Product.findById(req.params.id);
+    if (!p) {
+      return res.status(404).json({ message: "Product not found" });
     }
+    return res.json(p);
+  } catch (err) {
+    console.error("GET /products/:id error:", err);
+    return res.status(400).json({ message: "Invalid product id" });
+  }
 });
+
+// DELETE /api/products/:id  （manager only）
+router.delete(
+  "/:id",
+  requireAuth,
+  requireManager,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const deleted = await Product.findByIdAndDelete(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      return res.json({
+        ok: true,
+        id,
+      });
+    } catch (err) {
+      console.error("DELETE /products/:id error:", err);
+      return res.status(400).json({ message: "Invalid product id" });
+    }
+  }
+);
 
 // ✅ POST /api/products  创建（只允许 manager）
 router.post("/", requireAuth, requireManager, async (req, res) => {

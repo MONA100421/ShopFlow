@@ -96,8 +96,7 @@ export const createProduct = createAsyncThunk<
   { state: RootState; rejectValue: string }
 >("products/create", async (payload, { getState, rejectWithValue }) => {
   try {
-    const token =
-      getState()?.auth?.token || localStorage.getItem("token") || "";
+    const token = getState()?.auth?.token || localStorage.getItem("token") || "";
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -131,6 +130,35 @@ export const fetchProductById = createAsyncThunk<
     if (!resp.ok)
       return rejectWithValue(data?.message || "Load product failed");
     return pickProduct(data);
+  } catch (e: any) {
+    return rejectWithValue(e?.message || "Network error");
+  }
+});
+
+export const deleteProduct = createAsyncThunk<
+  string, // return deleted id
+  string, // arg: id
+  { state: RootState; rejectValue: string }
+>("products/delete", async (id, { getState, rejectWithValue }) => {
+  try {
+    const token =
+      (getState() as any)?.auth?.token || localStorage.getItem("token") || "";
+    const clean = String(token)
+      .trim()
+      .replace(/^Bearer\s+/i, "")
+      .replace(/^"(.*)"$/, "$1")
+      .replace(/^'(.*)'$/, "$1");
+
+    const resp = await fetch(`${API_BASE}/api/products/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${clean}`,
+      },
+    });
+
+    const data: any = await resp.json().catch(() => ({}));
+    if (!resp.ok) return rejectWithValue(data?.message || "Delete failed");
+    return id;
   } catch (e: any) {
     return rejectWithValue(e?.message || "Network error");
   }
@@ -201,9 +229,11 @@ const productSlice = createSlice({
       state.saveError = "";
     },
   },
+
+  // ✅ 这里只修复括号/链式结构，不改逻辑
   extraReducers: (builder) => {
-    // ----- list -----
     builder
+      // ----- list -----
       .addCase(fetchProducts.pending, (state) => {
         state.loading = true;
         state.error = "";
@@ -218,76 +248,84 @@ const productSlice = createSlice({
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
         state.error =
-          (action.payload as string) || action.error?.message || "Fetch failed";
-      });
+          (action.payload as string) ||
+          action.error?.message ||
+          "Fetch failed";
+      })
 
-    // ----- create -----
-    builder
+      // ✅ delete
+      .addCase(deleteProduct.fulfilled, (state, action) => {
+        const id = action.payload;
+        state.items = (state.items || []).filter(
+          (p: any) => p?._id !== id && p?.id !== id
+        );
+
+        // 如果你有 selected/current 也顺手清
+        if (
+          (state as any).current?.id === id ||
+          (state as any).current?._id === id
+        ) {
+          (state as any).current = null;
+        }
+      })
+
+      // ----- create -----
       .addCase(createProduct.pending, (state) => {
         state.loading = true;
         state.error = "";
       })
-      .addCase(
-        createProduct.fulfilled,
-        (state, action: PayloadAction<Product>) => {
-          state.loading = false;
-          const p = action.payload;
-          if (!p) return;
+      .addCase(createProduct.fulfilled, (state, action: PayloadAction<Product>) => {
+        state.loading = false;
+        const p = action.payload;
+        if (!p) return;
 
-          // 放到列表最前，同时避免重复
-          const pid = getPid(p);
-          state.items = [p, ...state.items.filter((x) => getPid(x) !== pid)];
-        }
-      )
+        // 放到列表最前，同时避免重复
+        const pid = getPid(p);
+        state.items = [p, ...state.items.filter((x) => getPid(x) !== pid)];
+      })
       .addCase(createProduct.rejected, (state, action) => {
         state.loading = false;
         state.error =
           (action.payload as string) ||
           action.error?.message ||
           "Create failed";
-      });
+      })
 
-    // ----- detail load -----
-    builder
+      // ----- detail load -----
       .addCase(fetchProductById.pending, (state) => {
         state.currentLoading = true;
         state.currentError = "";
         state.current = null;
       })
-      .addCase(
-        fetchProductById.fulfilled,
-        (state, action: PayloadAction<Product>) => {
-          state.currentLoading = false;
-          state.current = action.payload || null;
-        }
-      )
+      .addCase(fetchProductById.fulfilled, (state, action: PayloadAction<Product>) => {
+        state.currentLoading = false;
+        state.current = action.payload || null;
+      })
       .addCase(fetchProductById.rejected, (state, action) => {
         state.currentLoading = false;
         state.currentError =
-          (action.payload as string) || action.error?.message || "Load failed";
-      });
+          (action.payload as string) ||
+          action.error?.message ||
+          "Load failed";
+      })
 
-    // ----- update -----
-    builder
+      // ----- update -----
       .addCase(updateProduct.pending, (state) => {
         state.saving = true;
         state.saveError = "";
       })
-      .addCase(
-        updateProduct.fulfilled,
-        (state, action: PayloadAction<Product>) => {
-          state.saving = false;
-          const p = action.payload;
-          if (!p) return;
+      .addCase(updateProduct.fulfilled, (state, action: PayloadAction<Product>) => {
+        state.saving = false;
+        const p = action.payload;
+        if (!p) return;
 
-          // 更新 current
-          state.current = p;
+        // 更新 current
+        state.current = p;
 
-          // 同步更新 items
-          const pid = getPid(p);
-          state.items = state.items.map((x) => (getPid(x) === pid ? p : x));
-        }
-      )
+        // 同步更新 items
+        const pid = getPid(p);
+        state.items = state.items.map((x) => (getPid(x) === pid ? p : x));
+      })
       .addCase(updateProduct.rejected, (state, action) => {
         state.saving = false;
         state.saveError =

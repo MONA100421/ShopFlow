@@ -4,7 +4,11 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import type { RootState, AppDispatch } from "../redux/store";
-import { fetchProductById, updateProduct } from "../redux/slices/productSlice";
+import {
+  fetchProductById,
+  updateProduct,
+  deleteProduct,
+} from "../redux/slices/productSlice";
 
 type ProductLike = {
   _id?: string;
@@ -22,28 +26,26 @@ export default function EditProduct() {
   const { id } = useParams<{ id: string }>();
   const nav = useNavigate();
 
-  // ✅ 原生 dispatch（有类型）
   const dispatch = useDispatch<AppDispatch>();
-  // ✅ 迁移期“万能 dispatch”：专门给 JS thunk 用（写一次，后面都用它）
   const dispatchAny: any = dispatch;
 
-const auth = useSelector((s: RootState) => (s as any).auth);
-const reduxRole = String(auth?.user?.role ?? auth?.role ?? "").toLowerCase();
+  const auth = useSelector((s: RootState) => (s as any).auth);
+  const reduxRole = String(auth?.user?.role ?? auth?.role ?? "").toLowerCase();
 
-const token = typeof window !== "undefined" ? localStorage.getItem("token") || "" : "";
-const jwtRole = (() => {
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1] || ""));
-    return String(payload?.role || "").toLowerCase();
-  } catch {
-    return "";
-  }
-})();
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") || "" : "";
+  const jwtRole = (() => {
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1] || ""));
+      return String(payload?.role || "").toLowerCase();
+    } catch {
+      return "";
+    }
+  })();
 
-const role = reduxRole || jwtRole;
-const isManager = role === "admin" || role === "manager";
+  const role = reduxRole || jwtRole;
+  const isManager = role === "admin" || role === "manager";
 
-  // ✅ products：读当前 product + loading/error
   const current = useSelector(
     (s: RootState) => (s.products.current as ProductLike | null) || null
   );
@@ -54,7 +56,6 @@ const isManager = role === "admin" || role === "manager";
 
   const [msg, setMsg] = useState("");
 
-  // 表单字段：组件局部状态
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -63,20 +64,18 @@ const isManager = role === "admin" || role === "manager";
 
   // 1) 权限保护
   useEffect(() => {
-  // ✅ role 为空时不要立刻跳，等 AdminRoute /me 校验
-  if (!role) return;
-  if (!isManager) nav("/signin");
-}, [role, isManager, nav]);
+    if (!role) return;
+    if (!isManager) nav("/signin");
+  }, [role, isManager, nav]);
 
   // 2) load product
   useEffect(() => {
     if (!id) return;
-    const pid = id; // ✅ 收窄成 string
     setMsg("");
-    dispatchAny(fetchProductById(pid as any));
+    dispatchAny(fetchProductById(id));
   }, [dispatchAny, id]);
 
-  // 3) current 到了，把值灌进表单
+  // 3) current → form
   useEffect(() => {
     if (!current) return;
     setName(current?.name || "");
@@ -95,10 +94,9 @@ const isManager = role === "admin" || role === "manager";
       setMsg("❌ Missing product id");
       return;
     }
-    const pid = id;
 
     const payload = {
-      id: pid,
+      id,
       data: {
         name: name.trim(),
         description,
@@ -109,98 +107,175 @@ const isManager = role === "admin" || role === "manager";
     };
 
     try {
-      const action = dispatchAny(updateProduct(payload as any));
-
-      // 如果 thunk 是 createAsyncThunk，unwrap 会存在
+      const action = dispatchAny(updateProduct(payload));
       if (typeof action?.unwrap === "function") {
         await action.unwrap();
       }
-
       setMsg("✅ Updated!");
       nav("/products");
     } catch {
-      // 错误已进 redux 的 saveError
+      // error already in redux
     }
   }
 
-  return (
-    <div className="page">
-      <div className="page-head">
-        <h1>Edit Product</h1>
+  // 5) delete ✅（现在位置正确）
+  const onDelete = async () => {
+    if (!id) return;
 
-        <div className="page-actions">
-          <Link className="btn" to="/products">
-            Back
-          </Link>
-        </div>
+    const ok = window.confirm("确定要删除这个商品吗？删除后无法恢复。");
+    if (!ok) return;
+
+    setMsg("");
+
+    try {
+      await dispatch(deleteProduct(id)).unwrap();
+      nav("/products", { replace: true });
+    } catch (e: any) {
+      setMsg(String(e?.message || e || "Delete failed"));
+    }
+  };
+
+ return (
+  <div className="page">
+    <div className="page-head">
+      <h1>Edit Product</h1>
+      <div className="page-actions">
+        <Link className="btn" to="/products">
+          Back
+        </Link>
       </div>
-
-      {msg && <div style={{ marginBottom: 12, opacity: 0.85 }}>{msg}</div>}
-
-      {!loading && (error || saveError) && (
-        <div style={{ marginBottom: 12 }}>
-          Error: {String(saveError || error)}
-        </div>
-      )}
-
-      {loading ? (
-        <div style={{ marginTop: 16 }}>Loading...</div>
-      ) : (
-        <form className="form" onSubmit={onSubmit}>
-          <label className="field">
-            <div className="label">Name</div>
-            <input
-              className="input"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </label>
-
-          <label className="field">
-            <div className="label">Description</div>
-            <textarea
-              className="textarea"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={4}
-            />
-          </label>
-
-          <label className="field">
-            <div className="label">Price</div>
-            <input
-              className="input"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-            />
-          </label>
-
-          <label className="field">
-            <div className="label">Stock</div>
-            <input
-              className="input"
-              type="number"
-              value={stock}
-              onChange={(e) => setStock(e.target.value)}
-            />
-          </label>
-
-          <label className="field">
-            <div className="label">Image URL</div>
-            <input
-              className="input"
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-            />
-          </label>
-
-          <div className="form-actions">
-            <button className="btn btn-primary" type="submit" disabled={saving}>
-              {saving ? "Saving..." : "Save"}
-            </button>
-          </div>
-        </form>
-      )}
     </div>
-  );
+
+    {msg && <div style={{ marginBottom: 12, opacity: 0.85 }}>{msg}</div>}
+
+    {!loading && (error || saveError) && (
+      <div style={{ marginBottom: 12 }}>
+        Error: {String(saveError || error)}
+      </div>
+    )}
+
+    {loading ? (
+      <div style={{ marginTop: 16 }}>Loading...</div>
+    ) : (
+      <form className="form" onSubmit={onSubmit}>
+        <label className="field">
+          <div className="label">Name</div>
+          <input
+            className="input"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </label>
+
+        <label className="field">
+          <div className="label">Description</div>
+          <textarea
+            className="textarea"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={4}
+          />
+        </label>
+
+        <label className="field">
+          <div className="label">Price</div>
+          <input
+            className="input"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+          />
+        </label>
+
+        <label className="field">
+          <div className="label">Stock</div>
+          <input
+            className="input"
+            type="number"
+            value={stock}
+            onChange={(e) => setStock(e.target.value)}
+          />
+        </label>
+
+        <label className="field">
+          <div className="label">Image URL</div>
+          <input
+            className="input"
+            value={image}
+            onChange={(e) => setImage(e.target.value)}
+          />
+        </label>
+
+        {/* ✅ Image Preview Box (always shown, no "Preview" text) */}
+        <div className="field">
+          <div
+            style={{
+              width: "100%",
+              height: 280,
+              border: "2px dashed rgba(0,0,0,0.15)",
+              borderRadius: 12,
+              background: "rgba(255,255,255,0.7)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              overflow: "hidden",
+            }}
+          >
+            {image?.trim() ? (
+              <img
+                src={image.trim()}
+                alt="product"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block",
+                }}
+                onError={(e) => {
+                  // 图片坏了就回到占位（不留空白）
+                  (e.currentTarget as HTMLImageElement).removeAttribute("src");
+                }}
+              />
+            ) : (
+              <div style={{ opacity: 0.45, textAlign: "center" }}>
+                <div style={{ fontSize: 44, lineHeight: 1 }}>🖼️</div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div
+          className="form-actions"
+          style={{
+            display: "flex",
+            gap: 12,
+            marginTop: 16,
+          }}
+        >
+          <button
+            type="button"
+            onClick={onDelete}
+            className="btn"
+            style={{
+              minWidth: 140,
+              border: "1px solid #e5e7eb",
+              background: "#fff",
+              color: "#111827",
+            }}
+          >
+            Delete
+          </button>
+
+          <button
+            className="btn btn-primary"
+            type="submit"
+            disabled={saving}
+            style={{ flex: 1 }}
+          >
+            {saving ? "Saving..." : "Save"}
+          </button>
+        </div>
+      </form>
+    )}
+  </div>
+);
 }
