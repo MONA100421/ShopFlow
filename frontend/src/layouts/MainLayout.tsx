@@ -13,6 +13,9 @@ import CartDrawer from "../components/CartDrawer";
 import searchIcon from "../assets/magnifier.svg";
 import userIcon from "../assets/carbon_user-certification.svg";
 import cartIcon from "../assets/carbon_shopping-cart.svg";
+import youtubeIcon from "../assets/youtube.svg";
+import twitterIcon from "../assets/twitter.svg";
+import facebookIcon from "../assets/facebook.svg";
 
 export default function MainLayout() {
   /* ================= State ================= */
@@ -162,7 +165,24 @@ export default function MainLayout() {
       {/* ================= Footer ================= */}
       <footer className="site-footer">
         <div className="container footer-inner">
-          <span>© 2022 All Rights Reserved.</span>
+          {/* Left */}
+          <div className="footer-left">
+            © 2022 All Rights Reserved.
+          </div>
+
+          {/* Center */}
+          <div className="footer-social">
+            <img src={youtubeIcon} alt="YouTube" />
+            <img src={twitterIcon} alt="Twitter" />
+            <img src={facebookIcon} alt="Facebook" />
+          </div>
+
+          {/* Right */}
+          <div className="footer-links">
+            <a href="#">Contact us</a>
+            <a href="#">Privacy Policies</a>
+            <a href="#">Help</a>
+          </div>
         </div>
       </footer>
 
