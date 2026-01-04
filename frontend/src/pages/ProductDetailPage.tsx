@@ -40,18 +40,23 @@ export default function ProductDetailPage() {
   }
 
   /* =================================================
-     🟥 Out of Stock 判斷（正式使用）
+     🟥 Stock / Quantity Rules（與 ProductCard 完全一致）
   ================================================= */
   const isOutOfStock = product.stock === 0;
+  const maxQuantity = product.stock;
+  const isMaxReached = quantity >= maxQuantity;
 
-  /* ===== 原本 handlers（僅加防呆，不改行為） ===== */
+  /* ===== handlers（加上庫存上限防呆） ===== */
   const handleIncrease = () => {
     if (isOutOfStock) return;
+    if (quantity >= maxQuantity) return;
+
     setQuantity((q) => q + 1);
   };
 
   const handleDecrease = () => {
     if (isOutOfStock) return;
+
     setQuantity((q) => Math.max(1, q - 1));
   };
 
@@ -65,6 +70,7 @@ export default function ProductDetailPage() {
       })
     );
 
+    // reset to safe default
     setQuantity(1);
   };
 
@@ -124,7 +130,7 @@ export default function ProductDetailPage() {
               </p>
             )}
 
-            {/* Quantity selector */}
+            {/* ================= Quantity ================= */}
             <div className="product-quantity">
               <button
                 type="button"
@@ -139,7 +145,7 @@ export default function ProductDetailPage() {
               <button
                 type="button"
                 onClick={handleIncrease}
-                disabled={isOutOfStock}
+                disabled={isOutOfStock || isMaxReached}
               >
                 +
               </button>

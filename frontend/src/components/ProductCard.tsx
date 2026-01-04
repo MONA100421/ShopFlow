@@ -22,17 +22,24 @@ export default function ProductCard({
   const [quantity, setQuantity] = useState(1);
 
   /* =================================================
-     🟥 Out of Stock 判斷（與 Detail Page 一致）
+     🟥 Stock / Quantity Rules
+     - Out of Stock: stock === 0
+     - Max quantity = stock
   ================================================= */
   const isOutOfStock = product.stock === 0;
+  const maxQuantity = product.stock;
+  const isMaxReached = quantity >= maxQuantity;
 
   const handleIncrease = () => {
     if (isOutOfStock) return;
+    if (quantity >= maxQuantity) return;
+
     setQuantity((q) => q + 1);
   };
 
   const handleDecrease = () => {
     if (isOutOfStock) return;
+
     setQuantity((q) => Math.max(1, q - 1));
   };
 
@@ -45,6 +52,8 @@ export default function ProductCard({
         quantity,
       })
     );
+
+    // reset to safe default
     setQuantity(1);
   };
 
@@ -98,7 +107,7 @@ export default function ProductCard({
             className="qty-btn"
             onClick={handleIncrease}
             aria-label="Increase quantity"
-            disabled={isOutOfStock}
+            disabled={isOutOfStock || isMaxReached}
           >
             +
           </button>

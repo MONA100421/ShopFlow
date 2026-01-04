@@ -11,9 +11,8 @@ const initialState: CartState = {
 };
 
 /**
- * ⭐ 重點：
- * addToCart 不再只收 Product
- * 而是同時收 product + quantity
+ * ⭐ addToCart payload
+ * 同時包含 product + quantity
  */
 interface AddToCartPayload {
   product: Product;
@@ -25,7 +24,7 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     /* =========================
-       Add to Cart (一次加 N 個)
+       Add to Cart (核心防呆)
     ========================== */
     addToCart(
       state,
@@ -33,18 +32,27 @@ const cartSlice = createSlice({
     ) {
       const { product, quantity } = action.payload;
 
+      // ❌ 庫存為 0，直接拒絕
+      if (product.stock <= 0) return;
+
       const existingItem = state.items.find(
         (item) => item.product.id === product.id
       );
 
       if (existingItem) {
-        // 已存在 → 疊加數量
-        existingItem.quantity += quantity;
+        const newQuantity =
+          existingItem.quantity + quantity;
+
+        // 🔑 關鍵：數量不得超過庫存
+        existingItem.quantity = Math.min(
+          newQuantity,
+          product.stock
+        );
       } else {
-        // 不存在 → 新增一筆
+        // 🔑 新增時也要 clamp
         state.items.push({
           product,
-          quantity,
+          quantity: Math.min(quantity, product.stock),
         });
       }
     },
@@ -52,7 +60,10 @@ const cartSlice = createSlice({
     /* =========================
        Remove item
     ========================== */
-    removeFromCart(state, action: PayloadAction<string>) {
+    removeFromCart(
+      state,
+      action: PayloadAction<string>
+    ) {
       state.items = state.items.filter(
         (item) => item.product.id !== action.payload
       );
@@ -60,24 +71,38 @@ const cartSlice = createSlice({
 
     /* =========================
        Increase quantity (+1)
+       ❗ 不得超過 stock
     ========================== */
-    increaseQuantity(state, action: PayloadAction<string>) {
+    increaseQuantity(
+      state,
+      action: PayloadAction<string>
+    ) {
       const item = state.items.find(
         (i) => i.product.id === action.payload
       );
-      if (item) {
+
+      if (!item) return;
+
+      if (item.quantity < item.product.stock) {
         item.quantity += 1;
       }
     },
 
     /* =========================
        Decrease quantity (-1)
+       ❗ 最小為 1
     ========================== */
-    decreaseQuantity(state, action: PayloadAction<string>) {
+    decreaseQuantity(
+      state,
+      action: PayloadAction<string>
+    ) {
       const item = state.items.find(
         (i) => i.product.id === action.payload
       );
-      if (item && item.quantity > 1) {
+
+      if (!item) return;
+
+      if (item.quantity > 1) {
         item.quantity -= 1;
       }
     },
