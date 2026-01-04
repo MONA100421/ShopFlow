@@ -186,7 +186,7 @@
     /* Desktop default: 5 cards */
     grid-template-columns: repeat(5, minmax(0, 1fr));
 
-    /* Align with ProductCard */
+    /* 🔑 Desktop fixed height (Figma aligned) */
     grid-auto-rows: 303px;
 
     gap: 24px;
@@ -267,7 +267,7 @@
 }
 
 /* =========================================================
-   Responsive Layout (核心優化)
+   Responsive Layout
 ========================================================= */
 
 /* ≤1280px : 4 columns */
@@ -302,10 +302,13 @@
     }
 }
 
-/* ≤640px : mobile */
+/* ≤640px : Mobile (🔥 關鍵修正) */
 @media (max-width: 640px) {
     .product-grid {
         grid-template-columns: 1fr;
+
+        /* 🔥 關鍵：解除固定高度，讓卡片自適應 */
+        grid-auto-rows: auto;
     }
 
     .product-header {
