@@ -6,8 +6,10 @@ import {
 } from "react-router-dom";
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+
 import type { RootState, AppDispatch } from "../store/store";
 import { logout } from "../store/authSlice";
+
 import CartDrawer from "../components/CartDrawer";
 
 import searchIcon from "../assets/magnifier.svg";
@@ -75,7 +77,7 @@ export default function MainLayout() {
             Management <span>Chuwa</span>
           </Link>
 
-          {/* Mobile logo (Figma aligned) */}
+          {/* Mobile logo */}
           <Link
             to="/"
             className="header-logo header-logo-short"

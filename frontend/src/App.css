@@ -47,7 +47,6 @@
   height: 72px;
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
   gap: 24px;
 }
 
@@ -71,23 +70,11 @@
 }
 
 /* =========================================================
-   Mobile Logo (MChuwa — Figma Aligned)
+   Mobile Logo Base
 ========================================================= */
 
-.logo-m {
-  font-family: Inter, system-ui, sans-serif;
-  font-size: 23px;
-  /* M 大 */
-  font-weight: 700;
-  line-height: 21px;
-}
-
-.logo-text {
-  font-family: Inter, system-ui, sans-serif;
-  font-size: 11px;
-  /* Chuwa 小 */
-  font-weight: 700;
-  line-height: 21px;
+.header-logo-short {
+  display: none;
 }
 
 /* =========================================================
@@ -272,18 +259,12 @@
 }
 
 /* =========================================================
-   Responsive Flags
-========================================================= */
-
-.header-logo-short {
-  display: none;
-}
-
-/* =========================================================
    🔥 MOBILE HEADER + FOOTER (≤768px)
 ========================================================= */
 
 @media (max-width: 768px) {
+
+  /* ================= Header ================= */
 
   .site-header {
     height: auto;
@@ -296,33 +277,47 @@
     row-gap: 12px;
   }
 
-  /* Desktop logo off */
   .header-logo-full {
     display: none;
   }
 
-  /* Mobile logo on — 透明背景，對齊 Figma */
+  /* ✅ Mobile Logo：baseline 對齊，無漂浮 */
   .header-logo-short {
     display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 59px;
-    height: 21px;
-    background: transparent;
+    align-items: baseline;
+    gap: 2px;
+    white-space: nowrap;
     color: #ffffff;
+    transform: translateY(-2px);
+    /* 整組微調即可 */
   }
 
-  /* 第一排右側 */
+  .header-logo-short .logo-m {
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.6px;
+  }
+
+  .header-logo-short .logo-text {
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.2px;
+    opacity: 0.95;
+  }
+
   .header-actions {
     margin-left: auto;
     gap: 16px;
   }
 
-  /* 第二排：Search 換行 */
+  /* Search 永遠第二行 */
   .header-search {
     order: 99;
     flex: 0 0 100%;
-    order: 3;
     width: 100%;
   }
 
@@ -330,7 +325,8 @@
     max-width: 100%;
   }
 
-  /* Footer mobile */
+  /* ================= Footer ================= */
+
   .site-footer {
     height: auto;
   }
@@ -338,6 +334,7 @@
   .footer-inner {
     height: auto;
     padding: 24px 16px;
+    display: flex;
     flex-direction: column;
     align-items: center;
     gap: 16px;
