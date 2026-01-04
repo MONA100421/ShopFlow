@@ -74,9 +74,10 @@
 }
 
 .product-detail-page .product-detail-image img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* ✅ 統一視覺大小 */
 }
 
 /* =========================================================
@@ -113,7 +114,7 @@
     line-height: 138%;
     color: #535353;
 
-    /* 🔑 關鍵修正：長標題不撐爆 */
+    /* 🔑 長標題保護 */
     word-break: break-word;
     overflow-wrap: anywhere;
 }
@@ -142,7 +143,7 @@
     line-height: 138%;
     color: #6b7280;
 
-    /* 🔑 關鍵修正：長描述不擠版 */
+    /* 🔑 長描述不擠版 */
     word-break: break-word;
 }
 
