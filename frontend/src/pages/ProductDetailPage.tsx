@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 
 import type { Product } from "../types/Product";
-import type { AppDispatch } from "../store/store";
+import type { AppDispatch, RootState } from "../store/store";
 import { addToCart } from "../store/cartSlice";
 import { getProductById } from "../services/productService";
 
@@ -13,6 +13,13 @@ export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+
+  /* =================================================
+     🔑 唯一正確的身分來源（Redux auth）
+     與 RequireAdmin.tsx 完全一致
+  ================================================= */
+  const user = useSelector((state: RootState) => state.auth.user);
+  const isAdmin = user?.role === "admin";
 
   /* ===== 原本資料取得（不動） ===== */
   const product: Product | null =
@@ -48,12 +55,11 @@ export default function ProductDetailPage() {
         quantity,
       })
     );
-
     setQuantity(1);
   };
 
   /* ===============================
-     Render（只做結構與 class）
+     Render
   =============================== */
   return (
     <div className="product-detail-page">
@@ -99,7 +105,7 @@ export default function ProductDetailPage() {
               </p>
             )}
 
-            {/* Quantity selector（原本功能，保留） */}
+            {/* Quantity selector */}
             <div className="product-quantity">
               <button
                 type="button"
@@ -118,7 +124,7 @@ export default function ProductDetailPage() {
               </button>
             </div>
 
-            {/* Actions */}
+            {/* ================= Actions ================= */}
             <div className="product-actions">
               <button
                 className="add-to-cart-btn"
@@ -129,9 +135,13 @@ export default function ProductDetailPage() {
 
               <button
                 className="back-btn"
-                onClick={() => navigate(`/products/${product.id}/edit`)}
+                onClick={() =>
+                  isAdmin
+                    ? navigate(`/products/${product.id}/edit`)
+                    : navigate("/")
+                }
               >
-                Edit
+                {isAdmin ? "Edit" : "Back"}
               </button>
             </div>
           </div>
