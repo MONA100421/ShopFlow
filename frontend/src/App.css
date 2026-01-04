@@ -47,6 +47,7 @@
   height: 72px;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 24px;
 }
 
@@ -319,6 +320,8 @@
 
   /* 第二排：Search 換行 */
   .header-search {
+    order: 99;
+    flex: 0 0 100%;
     order: 3;
     width: 100%;
   }
