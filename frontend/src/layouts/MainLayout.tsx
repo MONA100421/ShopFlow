@@ -166,18 +166,39 @@ export default function MainLayout() {
       <footer className="site-footer">
         <div className="container footer-inner">
           {/* Left */}
-          <div className="footer-left">
-            © 2022 All Rights Reserved.
-          </div>
+          <span>© 2022 All Rights Reserved.</span>
 
-          {/* Center */}
+          {/* Social Icons */}
           <div className="footer-social">
-            <img src={youtubeIcon} alt="YouTube" />
-            <img src={twitterIcon} alt="Twitter" />
-            <img src={facebookIcon} alt="Facebook" />
+            <a
+              href="https://www.youtube.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="YouTube"
+            >
+              <img src={youtubeIcon} alt="YouTube" />
+            </a>
+
+            <a
+              href="https://twitter.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Twitter"
+            >
+              <img src={twitterIcon} alt="Twitter" />
+            </a>
+
+            <a
+              href="https://www.facebook.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook"
+            >
+              <img src={facebookIcon} alt="Facebook" />
+            </a>
           </div>
 
-          {/* Right */}
+          {/* Right links（如果你之後要加） */}
           <div className="footer-links">
             <a href="#">Contact us</a>
             <a href="#">Privacy Policies</a>

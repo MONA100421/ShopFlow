@@ -6,9 +6,6 @@
   box-sizing: border-box;
 }
 
-/* ❗ 不再在 html / body 設 height: 100% */
-/* ❗ 這部分已由 index.css 處理 scroll 安全 */
-
 /* =========================================================
    App Layout Root
 ========================================================= */
@@ -32,7 +29,7 @@
 }
 
 /* =========================================================
-   Header (Fixed, SAFE)
+   Header (Fixed, SAFE) — ❗完全不動
 ========================================================= */
 
 .site-header {
@@ -211,26 +208,19 @@
 }
 
 /* =========================================================
-   Main Content (🔥 Mobile Scroll SAFE)
+   Main Content (Scroll SAFE)
 ========================================================= */
 
-/*
-  關鍵設計：
-  - Header: 72px fixed
-  - Footer: 72px fixed
-  - Main: 剩餘高度 = 100vh - 144px
-*/
-
 .site-main {
-  min-height: calc(100vh - 144px);
+  min-height: calc(100vh - 157px);
+  /* 72 + 85 */
   padding-top: 72px;
-  padding-bottom: 72px;
-
+  padding-bottom: 85px;
   background-color: #f9fafb;
 }
 
 /* =========================================================
-   Footer (Figma aligned - Desktop ONLY)
+   Footer (Figma aligned - Desktop)
 ========================================================= */
 
 .site-footer {
@@ -240,7 +230,6 @@
   right: 0;
 
   height: 85px;
-  /* Figma height */
   z-index: 1000;
 
   background-color: #111827;
@@ -254,7 +243,7 @@
   justify-content: space-between;
 }
 
-/* Left: © 2022 */
+/* Left */
 .footer-left {
   font-family: Inter, system-ui, sans-serif;
   font-size: 16px;
@@ -262,25 +251,40 @@
   line-height: 28px;
 }
 
-/* Center: Social Icons */
+/* ===============================
+   Center: Social Icons (🔥水平排列保證)
+================================ */
+
 .footer-social {
   display: flex;
+  /* 🔑 保證水平 */
+  flex-direction: row;
+  /* 🔑 明確指定 */
   align-items: center;
-  gap: 12px;
+  gap: 24px;
+  /* icon 間距 */
+}
+
+.footer-social a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.85;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.footer-social a:hover {
+  opacity: 1;
+  transform: translateY(-2px);
 }
 
 .footer-social img {
   height: 20px;
   width: auto;
-  cursor: pointer;
-  opacity: 0.9;
+  display: block;
 }
 
-.footer-social img:hover {
-  opacity: 1;
-}
-
-/* Right: Links */
+/* Right */
 .footer-links {
   display: flex;
   gap: 24px;
@@ -304,12 +308,10 @@
    Header Logo Responsive Text (SAFE)
 ========================================================= */
 
-/* Desktop */
 .header-logo-short {
   display: none;
 }
 
-/* Mobile */
 @media (max-width: 768px) {
   .header-logo-full {
     display: none;
