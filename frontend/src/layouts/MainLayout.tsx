@@ -84,13 +84,13 @@ export default function MainLayout() {
                   setIsComposing(false);
                   const v = e.currentTarget.value;
                   setValue(v);
-                  commitSearch(v); // 中文組字完成後才搜尋
+                  commitSearch(v);
                 }}
                 onChange={(e) => {
                   const v = e.target.value;
                   setValue(v);
                   if (isComposing) return;
-                  commitSearch(v); // 英文即時搜尋
+                  commitSearch(v);
                 }}
               />
               <img
@@ -103,14 +103,9 @@ export default function MainLayout() {
 
           {/* Right Actions */}
           <div className="header-actions">
-            {/* User */}
             {!isAuthenticated ? (
               <Link to="/auth/login" className="header-user">
-                <img
-                  src={userIcon}
-                  alt="user"
-                  className="user-icon"
-                />
+                <img src={userIcon} alt="user" className="user-icon" />
                 <span>Sign In</span>
               </Link>
             ) : (
@@ -119,11 +114,7 @@ export default function MainLayout() {
                 className="header-user"
                 onClick={handleLogout}
               >
-                <img
-                  src={userIcon}
-                  alt="user"
-                  className="user-icon"
-                />
+                <img src={userIcon} alt="user" className="user-icon" />
                 <span>Sign Out</span>
               </button>
             )}
@@ -135,11 +126,7 @@ export default function MainLayout() {
               onClick={() => setCartOpen(true)}
             >
               <span className="cart-icon-wrapper">
-                <img
-                  src={cartIcon}
-                  alt="Cart"
-                  className="cart-icon"
-                />
+                <img src={cartIcon} alt="Cart" className="cart-icon" />
                 {totalQuantity > 0 && (
                   <span className="cart-badge">
                     {totalQuantity}
@@ -165,40 +152,25 @@ export default function MainLayout() {
       {/* ================= Footer ================= */}
       <footer className="site-footer">
         <div className="container footer-inner">
-          {/* Left */}
-          <span>© 2022 All Rights Reserved.</span>
+          {/* 桌機第一個：copyright（DOM 不動） */}
+          <span className="footer-left">
+            © 2022 All Rights Reserved.
+          </span>
 
-          {/* Social Icons */}
+          {/* 桌機中間：icons */}
           <div className="footer-social">
-            <a
-              href="https://www.youtube.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="YouTube"
-            >
+            <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer">
               <img src={youtubeIcon} alt="YouTube" />
             </a>
-
-            <a
-              href="https://twitter.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Twitter"
-            >
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
               <img src={twitterIcon} alt="Twitter" />
             </a>
-
-            <a
-              href="https://www.facebook.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Facebook"
-            >
+            <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">
               <img src={facebookIcon} alt="Facebook" />
             </a>
           </div>
 
-          {/* Right links（如果你之後要加） */}
+          {/* 桌機右側：links */}
           <div className="footer-links">
             <a href="#">Contact us</a>
             <a href="#">Privacy Policies</a>
