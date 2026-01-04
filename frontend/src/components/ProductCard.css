@@ -84,7 +84,9 @@
     gap: 4px;
 }
 
-/* Title */
+/* =========================================================
+   Title
+========================================================= */
 
 .product-title {
     margin: 0;
@@ -102,7 +104,9 @@
     /* 防止長標題撐爆 */
 }
 
-/* Price */
+/* =========================================================
+   Price
+========================================================= */
 
 .product-price {
     margin: 0;
@@ -150,6 +154,13 @@
     background: #f3f4f6;
 }
 
+/* 🔒 Out of Stock / Disabled */
+
+.product-quantity .qty-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
 .product-quantity span {
     width: 20px;
     height: 26px;
@@ -172,7 +183,9 @@
     gap: 8px;
 }
 
-/* Add to Cart */
+/* =========================================================
+   Add to Cart
+========================================================= */
 
 .add-to-cart-btn {
     flex: 1;
@@ -199,7 +212,17 @@
     opacity: 0.9;
 }
 
-/* Edit */
+/* 🔒 Out of Stock / Disabled */
+
+.add-to-cart-btn:disabled {
+    background: #cccccc;
+    color: #6b7280;
+    cursor: not-allowed;
+}
+
+/* =========================================================
+   Edit
+========================================================= */
 
 .edit-product-btn {
     flex: 1;

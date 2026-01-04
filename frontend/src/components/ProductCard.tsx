@@ -21,15 +21,24 @@ export default function ProductCard({
   const dispatch = useDispatch<AppDispatch>();
   const [quantity, setQuantity] = useState(1);
 
+  /* =================================================
+     🟥 Out of Stock 判斷（與 Detail Page 一致）
+  ================================================= */
+  const isOutOfStock = product.stock === 0;
+
   const handleIncrease = () => {
+    if (isOutOfStock) return;
     setQuantity((q) => q + 1);
   };
 
   const handleDecrease = () => {
+    if (isOutOfStock) return;
     setQuantity((q) => Math.max(1, q - 1));
   };
 
   const handleAddToCart = () => {
+    if (isOutOfStock) return;
+
     dispatch(
       addToCart({
         product,
@@ -75,6 +84,7 @@ export default function ProductCard({
             className="qty-btn"
             onClick={handleDecrease}
             aria-label="Decrease quantity"
+            disabled={isOutOfStock}
           >
             −
           </button>
@@ -88,6 +98,7 @@ export default function ProductCard({
             className="qty-btn"
             onClick={handleIncrease}
             aria-label="Increase quantity"
+            disabled={isOutOfStock}
           >
             +
           </button>
@@ -99,8 +110,9 @@ export default function ProductCard({
             type="button"
             className="add-to-cart-btn"
             onClick={handleAddToCart}
+            disabled={isOutOfStock}
           >
-            Add to Cart
+            {isOutOfStock ? "Out of Stock" : "Add to Cart"}
           </button>
 
           {isAdmin && onEdit && (

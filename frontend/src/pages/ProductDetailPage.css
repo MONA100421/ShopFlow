@@ -77,7 +77,6 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* ✅ 統一視覺大小 */
 }
 
 /* =========================================================
@@ -88,10 +87,11 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
-    /* 🔑 防止 grid 子元素撐爆 */
 }
 
-/* Category */
+/* =========================================================
+   Category
+========================================================= */
 
 .product-detail-page .product-category {
     margin-bottom: 8px;
@@ -103,7 +103,9 @@
     color: #6b7280;
 }
 
-/* Title */
+/* =========================================================
+   Title
+========================================================= */
 
 .product-detail-page .product-title {
     margin: 0 0 12px;
@@ -114,15 +116,16 @@
     line-height: 138%;
     color: #535353;
 
-    /* 🔑 長標題保護 */
     word-break: break-word;
     overflow-wrap: anywhere;
 }
 
-/* Price */
+/* =========================================================
+   Price
+========================================================= */
 
 .product-detail-page .product-price {
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 
     font-family: Inter, system-ui, sans-serif;
     font-size: 32px;
@@ -131,7 +134,35 @@
     color: #111827;
 }
 
-/* Description */
+/* =========================================================
+   Out of Stock Badge (Figma Group 19)
+========================================================= */
+
+.product-detail-page .out-of-stock-badge {
+    width: 76px;
+    height: 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(234, 61, 47, 0.13);
+    border-radius: 4px;
+
+    margin-bottom: 20px;
+}
+
+.product-detail-page .out-of-stock-text {
+    font-family: Inter, system-ui, sans-serif;
+    font-weight: 500;
+    font-size: 10px;
+    line-height: 138%;
+    color: rgba(234, 61, 47, 1);
+}
+
+/* =========================================================
+   Description
+========================================================= */
 
 .product-detail-page .product-description {
     max-width: 428px;
@@ -143,7 +174,6 @@
     line-height: 138%;
     color: #6b7280;
 
-    /* 🔑 長描述不擠版 */
     word-break: break-word;
 }
 
@@ -182,6 +212,11 @@
     background: #f3f4f6;
 }
 
+.product-detail-page .product-quantity button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
 .product-detail-page .product-quantity span {
     min-width: 24px;
     text-align: center;
@@ -200,7 +235,9 @@
     gap: 16px;
 }
 
-/* Add to Cart */
+/* =========================================================
+   Add to Cart
+========================================================= */
 
 .product-detail-page .add-to-cart-btn {
     width: 133px;
@@ -224,7 +261,15 @@
     opacity: 0.9;
 }
 
-/* Back / Edit Button */
+.product-detail-page .add-to-cart-btn:disabled {
+    background: #cccccc;
+    color: #6b7280;
+    cursor: not-allowed;
+}
+
+/* =========================================================
+   Back / Edit Button
+========================================================= */
 
 .product-detail-page .back-btn {
     width: 133px;

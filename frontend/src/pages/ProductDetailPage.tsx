@@ -39,22 +39,32 @@ export default function ProductDetailPage() {
     );
   }
 
-  /* ===== 原本 handlers（不動） ===== */
+  /* =================================================
+     🟥 Out of Stock 判斷（正式使用）
+  ================================================= */
+  const isOutOfStock = product.stock === 0;
+
+  /* ===== 原本 handlers（僅加防呆，不改行為） ===== */
   const handleIncrease = () => {
+    if (isOutOfStock) return;
     setQuantity((q) => q + 1);
   };
 
   const handleDecrease = () => {
+    if (isOutOfStock) return;
     setQuantity((q) => Math.max(1, q - 1));
   };
 
   const handleAddToCart = () => {
+    if (isOutOfStock) return;
+
     dispatch(
       addToCart({
         product,
         quantity,
       })
     );
+
     setQuantity(1);
   };
 
@@ -98,6 +108,15 @@ export default function ProductDetailPage() {
               ${product.price.toFixed(2)}
             </div>
 
+            {/* Out of Stock Badge（Figma Group 19） */}
+            {isOutOfStock && (
+              <div className="out-of-stock-badge">
+                <span className="out-of-stock-text">
+                  Out of Stock
+                </span>
+              </div>
+            )}
+
             {/* Description */}
             {product.description && (
               <p className="product-description">
@@ -110,6 +129,7 @@ export default function ProductDetailPage() {
               <button
                 type="button"
                 onClick={handleDecrease}
+                disabled={isOutOfStock}
               >
                 −
               </button>
@@ -119,6 +139,7 @@ export default function ProductDetailPage() {
               <button
                 type="button"
                 onClick={handleIncrease}
+                disabled={isOutOfStock}
               >
                 +
               </button>
@@ -129,8 +150,9 @@ export default function ProductDetailPage() {
               <button
                 className="add-to-cart-btn"
                 onClick={handleAddToCart}
+                disabled={isOutOfStock}
               >
-                Add to Cart
+                {isOutOfStock ? "Out of Stock" : "Add to Cart"}
               </button>
 
               <button
