@@ -97,9 +97,9 @@ export default function ProductsList() {
   // ✅ 每个商品一个“待加入数量”
   const [draftQtyMap, setDraftQtyMap] = useState<DraftQtyMap>({});
   const getDraftQty = (pid: string) =>
-    Math.max(0, Number(draftQtyMap[pid] ?? 1));
+    Math.max(1, Number(draftQtyMap[pid] ?? 1));
   const setDraftQty = (pid: string, next: number) =>
-    setDraftQtyMap((m) => ({ ...m, [pid]: Math.max(0, Number(next) || 0) }));
+    setDraftQtyMap((m) => ({ ...m, [pid]: Math.max(1, Number(next) || 1) }));
 
   useEffect(() => {
     dispatchAny(fetchProducts());
@@ -244,9 +244,9 @@ export default function ProductsList() {
               // ✅ UI 上的待加入数量：
               // - 缺货直接显示 0
               // - 有货时不允许超过库存
-              const rawDraft = pid ? getDraftQty(pid) : 0;
+              const rawDraft = pid ? getDraftQty(pid) : 1;
               const draftQty = outOfStock
-                ? 0
+                ? 1
                 : Math.max(1, Math.min(rawDraft, Math.max(1, stockNum || 1)));
 
               return (
@@ -282,7 +282,7 @@ export default function ProductsList() {
                       <div className="stepper">
                         <button
                           type="button"
-                          disabled={outOfStock || !pid || draftQty <= 1}
+                          disabled={outOfStock || !pid }
                           onClick={() => {
                             if (!pid) return;
                             if (outOfStock) return;

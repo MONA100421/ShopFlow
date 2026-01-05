@@ -207,7 +207,7 @@ export default function LayoutShell() {
 
     <footer className="footer">
       <div className="footer-inner">
-        <div className="footer-copy">©2022 All Rights Reserved.</div>
+        <div className="footer-copy">©2026 Bingchen designed.</div>
 
         <div className="footer-social">
           <a

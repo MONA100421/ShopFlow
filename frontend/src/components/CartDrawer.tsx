@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setQty, removeFromCart, setPromo } from "../redux/slices/cartSlice";
 import "./CartDrawer.css";
@@ -107,27 +107,35 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
 
   if (!open) return null;
 
-  return (
-    <div className="cart-overlay" onClick={onClose}>
-      <aside
-        className="cart-drawer"
-        onClick={(e: React.MouseEvent) => e.stopPropagation()}
-      >
-        <div className="cart-drawer-head">
-          <div className="cart-title">
-            Cart <span className="cart-count">({count})</span>
-          </div>
-          <button className="cart-x" onClick={onClose} aria-label="close">
-            ✕
-          </button>
+return (
+  <div className="cart-overlay" onClick={onClose}>
+    <aside
+      className="cart-drawer"
+      onClick={(e: React.MouseEvent) => e.stopPropagation()}
+    >
+      <div className="cart-drawer-head">
+        <div className="cart-title">
+          Cart <span className="cart-count">({count})</span>
         </div>
+        <button className="cart-x" onClick={onClose} aria-label="close">
+          ✕
+        </button>
+      </div>
 
-        <div className="cart-drawer-body">
-          {cartItems.length === 0 && (
-            <div className="muted">Cart is empty.</div>
-          )}
+      {/* ✅ 唯一滚动区域：商品列表 */}
+      <div className="cart-drawer-body">
+        {cartItems.length === 0 && <div className="muted">Cart is empty.</div>}
 
-          {cartItems.map((it) => (
+        {cartItems.map((it) => {
+          // ✅ 从 merged 的 product 字段里读库存（cartSelectors.ts 已经把 product spread 进来了）
+          const stockNum = Number((it as any)?.stock ?? NaN);
+          const hasStock = Number.isFinite(stockNum);
+          const cap = hasStock ? Math.max(0, stockNum) : Infinity;
+
+          const outOfStock = hasStock ? cap <= 0 : false;
+          const atCap = hasStock ? it.qty >= cap : false;
+
+          return (
             <div className="cart-item" key={it.id}>
               <img
                 className="cart-item-img"
@@ -136,25 +144,34 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
               />
 
               <div className="cart-item-mid">
-                <div className="cart-item-name">{String(it.name || "")}</div>
+                <div className="cart-item-name">{it.name}</div>
 
-                <div className="cart-qty">
+                <div className="cart-item-qty">
                   <button
                     className="qty-btn"
+                    type="button"
                     onClick={() =>
                       dispatch(
-                        setQty({ id: it.id, qty: Math.max(0, it.qty - 1) })
+                        setQty({ id: it.id, qty: Math.max(1, it.qty - 1) })
                       )
                     }
+                    disabled={it.qty <= 1}
                   >
-                    −
+                    –
                   </button>
-                  <div className="qty-box">{it.qty}</div>
+
+                  <span className="qty-num">{it.qty}</span>
+
                   <button
                     className="qty-btn"
-                    onClick={() =>
-                      dispatch(setQty({ id: it.id, qty: it.qty + 1 }))
-                    }
+                    type="button"
+                    // ✅ 到库存上限 or 缺货：购物车里也禁用 +
+                    disabled={outOfStock || atCap}
+                    onClick={() => {
+                      if (outOfStock || atCap) return;
+                      const next = hasStock ? Math.min(cap, it.qty + 1) : it.qty + 1;
+                      dispatch(setQty({ id: it.id, qty: next }));
+                    }}
                   >
                     +
                   </button>
@@ -163,62 +180,68 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
 
               <div className="cart-item-right">
                 <div className="cart-item-price">
-                  ${Number(it.price || 0).toFixed(2)}
+                  ${(Number(it.price || 0) * it.qty).toFixed(2)}
                 </div>
                 <button
-                  className="cart-remove"
+                  className="link"
+                  type="button"
                   onClick={() => dispatch(removeFromCart(it.id))}
                 >
                   Remove
                 </button>
               </div>
             </div>
-          ))}
+          );
+        })}
+      </div>
 
-          <div className="cart-promo">
-            <div className="cart-promo-title">Apply Discount Code</div>
-            <div className="cart-promo-row">
-              <input
-                className="cart-input"
-                value={promo}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  dispatch(setPromo(e.target.value))
-                }
-                placeholder="SAVE20 or SAVE10"
-              />
-              <button
-                className="cart-apply"
-                onClick={() => dispatch(setPromo(promo))}
-              >
-                Apply
-              </button>
-            </div>
-          </div>
-
-          <div className="cart-summary">
-            <div className="sum-row">
-              <span>Subtotal</span>
-              <span>${subtotal.toFixed(2)}</span>
-            </div>
-            <div className="sum-row">
-              <span>Tax</span>
-              <span>${tax.toFixed(2)}</span>
-            </div>
-            <div className="sum-row">
-              <span>Discount</span>
-              <span>-${discount.toFixed(2)}</span>
-            </div>
-            <div className="sum-row total">
-              <span>Estimated total</span>
-              <span>${total.toFixed(2)}</span>
-            </div>
-
-            <button className="cart-checkout" disabled={cartItems.length === 0}>
-              Continue to checkout
+      {/* ✅ 固定底部区域：Promo + Summary + Checkout */}
+      <div className="cart-drawer-footer">
+        <div className="cart-promo">
+          <div className="cart-promo-title">Apply Discount Code</div>
+          <div className="cart-promo-row">
+            <input
+              className="cart-input"
+              value={promo}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                dispatch(setPromo(e.target.value))
+              }
+              placeholder=""
+            />
+            <button
+              className="cart-apply"
+              type="button"
+              onClick={() => dispatch(setPromo(promo))}
+            >
+              Apply
             </button>
           </div>
         </div>
-      </aside>
-    </div>
-  );
+
+        <div className="cart-summary">
+          <div className="sum-row">
+            <span>Subtotal</span>
+            <span>${subtotal.toFixed(2)}</span>
+          </div>
+          <div className="sum-row">
+            <span>Tax</span>
+            <span>${tax.toFixed(2)}</span>
+          </div>
+          <div className="sum-row">
+            <span>Discount</span>
+            <span>-${discount.toFixed(2)}</span>
+          </div>
+          <div className="sum-row total">
+            <span>Estimated total</span>
+            <span>${total.toFixed(2)}</span>
+          </div>
+
+          <button className="cart-checkout" disabled={cartItems.length === 0}>
+            Continue to checkout
+          </button>
+        </div>
+      </div>
+    </aside>
+  </div>
+);
 }

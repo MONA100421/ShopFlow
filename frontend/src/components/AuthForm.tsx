@@ -92,6 +92,11 @@ export default function AuthForm({ mode }: Props) {
       ? "Update password"
       : "Sign in to your account";
 
+const close = () => {
+  if (window.history.length > 1) nav(-1);
+  else nav("/products", { replace: true });
+};
+
   return (
     <div className="auth-page">
       <div className="auth-card">
@@ -170,18 +175,18 @@ export default function AuthForm({ mode }: Props) {
             </button>
           </div>
         )}
-
         {mode === "signin" && (
-          <div className="switch-auth">
-            New here? <Link to="/signup">Create an account</Link>
+          <div className="switch-auth-row">
+            <span>
+              Don’t have an account? <Link to="/signup">Sign up</Link>
+            </span>
+
+            <Link to="/update" className="forgot-link">
+              Forgot password?
+            </Link>
           </div>
         )}
 
-        {mode === "signup" && (
-          <div className="switch-auth">
-            Already have an account? <Link to="/signin">Sign in</Link>
-          </div>
-        )}
       </div>
     </div>
   );

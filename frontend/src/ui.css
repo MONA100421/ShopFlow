@@ -517,3 +517,22 @@ body {
   flex: 1 1 auto;
   min-width: 0;
 }
+
+@media (max-width: 520px) {
+  .page-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .page-actions {
+    width: 100%;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .page-actions .select,
+  .page-actions .btn {
+    width: 100% !important; /* 覆盖 ProductsList 里给 select 写的 inline width */
+  }
+}
