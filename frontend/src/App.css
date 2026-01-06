@@ -208,7 +208,9 @@
 .site-main {
   min-height: calc(100vh - 157px);
   padding-top: 72px;
+  /* Desktop header height */
   padding-bottom: 85px;
+  /* Desktop footer height */
   background-color: #f9fafb;
 }
 
@@ -281,7 +283,6 @@
     display: none;
   }
 
-  /* ✅ Mobile Logo：baseline 對齊，無漂浮 */
   .header-logo-short {
     display: inline-flex;
     align-items: baseline;
@@ -289,7 +290,6 @@
     white-space: nowrap;
     color: #ffffff;
     transform: translateY(-2px);
-    /* 整組微調即可 */
   }
 
   .header-logo-short .logo-m {
@@ -314,7 +314,7 @@
     gap: 16px;
   }
 
-  /* Search 永遠第二行 */
+  /* Search 第二行 */
   .header-search {
     order: 99;
     flex: 0 0 100%;
@@ -323,6 +323,14 @@
 
   .search-input-wrapper {
     max-width: 100%;
+  }
+
+  /* ================= 🔑 Mobile Main Fix ================= */
+
+  .site-main {
+    /* ✔ 關鍵：避開「實際高度的 mobile header」 */
+    padding-top: 128px;
+    padding-bottom: 140px;
   }
 
   /* ================= Footer ================= */
