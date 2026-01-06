@@ -1,12 +1,18 @@
+// src/types/Product.ts
 export interface Product {
-  id: string;
+ id: string;
 
-  title: string;
-  description: string;
 
-  category: string;
-  price: number;
-  stock: number;
+ title: string;
+ description: string;
+ category: string;
+ price: number;
+ stock: number;
+ image: string;
 
-  image: string;
+
+ createdAt: string; // ⭐ 新增
 }
+
+
+
