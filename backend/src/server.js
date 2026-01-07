@@ -7,7 +7,8 @@ import dotenv from "dotenv";
 // ==============================
 import productRoutes from "./routes/product.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
-// import authRoutes from "./routes/auth.routes.js"; // 之後再開
+import orderRoutes from "./routes/order.routes.js";
+// import authRoutes from "./routes/auth.routes.js"; // 🔒 之後再接
 
 // ==============================
 // Env
@@ -23,7 +24,7 @@ const app = express();
 // Middleware
 // ==============================
 
-// CORS（允許前端 Vite）
+// CORS（允許 Vite 前端）
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -35,12 +36,13 @@ app.use(
 app.use(express.json());
 
 // ==============================
-// Health Check
+// Health Check（部署 / debug 必備）
 // ==============================
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
     message: "Backend server is running 🚀",
+    time: new Date().toISOString(),
   });
 });
 
@@ -54,7 +56,10 @@ app.use("/api/products", productRoutes);
 // 🔹 Cart
 app.use("/api/cart", cartRoutes);
 
-// 🔹 Auth（之後接）
+// 🔹 Orders（Checkout → Order）
+app.use("/api/orders", orderRoutes);
+
+// 🔹 Auth（之後接 JWT / Session）
 // app.use("/api/auth", authRoutes);
 
 // ==============================
