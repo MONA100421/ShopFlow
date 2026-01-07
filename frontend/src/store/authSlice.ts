@@ -2,7 +2,8 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import {
   loginAPI,
   registerAPI,
-  LoginResponse,
+  AuthResponse,
+  User,
 } from "../services/authService";
 
 /* ========================
@@ -10,7 +11,8 @@ import {
 ======================== */
 
 interface AuthState {
-  user: LoginResponse | null;
+  user: User | null;
+  token: string | null;
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
@@ -23,6 +25,7 @@ interface AuthState {
 
 const initialState: AuthState = {
   user: null,
+  token: null,
   isAuthenticated: false,
   loading: false,
   error: null,
@@ -44,36 +47,27 @@ interface AuthPayload {
 
 /** -------- Login -------- */
 export const loginThunk = createAsyncThunk<
-  LoginResponse,
+  AuthResponse,
   AuthPayload,
   { rejectValue: string }
->("auth/login", async ({ email, password }, { rejectWithValue }) => {
+>("auth/login", async (payload, { rejectWithValue }) => {
   try {
-    const user = await loginAPI(email, password);
-
-    localStorage.setItem("authUser", JSON.stringify(user));
-
-    return user;
-  } catch (err) {
-    return rejectWithValue("Invalid email or password");
+    return await loginAPI(payload);
+  } catch (err: any) {
+    return rejectWithValue(err?.message || "Invalid email or password");
   }
 });
 
 /** -------- Register -------- */
 export const registerThunk = createAsyncThunk<
-  LoginResponse,
+  AuthResponse,
   AuthPayload,
   { rejectValue: string }
->("auth/register", async ({ email, password }, { rejectWithValue }) => {
+>("auth/register", async (payload, { rejectWithValue }) => {
   try {
-    const user = await registerAPI(email, password);
-
-
-    localStorage.setItem("authUser", JSON.stringify(user));
-
-    return user;
-  } catch (err) {
-    return rejectWithValue("Register failed");
+    return await registerAPI(payload);
+  } catch (err: any) {
+    return rejectWithValue(err?.message || "Register failed");
   }
 });
 
@@ -88,22 +82,30 @@ const authSlice = createSlice({
   reducers: {
     logout(state) {
       state.user = null;
+      state.token = null;
       state.isAuthenticated = false;
       state.error = null;
       state.initialized = true;
 
-      localStorage.removeItem("authUser");
+      localStorage.removeItem("auth");
     },
 
-    restoreUser(state) {
-      const stored = localStorage.getItem("authUser");
+    /** 用於 App 啟動時還原登入狀態（refresh 不掉） */
+    restoreAuth(state) {
+      const stored = localStorage.getItem("auth");
 
       if (stored) {
-        state.user = JSON.parse(stored);
-        state.isAuthenticated = true;
-      } else {
-        state.user = null;
-        state.isAuthenticated = false;
+        try {
+          const parsed: AuthResponse = JSON.parse(stored);
+          state.user = parsed.user;
+          state.token = parsed.token;
+          state.isAuthenticated = true;
+        } catch {
+          state.user = null;
+          state.token = null;
+          state.isAuthenticated = false;
+          localStorage.removeItem("auth");
+        }
       }
 
       state.initialized = true;
@@ -120,12 +122,16 @@ const authSlice = createSlice({
       })
       .addCase(
         loginThunk.fulfilled,
-        (state, action: PayloadAction<LoginResponse>) => {
+        (state, action: PayloadAction<AuthResponse>) => {
           state.loading = false;
-          state.user = action.payload;
+          state.user = action.payload.user;
+          state.token = action.payload.token;
           state.isAuthenticated = true;
           state.error = null;
           state.initialized = true;
+
+          // persistence（demo/refresh 用）
+          localStorage.setItem("auth", JSON.stringify(action.payload));
         }
       )
       .addCase(loginThunk.rejected, (state, action) => {
@@ -141,12 +147,16 @@ const authSlice = createSlice({
       })
       .addCase(
         registerThunk.fulfilled,
-        (state, action: PayloadAction<LoginResponse>) => {
+        (state, action: PayloadAction<AuthResponse>) => {
           state.loading = false;
-          state.user = action.payload;
+          state.user = action.payload.user;
+          state.token = action.payload.token;
           state.isAuthenticated = true;
           state.error = null;
           state.initialized = true;
+
+          // persistence（demo/refresh 用）
+          localStorage.setItem("auth", JSON.stringify(action.payload));
         }
       )
       .addCase(registerThunk.rejected, (state, action) => {
@@ -161,5 +171,5 @@ const authSlice = createSlice({
    Exports
 ======================== */
 
-export const { logout, restoreUser } = authSlice.actions;
+export const { logout, restoreAuth } = authSlice.actions;
 export default authSlice.reducer;

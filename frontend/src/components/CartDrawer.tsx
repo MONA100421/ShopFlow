@@ -1,11 +1,14 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import type { RootState } from "../store/store";
+
+import type { RootState, AppDispatch } from "../store/store";
+
+/* ✅ 正確：只 dispatch thunk */
 import {
-  removeFromCart,
-  increaseQuantity,
-  decreaseQuantity,
+  updateQuantityThunk,
+  removeFromCartThunk,
 } from "../store/cartSlice";
+
 import "./CartDrawer.css";
 
 interface CartDrawerProps {
@@ -22,7 +25,7 @@ export default function CartDrawer({
 }: CartDrawerProps) {
   /* ================= Redux ================= */
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const items = useSelector(
     (state: RootState) => state.cart.items
   );
@@ -33,10 +36,11 @@ export default function CartDrawer({
   const [discountApplied, setDiscountApplied] =
     useState(false);
 
-  /* ================= Price Calculation ================= */
+  /* ================= Price ================= */
 
   const subtotal = items.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
+    (sum, item) =>
+      sum + item.product.price * item.quantity,
     0
   );
 
@@ -44,16 +48,10 @@ export default function CartDrawer({
   const discount = discountApplied ? DISCOUNT_AMOUNT : 0;
   const total = Math.max(subtotal + tax - discount, 0);
 
-  /* ================= Scroll Control (🔥 SAFE) ================= */
+  /* ================= Scroll Lock ================= */
 
   useEffect(() => {
-    if (open) {
-      /* 只鎖 Y 軸，避免手機 Safari 永久鎖死 */
-      document.body.style.overflowY = "hidden";
-    } else {
-      document.body.style.overflowY = "auto";
-    }
-
+    document.body.style.overflowY = open ? "hidden" : "auto";
     return () => {
       document.body.style.overflowY = "auto";
     };
@@ -64,13 +62,9 @@ export default function CartDrawer({
   /* ================= Discount ================= */
 
   const handleApplyDiscount = () => {
-    if (
+    setDiscountApplied(
       discountInput.trim().toUpperCase() === DISCOUNT_CODE
-    ) {
-      setDiscountApplied(true);
-    } else {
-      setDiscountApplied(false);
-    }
+    );
   };
 
   /* ================= Render ================= */
@@ -81,7 +75,7 @@ export default function CartDrawer({
         className="cart-drawer"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ================= Header ================= */}
+        {/* Header */}
         <header className="drawer-header">
           <h2 className="drawer-title">
             Cart ({items.length})
@@ -95,7 +89,7 @@ export default function CartDrawer({
           </button>
         </header>
 
-        {/* ================= Items ================= */}
+        {/* Items */}
         <section className="drawer-items">
           {items.length === 0 && (
             <div className="drawer-empty">
@@ -108,7 +102,6 @@ export default function CartDrawer({
               key={item.product.id}
               className="drawer-item"
             >
-              {/* Thumbnail */}
               {item.product.image ? (
                 <img
                   src={item.product.image}
@@ -120,9 +113,7 @@ export default function CartDrawer({
                 </div>
               )}
 
-              {/* Content */}
               <div className="drawer-item-content">
-                {/* Top */}
                 <div className="drawer-item-top">
                   <span className="drawer-item-name">
                     {item.product.title}
@@ -130,21 +121,22 @@ export default function CartDrawer({
                   <span className="drawer-item-price">
                     $
                     {(
-                      item.product.price * item.quantity
+                      item.product.price *
+                      item.quantity
                     ).toFixed(2)}
                   </span>
                 </div>
 
-                {/* Bottom */}
                 <div className="drawer-item-bottom">
                   <div className="drawer-item-actions">
                     <button
-                      type="button"
                       onClick={() =>
                         dispatch(
-                          decreaseQuantity(
-                            item.product.id
-                          )
+                          updateQuantityThunk({
+                            productId:
+                              item.product.id,
+                            delta: -1,
+                          })
                         )
                       }
                     >
@@ -156,12 +148,13 @@ export default function CartDrawer({
                     </span>
 
                     <button
-                      type="button"
                       onClick={() =>
                         dispatch(
-                          increaseQuantity(
-                            item.product.id
-                          )
+                          updateQuantityThunk({
+                            productId:
+                              item.product.id,
+                            delta: 1,
+                          })
                         )
                       }
                     >
@@ -170,11 +163,10 @@ export default function CartDrawer({
                   </div>
 
                   <button
-                    type="button"
                     className="drawer-remove"
                     onClick={() =>
                       dispatch(
-                        removeFromCart(
+                        removeFromCartThunk(
                           item.product.id
                         )
                       )
@@ -188,12 +180,10 @@ export default function CartDrawer({
           ))}
         </section>
 
-        {/* ================= Footer ================= */}
+        {/* Footer */}
         <footer className="drawer-footer">
-          {/* Discount */}
           <div className="drawer-discount">
             <label>Apply Discount Code</label>
-
             <div className="drawer-discount-row">
               <input
                 value={discountInput}
@@ -202,25 +192,17 @@ export default function CartDrawer({
                 }
                 placeholder="Enter code"
               />
-
-              <button
-                type="button"
-                onClick={handleApplyDiscount}
-              >
+              <button onClick={handleApplyDiscount}>
                 Apply
               </button>
             </div>
           </div>
 
-          {/* Summary */}
           <div className="drawer-summary">
             <div>
               <span>Subtotal</span>
-              <span>
-                ${subtotal.toFixed(2)}
-              </span>
+              <span>${subtotal.toFixed(2)}</span>
             </div>
-
             <div>
               <span>Tax</span>
               <span>${tax.toFixed(2)}</span>
@@ -230,8 +212,7 @@ export default function CartDrawer({
               <div>
                 <span>Discount</span>
                 <span>
-                  - $
-                  {DISCOUNT_AMOUNT.toFixed(2)}
+                  - ${DISCOUNT_AMOUNT.toFixed(2)}
                 </span>
               </div>
             )}
@@ -242,10 +223,7 @@ export default function CartDrawer({
             </div>
           </div>
 
-          <button
-            type="button"
-            className="drawer-checkout-btn"
-          >
+          <button className="drawer-checkout-btn">
             Continue to checkout
           </button>
         </footer>

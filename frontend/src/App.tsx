@@ -14,18 +14,18 @@ function App() {
     <Routes>
       {/* ================= Main Layout ================= */}
       <Route element={<MainLayout />}>
-        {/* Public pages */}
+        {/* ---------- Public pages ---------- */}
         <Route path="/" element={<ProductListPage />} />
         <Route path="/auth/:mode" element={<AuthPage />} />
         <Route path="/products/:id" element={<ProductDetailPage />} />
 
-        {/* ================= Admin only ================= */}
+        {/* ---------- Admin only ---------- */}
         <Route element={<RequireAdmin />}>
           <Route path="/products/new" element={<ProductFormPage />} />
           <Route path="/products/:id/edit" element={<ProductFormPage />} />
         </Route>
 
-        {/* 404 */}
+        {/* ---------- 404 ---------- */}
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

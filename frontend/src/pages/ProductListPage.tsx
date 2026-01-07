@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import ProductCard from "../components/ProductCard";
 import type { RootState, AppDispatch } from "../store/store";
-import { fetchProducts } from "../store/productsSlice";
+import { fetchProductsThunk } from "../store/productsSlice";
 
 
 import checkRightIcon from "../assets/check-right.svg";
@@ -83,7 +83,7 @@ export default function ProductListPage() {
 
 
  useEffect(() => {
-   dispatch(fetchProducts());
+   dispatch(fetchProductsThunk());
  }, [dispatch]);
 
 

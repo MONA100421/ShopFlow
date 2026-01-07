@@ -5,6 +5,8 @@ import { useDispatch } from "react-redux";
 
 import type { Product } from "../types/Product";
 import type { AppDispatch } from "../store/store";
+
+/* ✅ 正確：直接 import action */
 import { addToCart } from "../store/cartSlice";
 
 interface ProductCardProps {
@@ -21,25 +23,20 @@ export default function ProductCard({
   const dispatch = useDispatch<AppDispatch>();
   const [quantity, setQuantity] = useState(1);
 
-  /* =================================================
-     🟥 Stock / Quantity Rules
-     - Out of Stock: stock === 0
-     - Max quantity = stock
-  ================================================= */
+  /* ================= Stock rules ================= */
+
   const isOutOfStock = product.stock === 0;
   const maxQuantity = product.stock;
   const isMaxReached = quantity >= maxQuantity;
 
   const handleIncrease = () => {
     if (isOutOfStock) return;
-    if (quantity >= maxQuantity) return;
-
+    if (isMaxReached) return;
     setQuantity((q) => q + 1);
   };
 
   const handleDecrease = () => {
     if (isOutOfStock) return;
-
     setQuantity((q) => Math.max(1, q - 1));
   };
 
@@ -53,22 +50,18 @@ export default function ProductCard({
       })
     );
 
-    // reset to safe default
     setQuantity(1);
   };
 
   return (
     <div className="product-card">
-      {/* ================= Image ================= */}
+      {/* Image */}
       <Link
         to={`/products/${product.id}`}
         className="product-image"
       >
         {product.image ? (
-          <img
-            src={product.image}
-            alt={product.title}
-          />
+          <img src={product.image} alt={product.title} />
         ) : (
           <div className="image-placeholder">
             No Image
@@ -76,7 +69,7 @@ export default function ProductCard({
         )}
       </Link>
 
-      {/* ================= Content ================= */}
+      {/* Content */}
       <div className="product-content">
         <h3 className="product-title">
           {product.title}
@@ -86,13 +79,12 @@ export default function ProductCard({
           ${product.price.toFixed(2)}
         </p>
 
-        {/* ================= Quantity ================= */}
+        {/* Quantity */}
         <div className="product-quantity">
           <button
             type="button"
             className="qty-btn"
             onClick={handleDecrease}
-            aria-label="Decrease quantity"
             disabled={isOutOfStock}
           >
             −
@@ -106,14 +98,13 @@ export default function ProductCard({
             type="button"
             className="qty-btn"
             onClick={handleIncrease}
-            aria-label="Increase quantity"
             disabled={isOutOfStock || isMaxReached}
           >
             +
           </button>
         </div>
 
-        {/* ================= Actions ================= */}
+        {/* Actions */}
         <div className="product-actions">
           <button
             type="button"
@@ -121,7 +112,9 @@ export default function ProductCard({
             onClick={handleAddToCart}
             disabled={isOutOfStock}
           >
-            {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+            {isOutOfStock
+              ? "Out of Stock"
+              : "Add to Cart"}
           </button>
 
           {isAdmin && onEdit && (

@@ -4,131 +4,220 @@ import {
   PayloadAction,
 } from "@reduxjs/toolkit";
 import type { Product } from "../types/Product";
-import { getProducts } from "../services/productService";
+import {
+  getProducts,
+  createProductAPI,
+  updateProductAPI,
+  deleteProductAPI,
+} from "../services/productService";
 
 /* ======================================================
-   Async thunk：取得商品（localStorage / mock）
+   Local Cache (Demo only, removable later)
 ====================================================== */
-export const fetchProducts = createAsyncThunk<Product[]>(
-  "products/fetchProducts",
-  async () => {
-    const products = await getProducts();
-    return products;
-  }
-);
 
-/* ======================================================
-   State 型別
-====================================================== */
-interface ProductsState {
-  list: Product[];
-  loading: boolean;
-  error: string | null;
-}
+const STORAGE_KEY = "products_cache";
 
-/* ======================================================
-   localStorage helpers（關鍵）
-====================================================== */
-const STORAGE_KEY = "products";
-
-const loadProductsFromStorage = (): Product[] => {
+const loadCache = (): Product[] => {
   try {
-    const data = localStorage.getItem(STORAGE_KEY);
-    return data ? (JSON.parse(data) as Product[]) : [];
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as Product[]) : [];
   } catch {
     return [];
   }
 };
 
-const saveProductsToStorage = (products: Product[]) => {
+const saveCache = (products: Product[]) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
 };
 
 /* ======================================================
-   Initial State
+   Async Thunks (API-first)
 ====================================================== */
+
+/** GET /api/products */
+export const fetchProductsThunk = createAsyncThunk<
+  Product[],
+  void,
+  { rejectValue: string }
+>("products/fetch", async (_, { rejectWithValue }) => {
+  try {
+    return await getProducts();
+  } catch {
+    return rejectWithValue("Failed to load products");
+  }
+});
+
+/** POST /api/products (admin) */
+export const createProductThunk = createAsyncThunk<
+  Product,
+  Product,
+  { rejectValue: string }
+>("products/create", async (product, { rejectWithValue }) => {
+  try {
+    return await createProductAPI(product);
+  } catch {
+    return rejectWithValue("Create product failed");
+  }
+});
+
+/** PUT /api/products/:id (admin) */
+export const updateProductThunk = createAsyncThunk<
+  Product,
+  Product,
+  { rejectValue: string }
+>("products/update", async (product, { rejectWithValue }) => {
+  try {
+    return await updateProductAPI(product);
+  } catch {
+    return rejectWithValue("Update product failed");
+  }
+});
+
+/** DELETE /api/products/:id (admin) */
+export const deleteProductThunk = createAsyncThunk<
+  string,
+  string,
+  { rejectValue: string }
+>("products/delete", async (productId, { rejectWithValue }) => {
+  try {
+    await deleteProductAPI(productId);
+    return productId;
+  } catch {
+    return rejectWithValue("Delete product failed");
+  }
+});
+
+/* ======================================================
+   State
+====================================================== */
+
+interface ProductsState {
+  list: Product[];
+  loading: boolean;
+  error: string | null;
+  initialized: boolean;
+}
+
 const initialState: ProductsState = {
-  list: loadProductsFromStorage(), // 🔑 Reload 不會消失
+  list: loadCache(), // demo / refresh only
   loading: false,
   error: null,
+  initialized: false,
 };
 
 /* ======================================================
    Slice
 ====================================================== */
+
 const productsSlice = createSlice({
   name: "products",
   initialState,
 
   reducers: {
-    /* ===============================
-       Add Product
-    =============================== */
-    addProduct: (state, action: PayloadAction<Product>) => {
-      state.list.push(action.payload);
-      saveProductsToStorage(state.list);
-    },
-
-    /* ===============================
-       Update Product
-    =============================== */
-    updateProduct: (state, action: PayloadAction<Product>) => {
-      const index = state.list.findIndex(
-        (product) => product.id === action.payload.id
-      );
-
-      if (index !== -1) {
-        state.list[index] = action.payload;
-        saveProductsToStorage(state.list);
-      }
-    },
-
-    /* ===============================
-       Delete Product
-    =============================== */
-    deleteProduct: (state, action: PayloadAction<string>) => {
-      state.list = state.list.filter(
-        (product) => product.id !== action.payload
-      );
-      saveProductsToStorage(state.list);
+    /** 清空商品（例如 logout） */
+    clearProducts(state) {
+      state.list = [];
+      state.initialized = false;
+      localStorage.removeItem(STORAGE_KEY);
     },
   },
 
   extraReducers: (builder) => {
     builder
-      .addCase(fetchProducts.pending, (state) => {
+
+      /* =====================
+         Fetch Products
+      ====================== */
+      .addCase(fetchProductsThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-
-      .addCase(fetchProducts.fulfilled, (state, action) => {
-        state.loading = false;
-
-        /**
-         * ⚠️ 關鍵設計：
-         * localStorage 有資料時，不覆蓋
-         * 避免 Add / Edit / Delete 後被 fetch 清掉
-         */
-        if (state.list.length === 0) {
+      .addCase(
+        fetchProductsThunk.fulfilled,
+        (state, action: PayloadAction<Product[]>) => {
+          state.loading = false;
           state.list = action.payload;
-          saveProductsToStorage(state.list);
+          state.initialized = true;
+          saveCache(state.list);
         }
+      )
+      .addCase(fetchProductsThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload ?? "Failed to load products";
       })
 
-      .addCase(fetchProducts.rejected, (state) => {
+      /* =====================
+         Create Product
+      ====================== */
+      .addCase(createProductThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        createProductThunk.fulfilled,
+        (state, action: PayloadAction<Product>) => {
+          state.loading = false;
+          state.list.unshift(action.payload);
+          saveCache(state.list);
+        }
+      )
+      .addCase(createProductThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = "Failed to load products";
+        state.error = action.payload ?? "Create product failed";
+      })
+
+      /* =====================
+         Update Product
+      ====================== */
+      .addCase(updateProductThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        updateProductThunk.fulfilled,
+        (state, action: PayloadAction<Product>) => {
+          state.loading = false;
+          const index = state.list.findIndex(
+            (p) => p.id === action.payload.id
+          );
+          if (index !== -1) {
+            state.list[index] = action.payload;
+            saveCache(state.list);
+          }
+        }
+      )
+      .addCase(updateProductThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload ?? "Update product failed";
+      })
+
+      /* =====================
+         Delete Product
+      ====================== */
+      .addCase(deleteProductThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        deleteProductThunk.fulfilled,
+        (state, action: PayloadAction<string>) => {
+          state.loading = false;
+          state.list = state.list.filter(
+            (p) => p.id !== action.payload
+          );
+          saveCache(state.list);
+        }
+      )
+      .addCase(deleteProductThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload ?? "Delete product failed";
       });
   },
 });
 
 /* ======================================================
-   Exports（⚠️ 一定是 named export）
+   Exports
 ====================================================== */
-export const {
-  addProduct,
-  updateProduct,
-  deleteProduct,
-} = productsSlice.actions;
 
+export const { clearProducts } = productsSlice.actions;
 export default productsSlice.reducer;
