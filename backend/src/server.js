@@ -2,8 +2,12 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 
-// 🔹 Routes
+// ==============================
+// Routes
+// ==============================
 import productRoutes from "./routes/product.routes.js";
+import cartRoutes from "./routes/cart.routes.js";
+// import authRoutes from "./routes/auth.routes.js"; // 之後再開
 
 // ==============================
 // Env
@@ -18,6 +22,8 @@ const app = express();
 // ==============================
 // Middleware
 // ==============================
+
+// CORS（允許前端 Vite）
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -25,10 +31,11 @@ app.use(
   })
 );
 
+// JSON body parser
 app.use(express.json());
 
 // ==============================
-// Health check
+// Health Check
 // ==============================
 app.get("/api/health", (req, res) => {
   res.json({
@@ -41,19 +48,22 @@ app.get("/api/health", (req, res) => {
 // API Routes
 // ==============================
 
-// 🔹 Products API
+// 🔹 Products
 app.use("/api/products", productRoutes);
 
-// （之後會加）
+// 🔹 Cart
+app.use("/api/cart", cartRoutes);
+
+// 🔹 Auth（之後接）
 // app.use("/api/auth", authRoutes);
-// app.use("/api/cart", cartRoutes);
 
 // ==============================
-// 404 handler（一定放最後）
+// 404 Handler（一定放最後）
 // ==============================
 app.use((req, res) => {
   res.status(404).json({
     error: "API route not found",
+    path: req.originalUrl,
   });
 });
 
