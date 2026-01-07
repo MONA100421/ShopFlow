@@ -9,7 +9,7 @@ import type { Product } from "../types/Product";
  * - true  → 前端自跑（現在）
  * - false → 接 Express / MongoDB
  */
-const USE_MOCK_API = true;
+const USE_MOCK_API = false;
 
 /**
  * Express API base
@@ -17,7 +17,7 @@ const USE_MOCK_API = true;
  *   app.use("/api/products", productsRouter)
  * 就能直接接
  */
-const API_BASE_URL = "/api/products";
+const API_BASE_URL = "http://localhost:4000/api/products";
 
 /* ======================================================
    Mock Store（僅 demo / 前端開發用）
