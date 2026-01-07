@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 
 import type { Product } from "../types/Product";
 import type { AppDispatch, RootState } from "../store/store";
-import { addToCart } from "../store/cartSlice";
+import { addToCartThunk } from "../store/cartSlice";
 import { getProductById } from "../services/productService";
 
 import "./ProductDetailPage.css";
@@ -15,17 +15,51 @@ export default function ProductDetailPage() {
   const dispatch = useDispatch<AppDispatch>();
 
   /* =================================================
-     🔑 唯一正確的身分來源（Redux auth）
-     與 RequireAdmin.tsx 完全一致
+     🔑 身分來源（與 RequireAdmin.tsx 完全一致）
   ================================================= */
   const user = useSelector((state: RootState) => state.auth.user);
   const isAdmin = user?.role === "admin";
 
-  /* ===== 原本資料取得（不動） ===== */
-  const product: Product | null =
-    id ? getProductById(id) ?? null : null;
+  /* =================================================
+     ✅ 正確的 Product 取得方式（async）
+  ================================================= */
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    if (!id) {
+      setLoading(false);
+      return;
+    }
+
+    const loadProduct = async () => {
+      try {
+        const data = await getProductById(id);
+        setProduct(data);
+      } catch (err) {
+        console.error("Failed to load product:", err);
+        setProduct(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProduct();
+  }, [id]);
+
+  /* ================= Quantity ================= */
   const [quantity, setQuantity] = useState(1);
+
+  /* ================= Loading / Not Found ================= */
+  if (loading) {
+    return (
+      <div className="product-detail-page">
+        <div className="product-detail-container">
+          <div className="product-not-found">Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -46,17 +80,15 @@ export default function ProductDetailPage() {
   const maxQuantity = product.stock;
   const isMaxReached = quantity >= maxQuantity;
 
-  /* ===== handlers（加上庫存上限防呆） ===== */
+  /* ================= Handlers ================= */
   const handleIncrease = () => {
     if (isOutOfStock) return;
     if (quantity >= maxQuantity) return;
-
     setQuantity((q) => q + 1);
   };
 
   const handleDecrease = () => {
     if (isOutOfStock) return;
-
     setQuantity((q) => Math.max(1, q - 1));
   };
 
@@ -64,7 +96,7 @@ export default function ProductDetailPage() {
     if (isOutOfStock) return;
 
     dispatch(
-      addToCart({
+      addToCartThunk({
         product,
         quantity,
       })
@@ -74,9 +106,7 @@ export default function ProductDetailPage() {
     setQuantity(1);
   };
 
-  /* ===============================
-     Render
-  =============================== */
+  /* ================= Render ================= */
   return (
     <div className="product-detail-page">
       <div className="product-detail-container">
@@ -114,7 +144,7 @@ export default function ProductDetailPage() {
               ${product.price.toFixed(2)}
             </div>
 
-            {/* Out of Stock Badge（Figma Group 19） */}
+            {/* Out of Stock Badge */}
             {isOutOfStock && (
               <div className="out-of-stock-badge">
                 <span className="out-of-stock-text">

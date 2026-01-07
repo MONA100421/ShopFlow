@@ -7,7 +7,7 @@ import type { Product } from "../types/Product";
 import type { AppDispatch } from "../store/store";
 
 /* ✅ 正確：直接 import action */
-import { addToCart } from "../store/cartSlice";
+import { addToCartThunk } from "../store/cartSlice";
 
 interface ProductCardProps {
   product: Product;
@@ -44,7 +44,7 @@ export default function ProductCard({
     if (isOutOfStock) return;
 
     dispatch(
-      addToCart({
+      addToCartThunk({
         product,
         quantity,
       })

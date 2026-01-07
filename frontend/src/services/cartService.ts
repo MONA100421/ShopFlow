@@ -5,26 +5,14 @@ import type { Product } from "../types/Product";
    Config
 ====================================================== */
 
-// 🔁 之後接 Express 只改這一行
-const USE_MOCK_API = true;
-
-// 未來 Express Cart API base
-const API_BASE_URL = "/api/cart";
+const USE_MOCK_API = false;
+const API_BASE_URL = "http://localhost:4000/api/cart";
 
 /* ======================================================
-   Mock Cart Store（模擬 DB）
+   Mock（僅 demo）
 ====================================================== */
 
-/**
- * 在 mock 模式下：
- * - 每個 user 會有一個 cart
- * - 這裡先用單一 cart（課堂 / demo 足夠）
- */
 let mockCart: CartItem[] = [];
-
-/* ======================================================
-   Helpers
-====================================================== */
 
 const delay = (ms = 400) =>
   new Promise((resolve) => setTimeout(resolve, ms));
@@ -33,128 +21,65 @@ const delay = (ms = 400) =>
    APIs
 ====================================================== */
 
-/**
- * GET /api/cart
- * 取得目前使用者 cart
- */
 export async function fetchCartAPI(): Promise<CartItem[]> {
   if (USE_MOCK_API) {
     await delay();
     return [...mockCart];
   }
 
-  const res = await fetch(API_BASE_URL, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch cart");
-  }
-
+  const res = await fetch(API_BASE_URL);
+  if (!res.ok) throw new Error("Fetch cart failed");
   return res.json();
 }
 
-/**
- * POST /api/cart
- * 新增 / 合併商品到 cart
- */
 export async function addToCartAPI(
   product: Product,
   quantity: number
 ): Promise<CartItem[]> {
   if (USE_MOCK_API) {
     await delay();
-
-    if (product.stock <= 0) {
-      return mockCart;
-    }
-
     const existing = mockCart.find(
-      (item) => item.product.id === product.id
+      (i) => i.product.id === product.id
     );
-
-    if (existing) {
-      existing.quantity = Math.min(
-        existing.quantity + quantity,
-        product.stock
-      );
-    } else {
-      mockCart.push({
-        product,
-        quantity: Math.min(quantity, product.stock),
-      });
-    }
-
+    if (existing) existing.quantity += quantity;
+    else mockCart.push({ product, quantity });
     return [...mockCart];
   }
 
   const res = await fetch(API_BASE_URL, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ productId: product.id, quantity }),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ product, quantity }),
   });
 
-  if (!res.ok) {
-    throw new Error("Failed to add to cart");
-  }
-
+  if (!res.ok) throw new Error("Add to cart failed");
   return res.json();
 }
 
-/**
- * PUT /api/cart
- * 更新商品數量（+1 / -1）
- */
 export async function updateCartQuantityAPI(
   productId: string,
   delta: 1 | -1
 ): Promise<CartItem[]> {
   if (USE_MOCK_API) {
     await delay();
-
-    mockCart = mockCart.map((item) => {
-      if (item.product.id !== productId) {
-        return item;
-      }
-
-      const nextQty =
-        delta === 1
-          ? Math.min(
-              item.quantity + 1,
-              item.product.stock
-            )
-          : Math.max(item.quantity - 1, 1);
-
-      return { ...item, quantity: nextQty };
-    });
-
+    mockCart = mockCart.map((item) =>
+      item.product.id === productId
+        ? { ...item, quantity: item.quantity + delta }
+        : item
+    );
     return [...mockCart];
   }
 
-  const res = await fetch(API_BASE_URL, {
+  const res = await fetch(`${API_BASE_URL}/${productId}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ productId, delta }),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ delta }),
   });
 
-  if (!res.ok) {
-    throw new Error("Failed to update cart quantity");
-  }
-
+  if (!res.ok) throw new Error("Update quantity failed");
   return res.json();
 }
 
-/**
- * DELETE /api/cart/:productId
- * 移除單一商品
- */
 export async function removeFromCartAPI(
   productId: string
 ): Promise<CartItem[]> {
@@ -170,17 +95,10 @@ export async function removeFromCartAPI(
     method: "DELETE",
   });
 
-  if (!res.ok) {
-    throw new Error("Failed to remove item from cart");
-  }
-
+  if (!res.ok) throw new Error("Remove item failed");
   return res.json();
 }
 
-/**
- * DELETE /api/cart
- * 清空 cart
- */
 export async function clearCartAPI(): Promise<void> {
   if (USE_MOCK_API) {
     await delay();
@@ -192,7 +110,5 @@ export async function clearCartAPI(): Promise<void> {
     method: "DELETE",
   });
 
-  if (!res.ok) {
-    throw new Error("Failed to clear cart");
-  }
+  if (!res.ok) throw new Error("Clear cart failed");
 }

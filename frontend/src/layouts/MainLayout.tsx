@@ -4,11 +4,12 @@ import {
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import type { RootState, AppDispatch } from "../store/store";
 import { logout } from "../store/authSlice";
+import { fetchCartThunk } from "../store/cartSlice";
 
 import CartDrawer from "../components/CartDrawer";
 
@@ -20,16 +21,34 @@ import twitterIcon from "../assets/twitter.svg";
 import facebookIcon from "../assets/facebook.svg";
 
 export default function MainLayout() {
-  /* ================= State ================= */
-
+  /* ================= Local UI State ================= */
   const [cartOpen, setCartOpen] = useState(false);
 
+  /* ================= Hooks ================= */
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  /* ================= Search (IME Safe) ================= */
+  /* ================= Redux ================= */
+  const { isAuthenticated } = useSelector(
+    (state: RootState) => state.auth
+  );
 
+  const { items, initialized } = useSelector(
+    (state: RootState) => state.cart
+  );
+
+  /* =================================================
+     ✅ 初始化 Cart（只做一次）
+     - 重新整理頁面也能拿到 cart
+  ================================================= */
+  useEffect(() => {
+    if (!initialized) {
+      dispatch(fetchCartThunk());
+    }
+  }, [dispatch, initialized]);
+
+  /* ================= Search (IME Safe) ================= */
   const [value, setValue] = useState(searchParams.get("q") || "");
   const [isComposing, setIsComposing] = useState(false);
 
@@ -38,27 +57,20 @@ export default function MainLayout() {
   };
 
   /* ================= Auth ================= */
-
-  const { isAuthenticated } = useSelector(
-    (state: RootState) => state.auth
-  );
-
   const handleLogout = () => {
     dispatch(logout());
     navigate("/auth/login");
   };
 
-  /* ================= Cart ================= */
-
-  const items = useSelector((state: RootState) => state.cart.items);
-
+  /* ================= Cart Summary ================= */
   const totalQuantity = items.reduce(
     (sum, item) => sum + item.quantity,
     0
   );
 
   const totalPrice = items.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
+    (sum, item) =>
+      sum + item.product.price * item.quantity,
     0
   );
 
@@ -68,8 +80,6 @@ export default function MainLayout() {
       <header className="site-header">
         <div className="container header-inner">
           {/* ===== Logo ===== */}
-
-          {/* Desktop logo */}
           <Link
             to="/"
             className="header-logo header-logo-full"
@@ -77,7 +87,6 @@ export default function MainLayout() {
             Management <span>Chuwa</span>
           </Link>
 
-          {/* Mobile logo */}
           <Link
             to="/"
             className="header-logo header-logo-short"
@@ -93,7 +102,9 @@ export default function MainLayout() {
                 className="search-input"
                 placeholder="Search"
                 value={value}
-                onCompositionStart={() => setIsComposing(true)}
+                onCompositionStart={() =>
+                  setIsComposing(true)
+                }
                 onCompositionEnd={(e) => {
                   setIsComposing(false);
                   const v = e.currentTarget.value;
@@ -117,7 +128,7 @@ export default function MainLayout() {
 
           {/* ===== Right Actions ===== */}
           <div className="header-actions">
-            {/* User */}
+            {/* ---------- User ---------- */}
             {!isAuthenticated ? (
               <Link
                 to="/auth/login"
@@ -145,7 +156,7 @@ export default function MainLayout() {
               </button>
             )}
 
-            {/* Cart */}
+            {/* ---------- Cart ---------- */}
             <button
               type="button"
               className="header-cart"
@@ -192,21 +203,30 @@ export default function MainLayout() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <img src={youtubeIcon} alt="YouTube" />
+              <img
+                src={youtubeIcon}
+                alt="YouTube"
+              />
             </a>
             <a
               href="https://twitter.com"
               target="_blank"
               rel="noopener noreferrer"
             >
-              <img src={twitterIcon} alt="Twitter" />
+              <img
+                src={twitterIcon}
+                alt="Twitter"
+              />
             </a>
             <a
               href="https://www.facebook.com"
               target="_blank"
               rel="noopener noreferrer"
             >
-              <img src={facebookIcon} alt="Facebook" />
+              <img
+                src={facebookIcon}
+                alt="Facebook"
+              />
             </a>
           </div>
 
