@@ -1,10 +1,10 @@
 import { Router, Request, Response } from "express";
 
 /* ======================================================
-   Types（先定義型別，之後 MongoDB 直接沿用）
+   Types（之後 MongoDB / Mongoose 可直接沿用）
 ====================================================== */
 
-interface Product {
+export interface Product {
   id: string;
   title: string;
   price: number;
@@ -20,10 +20,10 @@ interface Product {
 
 const router = Router();
 
-/**
- * ✅ 暫時用的假資料（之後會換成 MongoDB）
- * ⚠️ 結構已對齊前端 Product type
- */
+/* ======================================================
+   Mock Data（暫存於記憶體）
+====================================================== */
+
 const mockProducts: Product[] = [
   {
     id: "p1",
@@ -70,10 +70,8 @@ router.get("/", (_req: Request, res: Response) => {
    👉 取得單一商品
 ====================================================== */
 router.get("/:id", (req: Request, res: Response) => {
-  const { id } = req.params;
-
   const product = mockProducts.find(
-    (item) => item.id === id
+    (item) => item.id === req.params.id
   );
 
   if (!product) {
@@ -87,16 +85,11 @@ router.get("/:id", (req: Request, res: Response) => {
 
 /* ======================================================
    POST /api/products
-   👉 新增商品（暫時只存在記憶體）
+   👉 新增商品
 ====================================================== */
 router.post("/", (req: Request, res: Response) => {
-  const {
-    title,
-    price,
-    stock,
-    image,
-    description,
-  } = req.body as Partial<Product>;
+  const { title, price, stock, image, description } =
+    req.body as Partial<Product>;
 
   if (
     !title ||
@@ -125,13 +118,11 @@ router.post("/", (req: Request, res: Response) => {
 
 /* ======================================================
    PUT /api/products/:id
-   👉 更新商品（暫時只改記憶體）
+   👉 更新商品
 ====================================================== */
 router.put("/:id", (req: Request, res: Response) => {
-  const { id } = req.params;
-
   const index = mockProducts.findIndex(
-    (item) => item.id === id
+    (item) => item.id === req.params.id
   );
 
   if (index === -1) {
@@ -150,13 +141,11 @@ router.put("/:id", (req: Request, res: Response) => {
 
 /* ======================================================
    DELETE /api/products/:id
-   👉 刪除商品
+   👉 刪除商品（記憶體）
 ====================================================== */
 router.delete("/:id", (req: Request, res: Response) => {
-  const { id } = req.params;
-
   const index = mockProducts.findIndex(
-    (item) => item.id === id
+    (item) => item.id === req.params.id
   );
 
   if (index === -1) {
@@ -165,10 +154,7 @@ router.delete("/:id", (req: Request, res: Response) => {
     });
   }
 
-  const [deletedProduct] = mockProducts.splice(
-    index,
-    1
-  );
+  const [deletedProduct] = mockProducts.splice(index, 1);
 
   res.json(deletedProduct);
 });

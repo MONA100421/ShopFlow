@@ -3,10 +3,9 @@ import { Router } from "express";
    Router
 ====================================================== */
 const router = Router();
-/**
- * ✅ 暫時用的假資料（之後會換成 MongoDB）
- * ⚠️ 結構已對齊前端 Product type
- */
+/* ======================================================
+   Mock Data（暫存於記憶體）
+====================================================== */
 const mockProducts = [
     {
         id: "p1",
@@ -48,8 +47,7 @@ router.get("/", (_req, res) => {
    👉 取得單一商品
 ====================================================== */
 router.get("/:id", (req, res) => {
-    const { id } = req.params;
-    const product = mockProducts.find((item) => item.id === id);
+    const product = mockProducts.find((item) => item.id === req.params.id);
     if (!product) {
         return res.status(404).json({
             error: "Product not found",
@@ -59,10 +57,10 @@ router.get("/:id", (req, res) => {
 });
 /* ======================================================
    POST /api/products
-   👉 新增商品（暫時只存在記憶體）
+   👉 新增商品
 ====================================================== */
 router.post("/", (req, res) => {
-    const { title, price, stock, image, description, } = req.body;
+    const { title, price, stock, image, description } = req.body;
     if (!title ||
         typeof price !== "number" ||
         typeof stock !== "number") {
@@ -84,11 +82,10 @@ router.post("/", (req, res) => {
 });
 /* ======================================================
    PUT /api/products/:id
-   👉 更新商品（暫時只改記憶體）
+   👉 更新商品
 ====================================================== */
 router.put("/:id", (req, res) => {
-    const { id } = req.params;
-    const index = mockProducts.findIndex((item) => item.id === id);
+    const index = mockProducts.findIndex((item) => item.id === req.params.id);
     if (index === -1) {
         return res.status(404).json({
             error: "Product not found",
@@ -102,11 +99,10 @@ router.put("/:id", (req, res) => {
 });
 /* ======================================================
    DELETE /api/products/:id
-   👉 刪除商品
+   👉 刪除商品（記憶體）
 ====================================================== */
 router.delete("/:id", (req, res) => {
-    const { id } = req.params;
-    const index = mockProducts.findIndex((item) => item.id === id);
+    const index = mockProducts.findIndex((item) => item.id === req.params.id);
     if (index === -1) {
         return res.status(404).json({
             error: "Product not found",
