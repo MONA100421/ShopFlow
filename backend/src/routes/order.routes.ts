@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import cartRouter from "./cart.routes";
+import cartRouter from "./cart.routes.js";
 
 /* ======================================================
    Types（之後 DB / Payment 都可直接沿用）

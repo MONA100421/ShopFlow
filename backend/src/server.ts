@@ -5,9 +5,9 @@ import dotenv from "dotenv";
 // ==============================
 // Routes
 // ==============================
-import productRoutes from "./routes/product.routes";
-import cartRoutes from "./routes/cart.routes";
-import orderRoutes from "./routes/order.routes";
+import productRoutes from "./routes/product.routes.js";
+import cartRoutes from "./routes/cart.routes.js";
+import orderRoutes from "./routes/order.routes.js";
 // import authRoutes from "./routes/auth.routes"; // 🔒 之後再接
 
 // ==============================
