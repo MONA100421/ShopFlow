@@ -2,14 +2,26 @@
   "name": "shopflow-backend",
   "version": "1.0.0",
   "type": "module",
-  "main": "src/server.js",
+  "private": true,
+
   "scripts": {
-    "dev": "node src/server.js",
-    "start": "node src/server.js"
+    "dev": "nodemon --watch src --ext ts --exec ts-node src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
   },
+
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2"
+  },
+
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.0.6",
+    "nodemon": "^3.1.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }
