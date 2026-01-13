@@ -1,6 +1,12 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
+
+// ==============================
+// Load env (一定要最早)
+// ==============================
+dotenv.config();
 
 // ==============================
 // Routes
@@ -8,12 +14,7 @@ import dotenv from "dotenv";
 import productRoutes from "./routes/product.routes";
 import cartRoutes from "./routes/cart.routes";
 import orderRoutes from "./routes/order.routes";
-// import authRoutes from "./routes/auth.routes"; // 🔒 之後再接
-
-// ==============================
-// Env
-// ==============================
-dotenv.config();
+// import authRoutes from "./routes/auth.routes";
 
 // ==============================
 // App
@@ -36,9 +37,9 @@ app.use(
 app.use(express.json());
 
 // ==============================
-// Health Check（部署 / debug 必備）
+// Health Check
 // ==============================
-app.get("/api/health", (req: Request, res: Response) => {
+app.get("/api/health", (_req: Request, res: Response) => {
   res.json({
     status: "ok",
     message: "Backend server is running 🚀",
@@ -50,20 +51,13 @@ app.get("/api/health", (req: Request, res: Response) => {
 // API Routes
 // ==============================
 
-// 🔹 Products
 app.use("/api/products", productRoutes);
-
-// 🔹 Cart
 app.use("/api/cart", cartRoutes);
-
-// 🔹 Orders（Checkout → Order）
 app.use("/api/orders", orderRoutes);
-
-// 🔹 Auth（之後接 JWT / Session）
 // app.use("/api/auth", authRoutes);
 
 // ==============================
-// 404 Handler（一定放最後）
+// 404 Handler
 // ==============================
 app.use((req: Request, res: Response) => {
   res.status(404).json({
@@ -73,10 +67,32 @@ app.use((req: Request, res: Response) => {
 });
 
 // ==============================
-// Server
+// MongoDB Connection
 // ==============================
-const PORT = Number(process.env.PORT) || 4000;
+const MONGODB_URI = process.env.MONGODB_URI;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Backend server running at http://localhost:${PORT}`);
-});
+if (!MONGODB_URI) {
+  console.error("❌ MONGODB_URI is not defined in .env");
+  process.exit(1);
+}
+
+mongoose
+  .connect(MONGODB_URI)
+  .then(() => {
+    console.log("✅ MongoDB connected");
+
+    // ==============================
+    // Server
+    // ==============================
+    const PORT = Number(process.env.PORT) || 4000;
+
+    app.listen(PORT, () => {
+      console.log(
+        `🚀 Backend server running at http://localhost:${PORT}`
+      );
+    });
+  })
+  .catch((error) => {
+    console.error("❌ MongoDB connection failed:", error);
+    process.exit(1);
+  });

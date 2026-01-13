@@ -1,14 +1,14 @@
-import { Router, Request, Response } from "express";
+import { Request, Response } from "express";
 import mongoose from "mongoose";
 import Product from "../models/Product.model";
 
-const router = Router();
-
 /* ======================================================
    GET /api/products
-   👉 取得所有啟用商品
 ====================================================== */
-router.get("/", async (_req: Request, res: Response) => {
+export const getAllProducts = async (
+  _req: Request,
+  res: Response
+) => {
   try {
     const products = await Product.find({ isActive: true }).sort({
       createdAt: -1,
@@ -16,18 +16,20 @@ router.get("/", async (_req: Request, res: Response) => {
 
     res.json(products);
   } catch (error) {
-    console.error("GET /products error:", error);
+    console.error("getAllProducts error:", error);
     res.status(500).json({
       error: "Failed to fetch products",
     });
   }
-});
+};
 
 /* ======================================================
    GET /api/products/:id
-   👉 取得單一商品
 ====================================================== */
-router.get("/:id", async (req: Request, res: Response) => {
+export const getProductById = async (
+  req: Request,
+  res: Response
+) => {
   const id = req.params.id as string;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -47,36 +49,40 @@ router.get("/:id", async (req: Request, res: Response) => {
 
     res.json(product);
   } catch (error) {
-    console.error("GET /products/:id error:", error);
+    console.error("getProductById error:", error);
     res.status(500).json({
       error: "Failed to fetch product",
     });
   }
-});
+};
 
 /* ======================================================
    POST /api/products
-   👉 新增商品（Admin）
 ====================================================== */
-router.post("/", async (req: Request, res: Response) => {
+export const createProduct = async (
+  req: Request,
+  res: Response
+) => {
   try {
     const newProduct = new Product(req.body);
     const savedProduct = await newProduct.save();
 
     res.status(201).json(savedProduct);
   } catch (error) {
-    console.error("POST /products error:", error);
+    console.error("createProduct error:", error);
     res.status(500).json({
       error: "Failed to create product",
     });
   }
-});
+};
 
 /* ======================================================
    PUT /api/products/:id
-   👉 更新商品（Admin）
 ====================================================== */
-router.put("/:id", async (req: Request, res: Response) => {
+export const updateProduct = async (
+  req: Request,
+  res: Response
+) => {
   const id = req.params.id as string;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -100,18 +106,20 @@ router.put("/:id", async (req: Request, res: Response) => {
 
     res.json(updatedProduct);
   } catch (error) {
-    console.error("PUT /products/:id error:", error);
+    console.error("updateProduct error:", error);
     res.status(500).json({
       error: "Failed to update product",
     });
   }
-});
+};
 
 /* ======================================================
-   DELETE /api/products/:id
-   👉 軟刪除商品（isActive = false）
+   DELETE /api/products/:id (Soft Delete)
 ====================================================== */
-router.delete("/:id", async (req: Request, res: Response) => {
+export const deleteProduct = async (
+  req: Request,
+  res: Response
+) => {
   const id = req.params.id as string;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -135,11 +143,9 @@ router.delete("/:id", async (req: Request, res: Response) => {
 
     res.json(deletedProduct);
   } catch (error) {
-    console.error("DELETE /products/:id error:", error);
+    console.error("deleteProduct error:", error);
     res.status(500).json({
       error: "Failed to delete product",
     });
   }
-});
-
-export default router;
+};

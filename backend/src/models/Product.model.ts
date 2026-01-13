@@ -2,18 +2,15 @@ import mongoose, {
   Schema,
   Document,
   Model,
-  Types,
 } from "mongoose";
 
 /**
  * ============================
- * 1️⃣ Product Type (TS Interface)
+ * 1️⃣ Product Type (TypeScript)
  * ============================
- * 👉 描述「一個 Product 在程式中的型態」
+ * 👉 描述「一筆 Product 文件」在程式中的型態
  */
 export interface IProduct extends Document {
-  _id: Types.ObjectId;
-
   title: string;
   description?: string;
   price: number;
@@ -32,7 +29,7 @@ export interface IProduct extends Document {
  * ============================
  * 2️⃣ Product Schema (Mongoose)
  * ============================
- * 👉 定義「資料庫層級」的結構與驗證
+ * 👉 定義資料庫結構、驗證規則、預設值
  */
 const ProductSchema = new Schema<IProduct>(
   {
@@ -58,8 +55,8 @@ const ProductSchema = new Schema<IProduct>(
     category: {
       type: String,
       required: true,
-      index: true,
       trim: true,
+      index: true,
     },
 
     imageUrl: {
@@ -80,16 +77,16 @@ const ProductSchema = new Schema<IProduct>(
     },
   },
   {
-    timestamps: true, // ✅ 自動加入 createdAt / updatedAt
-    versionKey: false,
+    timestamps: true,   // ✅ 自動產生 createdAt / updatedAt
+    versionKey: false,  // ❌ 不需要 __v
   }
 );
 
 /**
  * ============================
- * 3️⃣ Model Export（避免重複編譯）
+ * 3️⃣ Model Export（防止重複編譯）
  * ============================
- * 👉 避免在 dev / hot reload 時 model 被重複註冊
+ * 👉 ts-node / nodemon / hot reload 必備
  */
 const Product: Model<IProduct> =
   mongoose.models.Product ||
