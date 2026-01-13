@@ -1,0 +1,47 @@
+####################################
+# Dependencies
+####################################
+node_modules/
+
+####################################
+# Build / Compile Output
+####################################
+dist/
+build/
+dist-ssr/
+
+####################################
+# Environment Variables (Secrets)
+####################################
+.env
+.env.*
+!.env.example
+
+####################################
+# Logs
+####################################
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+####################################
+# OS / Editor / IDE
+####################################
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+####################################
+# Local-only files
+####################################
+*.local

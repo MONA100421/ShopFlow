@@ -1,14 +1,35 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    /* =========================
+       Runtime / Module
+    ========================= */
+    "target": "ES2020",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+
+    /* =========================
+       Paths
+    ========================= */
     "rootDir": "src",
     "outDir": "dist",
+
+    /* =========================
+       Type Safety
+    ========================= */
     "strict": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* =========================
+       Interop / DX
+    ========================= */
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+
+    /* =========================
+       Dev Experience
+    ========================= */
+    "sourceMap": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }
