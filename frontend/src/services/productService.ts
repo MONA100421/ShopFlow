@@ -6,16 +6,15 @@ import type { Product } from "../types/Product";
 
 /**
  * 🔁 是否使用 mock API
- * - true  → 前端自跑（現在）
+ * - true  → 前端自跑（demo / UI）
  * - false → 接 Express / MongoDB
  */
 const USE_MOCK_API = false;
 
 /**
  * Express API base
- * 未來只要後端有：
- *   app.use("/api/products", productsRouter)
- * 就能直接接
+ * 對齊後端：
+ * app.use("/api/products", productRouter)
  */
 const API_BASE_URL = "http://localhost:4000/api/products";
 
@@ -37,16 +36,14 @@ const delay = (ms = 600) =>
  * 正規化成前端 Product
  */
 const normalizeProduct = (raw: any): Product => ({
-  id: raw.id ?? raw._id, // MongoDB _id 對齊 frontend
+  id: raw._id, // ✅ MongoDB ObjectId
   title: raw.title,
-  description: raw.description,
-  price: Number(raw.price),
-  image: raw.image,
+  description: raw.description ?? "",
   category: raw.category ?? "general",
+  price: Number(raw.price),
   stock: Number(raw.stock ?? 0),
-  createdAt:
-    raw.createdAt ??
-    new Date().toISOString(),
+  image: raw.imageUrl ?? "", // ✅ 對齊後端 imageUrl
+  createdAt: raw.createdAt,
 });
 
 /* ======================================================
@@ -104,13 +101,13 @@ export async function getProductById(
  * admin only
  */
 export async function createProductAPI(
-  product: Product
+  payload: Omit<Product, "id" | "createdAt">
 ): Promise<Product> {
   if (USE_MOCK_API) {
     await delay();
 
     const newProduct: Product = {
-      ...product,
+      ...payload,
       id: crypto.randomUUID(),
       createdAt: new Date().toISOString(),
     };
@@ -124,7 +121,14 @@ export async function createProductAPI(
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(product),
+    body: JSON.stringify({
+      title: payload.title,
+      description: payload.description,
+      category: payload.category,
+      price: payload.price,
+      stock: payload.stock,
+      imageUrl: payload.image, // ✅ 對齊後端 schema
+    }),
   });
 
   if (!res.ok) {
@@ -159,7 +163,14 @@ export async function updateProductAPI(
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(product),
+      body: JSON.stringify({
+        title: product.title,
+        description: product.description,
+        category: product.category,
+        price: product.price,
+        stock: product.stock,
+        imageUrl: product.image, // ✅ 對齊後端
+      }),
     }
   );
 

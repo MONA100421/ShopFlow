@@ -10,24 +10,27 @@ import { getProductById } from "../services/productService";
 import "./ProductDetailPage.css";
 
 export default function ProductDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
 
   /* =================================================
-     🔑 身分來源（與 RequireAdmin.tsx 完全一致）
+     🔑 Auth / Role
   ================================================= */
   const user = useSelector((state: RootState) => state.auth.user);
   const isAdmin = user?.role === "admin";
 
   /* =================================================
-     ✅ 正確的 Product 取得方式（async）
+     Product State
   ================================================= */
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
+  /* =================================================
+     Fetch Product
+  ================================================= */
   useEffect(() => {
-    if (!id) {
+    if (!id || typeof id !== "string") {
       setLoading(false);
       return;
     }
@@ -50,7 +53,7 @@ export default function ProductDetailPage() {
   /* ================= Quantity ================= */
   const [quantity, setQuantity] = useState(1);
 
-  /* ================= Loading / Not Found ================= */
+  /* ================= Loading ================= */
   if (loading) {
     return (
       <div className="product-detail-page">
@@ -61,6 +64,7 @@ export default function ProductDetailPage() {
     );
   }
 
+  /* ================= Not Found ================= */
   if (!product) {
     return (
       <div className="product-detail-page">
@@ -74,7 +78,7 @@ export default function ProductDetailPage() {
   }
 
   /* =================================================
-     🟥 Stock / Quantity Rules（與 ProductCard 完全一致）
+     Stock / Quantity Rules
   ================================================= */
   const isOutOfStock = product.stock === 0;
   const maxQuantity = product.stock;
@@ -82,8 +86,7 @@ export default function ProductDetailPage() {
 
   /* ================= Handlers ================= */
   const handleIncrease = () => {
-    if (isOutOfStock) return;
-    if (quantity >= maxQuantity) return;
+    if (isOutOfStock || isMaxReached) return;
     setQuantity((q) => q + 1);
   };
 
@@ -102,7 +105,6 @@ export default function ProductDetailPage() {
       })
     );
 
-    // reset to safe default
     setQuantity(1);
   };
 
@@ -110,57 +112,50 @@ export default function ProductDetailPage() {
   return (
     <div className="product-detail-page">
       <div className="product-detail-container">
-        {/* ================= Page Header ================= */}
         <h1 className="product-detail-page-title">
-          Products Detail
+          Product Detail
         </h1>
 
-        {/* ================= Detail Card ================= */}
         <div className="product-detail-card">
-          {/* ---------- Left: Product Image ---------- */}
+          {/* Image */}
           <div className="product-detail-image">
-            {product.image && (
+            {product.image ? (
               <img
                 src={product.image}
                 alt={product.title}
               />
+            ) : (
+              <div className="no-image">No Image</div>
             )}
           </div>
 
-          {/* ---------- Right: Product Info ---------- */}
+          {/* Info */}
           <div className="product-detail-info">
-            {/* Category */}
             <div className="product-category">
               {product.category}
             </div>
 
-            {/* Title */}
             <h2 className="product-title">
               {product.title}
             </h2>
 
-            {/* Price */}
             <div className="product-price">
               ${product.price.toFixed(2)}
             </div>
 
-            {/* Out of Stock Badge */}
             {isOutOfStock && (
               <div className="out-of-stock-badge">
-                <span className="out-of-stock-text">
-                  Out of Stock
-                </span>
+                Out of Stock
               </div>
             )}
 
-            {/* Description */}
             {product.description && (
               <p className="product-description">
                 {product.description}
               </p>
             )}
 
-            {/* ================= Quantity ================= */}
+            {/* Quantity */}
             <div className="product-quantity">
               <button
                 type="button"
@@ -181,7 +176,7 @@ export default function ProductDetailPage() {
               </button>
             </div>
 
-            {/* ================= Actions ================= */}
+            {/* Actions */}
             <div className="product-actions">
               <button
                 className="add-to-cart-btn"

@@ -12,7 +12,7 @@ import {
 } from "../services/productService";
 
 /* ======================================================
-   Local Cache (Demo only, removable later)
+   Local Cache (optional, safe with backend)
 ====================================================== */
 
 const STORAGE_KEY = "products_cache";
@@ -31,7 +31,7 @@ const saveCache = (products: Product[]) => {
 };
 
 /* ======================================================
-   Async Thunks (API-first)
+   Async Thunks
 ====================================================== */
 
 /** GET /api/products */
@@ -42,7 +42,7 @@ export const fetchProductsThunk = createAsyncThunk<
 >("products/fetch", async (_, { rejectWithValue }) => {
   try {
     return await getProducts();
-  } catch {
+  } catch (err) {
     return rejectWithValue("Failed to load products");
   }
 });
@@ -50,11 +50,11 @@ export const fetchProductsThunk = createAsyncThunk<
 /** POST /api/products (admin) */
 export const createProductThunk = createAsyncThunk<
   Product,
-  Product,
+  Omit<Product, "id" | "createdAt">,
   { rejectValue: string }
->("products/create", async (product, { rejectWithValue }) => {
+>("products/create", async (payload, { rejectWithValue }) => {
   try {
-    return await createProductAPI(product);
+    return await createProductAPI(payload);
   } catch {
     return rejectWithValue("Create product failed");
   }
@@ -99,7 +99,7 @@ interface ProductsState {
 }
 
 const initialState: ProductsState = {
-  list: loadCache(), // demo / refresh only
+  list: loadCache(), // ✅ 可保留，不影響後端
   loading: false,
   error: null,
   initialized: false,
@@ -114,7 +114,7 @@ const productsSlice = createSlice({
   initialState,
 
   reducers: {
-    /** 清空商品（例如 logout） */
+    /** 清空商品（例如 logout / 切換帳號） */
     clearProducts(state) {
       state.list = [];
       state.initialized = false;
@@ -143,7 +143,8 @@ const productsSlice = createSlice({
       )
       .addCase(fetchProductsThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload ?? "Failed to load products";
+        state.error =
+          action.payload ?? "Failed to load products";
       })
 
       /* =====================
@@ -163,7 +164,8 @@ const productsSlice = createSlice({
       )
       .addCase(createProductThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload ?? "Create product failed";
+        state.error =
+          action.payload ?? "Create product failed";
       })
 
       /* =====================
@@ -188,7 +190,8 @@ const productsSlice = createSlice({
       )
       .addCase(updateProductThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload ?? "Update product failed";
+        state.error =
+          action.payload ?? "Update product failed";
       })
 
       /* =====================
@@ -210,7 +213,8 @@ const productsSlice = createSlice({
       )
       .addCase(deleteProductThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload ?? "Delete product failed";
+        state.error =
+          action.payload ?? "Delete product failed";
       });
   },
 });
