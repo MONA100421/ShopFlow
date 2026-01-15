@@ -34,11 +34,6 @@ export const getProductById = async (
 ): Promise<void> => {
   const id = String(req.params.id);
 
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    res.status(400).json({ error: "Invalid product id" });
-    return;
-  }
-
   try {
     const product = await Product.findById(id);
 
