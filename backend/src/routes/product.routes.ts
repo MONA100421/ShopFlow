@@ -4,6 +4,8 @@ import { validate } from "../middlewares/validate";
 import {
   createProductSchema,
   updateProductSchema,
+  getProductByIdSchema,
+  deleteProductSchema,
 } from "../validations/product.validation";
 
 const router = Router();
@@ -16,7 +18,11 @@ router.get("/", productController.getAllProducts);
 /* ======================================================
    GET /api/products/:id
 ====================================================== */
-router.get("/:id", productController.getProductById);
+router.get(
+  "/:id",
+  validate(getProductByIdSchema),
+  productController.getProductById
+);
 
 /* ======================================================
    POST /api/products
@@ -39,6 +45,10 @@ router.put(
 /* ======================================================
    DELETE /api/products/:id
 ====================================================== */
-router.delete("/:id", productController.deleteProduct);
+router.delete(
+  "/:id",
+  validate(deleteProductSchema),
+  productController.deleteProduct
+);
 
 export default router;
