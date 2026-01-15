@@ -4,17 +4,18 @@ import Product from "../models/Product.model";
 
 /* ======================================================
    GET /api/products
+   Get all active products
 ====================================================== */
 export const getAllProducts = async (
   _req: Request,
   res: Response
-) => {
+): Promise<void> => {
   try {
     const products = await Product.find({ isActive: true }).sort({
       createdAt: -1,
     });
 
-    res.json(products);
+    res.status(200).json(products);
   } catch (error) {
     console.error("getAllProducts error:", error);
     res.status(500).json({
@@ -25,29 +26,28 @@ export const getAllProducts = async (
 
 /* ======================================================
    GET /api/products/:id
+   Get single product by id
 ====================================================== */
 export const getProductById = async (
   req: Request,
   res: Response
-) => {
-  const id = req.params.id as string;
+): Promise<void> => {
+  const id = String(req.params.id);
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({
-      error: "Invalid product id",
-    });
+    res.status(400).json({ error: "Invalid product id" });
+    return;
   }
 
   try {
     const product = await Product.findById(id);
 
     if (!product || !product.isActive) {
-      return res.status(404).json({
-        error: "Product not found",
-      });
+      res.status(404).json({ error: "Product not found" });
+      return;
     }
 
-    res.json(product);
+    res.status(200).json(product);
   } catch (error) {
     console.error("getProductById error:", error);
     res.status(500).json({
@@ -58,11 +58,12 @@ export const getProductById = async (
 
 /* ======================================================
    POST /api/products
+   Create new product (Admin)
 ====================================================== */
 export const createProduct = async (
   req: Request,
   res: Response
-) => {
+): Promise<void> => {
   try {
     const newProduct = new Product(req.body);
     const savedProduct = await newProduct.save();
@@ -78,17 +79,17 @@ export const createProduct = async (
 
 /* ======================================================
    PUT /api/products/:id
+   Update product (Admin)
 ====================================================== */
 export const updateProduct = async (
   req: Request,
   res: Response
-) => {
-  const id = req.params.id as string;
+): Promise<void> => {
+  const id = String(req.params.id);
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({
-      error: "Invalid product id",
-    });
+    res.status(400).json({ error: "Invalid product id" });
+    return;
   }
 
   try {
@@ -99,12 +100,11 @@ export const updateProduct = async (
     );
 
     if (!updatedProduct) {
-      return res.status(404).json({
-        error: "Product not found",
-      });
+      res.status(404).json({ error: "Product not found" });
+      return;
     }
 
-    res.json(updatedProduct);
+    res.status(200).json(updatedProduct);
   } catch (error) {
     console.error("updateProduct error:", error);
     res.status(500).json({
@@ -114,18 +114,18 @@ export const updateProduct = async (
 };
 
 /* ======================================================
-   DELETE /api/products/:id (Soft Delete)
+   DELETE /api/products/:id
+   Soft delete product (isActive = false)
 ====================================================== */
 export const deleteProduct = async (
   req: Request,
   res: Response
-) => {
-  const id = req.params.id as string;
+): Promise<void> => {
+  const id = String(req.params.id);
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({
-      error: "Invalid product id",
-    });
+    res.status(400).json({ error: "Invalid product id" });
+    return;
   }
 
   try {
@@ -136,12 +136,11 @@ export const deleteProduct = async (
     );
 
     if (!deletedProduct) {
-      return res.status(404).json({
-        error: "Product not found",
-      });
+      res.status(404).json({ error: "Product not found" });
+      return;
     }
 
-    res.json(deletedProduct);
+    res.status(200).json(deletedProduct);
   } catch (error) {
     console.error("deleteProduct error:", error);
     res.status(500).json({
