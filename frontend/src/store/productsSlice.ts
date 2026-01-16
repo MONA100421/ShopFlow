@@ -6,29 +6,11 @@ import {
 import type { Product } from "../types/Product";
 import {
   getProducts,
+  getProductById,
   createProductAPI,
   updateProductAPI,
   deleteProductAPI,
 } from "../services/productService";
-
-/* ======================================================
-   Local Cache (optional, safe with backend)
-====================================================== */
-
-const STORAGE_KEY = "products_cache";
-
-const loadCache = (): Product[] => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as Product[]) : [];
-  } catch {
-    return [];
-  }
-};
-
-const saveCache = (products: Product[]) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-};
 
 /* ======================================================
    Async Thunks
@@ -39,28 +21,41 @@ export const fetchProductsThunk = createAsyncThunk<
   Product[],
   void,
   { rejectValue: string }
->("products/fetch", async (_, { rejectWithValue }) => {
+>("products/fetchAll", async (_, { rejectWithValue }) => {
   try {
     return await getProducts();
-  } catch (err) {
+  } catch {
     return rejectWithValue("Failed to load products");
   }
 });
 
-/** POST /api/products (admin) */
+/** GET /api/products/:id ✅ NEW */
+export const fetchProductByIdThunk = createAsyncThunk<
+  Product,
+  string,
+  { rejectValue: string }
+>("products/fetchById", async (id, { rejectWithValue }) => {
+  try {
+    return await getProductById(id);
+  } catch {
+    return rejectWithValue("Failed to load product");
+  }
+});
+
+/** POST /api/products */
 export const createProductThunk = createAsyncThunk<
   Product,
-  Omit<Product, "id" | "createdAt">,
+  Product,
   { rejectValue: string }
->("products/create", async (payload, { rejectWithValue }) => {
+>("products/create", async (product, { rejectWithValue }) => {
   try {
-    return await createProductAPI(payload);
+    return await createProductAPI(product);
   } catch {
     return rejectWithValue("Create product failed");
   }
 });
 
-/** PUT /api/products/:id (admin) */
+/** PUT /api/products/:id */
 export const updateProductThunk = createAsyncThunk<
   Product,
   Product,
@@ -73,7 +68,7 @@ export const updateProductThunk = createAsyncThunk<
   }
 });
 
-/** DELETE /api/products/:id (admin) */
+/** DELETE /api/products/:id */
 export const deleteProductThunk = createAsyncThunk<
   string,
   string,
@@ -99,7 +94,7 @@ interface ProductsState {
 }
 
 const initialState: ProductsState = {
-  list: loadCache(), // ✅ 可保留，不影響後端
+  list: [],
   loading: false,
   error: null,
   initialized: false,
@@ -114,11 +109,9 @@ const productsSlice = createSlice({
   initialState,
 
   reducers: {
-    /** 清空商品（例如 logout / 切換帳號） */
     clearProducts(state) {
       state.list = [];
       state.initialized = false;
-      localStorage.removeItem(STORAGE_KEY);
     },
   },
 
@@ -126,7 +119,7 @@ const productsSlice = createSlice({
     builder
 
       /* =====================
-         Fetch Products
+         Fetch All Products
       ====================== */
       .addCase(fetchProductsThunk.pending, (state) => {
         state.loading = true;
@@ -138,7 +131,6 @@ const productsSlice = createSlice({
           state.loading = false;
           state.list = action.payload;
           state.initialized = true;
-          saveCache(state.list);
         }
       )
       .addCase(fetchProductsThunk.rejected, (state, action) => {
@@ -148,73 +140,56 @@ const productsSlice = createSlice({
       })
 
       /* =====================
-         Create Product
+         Fetch Product By Id ✅
       ====================== */
-      .addCase(createProductThunk.pending, (state) => {
+      .addCase(fetchProductByIdThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(
-        createProductThunk.fulfilled,
+        fetchProductByIdThunk.fulfilled,
         (state, action: PayloadAction<Product>) => {
           state.loading = false;
-          state.list.unshift(action.payload);
-          saveCache(state.list);
-        }
-      )
-      .addCase(createProductThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error =
-          action.payload ?? "Create product failed";
-      })
 
-      /* =====================
-         Update Product
-      ====================== */
-      .addCase(updateProductThunk.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(
-        updateProductThunk.fulfilled,
-        (state, action: PayloadAction<Product>) => {
-          state.loading = false;
           const index = state.list.findIndex(
             (p) => p.id === action.payload.id
           );
+
           if (index !== -1) {
+            // 已存在 → 更新
             state.list[index] = action.payload;
-            saveCache(state.list);
+          } else {
+            // 不存在 → 加入
+            state.list.push(action.payload);
           }
         }
       )
-      .addCase(updateProductThunk.rejected, (state, action) => {
+      .addCase(fetchProductByIdThunk.rejected, (state, action) => {
         state.loading = false;
         state.error =
-          action.payload ?? "Update product failed";
+          action.payload ?? "Failed to load product";
       })
 
       /* =====================
-         Delete Product
+         Create / Update / Delete
       ====================== */
-      .addCase(deleteProductThunk.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+      .addCase(createProductThunk.fulfilled, (state, action) => {
+        state.list.unshift(action.payload);
       })
-      .addCase(
-        deleteProductThunk.fulfilled,
-        (state, action: PayloadAction<string>) => {
-          state.loading = false;
-          state.list = state.list.filter(
-            (p) => p.id !== action.payload
-          );
-          saveCache(state.list);
+
+      .addCase(updateProductThunk.fulfilled, (state, action) => {
+        const index = state.list.findIndex(
+          (p) => p.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.list[index] = action.payload;
         }
-      )
-      .addCase(deleteProductThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error =
-          action.payload ?? "Delete product failed";
+      })
+
+      .addCase(deleteProductThunk.fulfilled, (state, action) => {
+        state.list = state.list.filter(
+          (p) => p.id !== action.payload
+        );
       });
   },
 });

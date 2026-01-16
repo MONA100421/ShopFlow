@@ -9,6 +9,12 @@ interface ProductFormProps {
   submitLabel?: string;
 }
 
+interface FormErrors {
+  title?: string;
+  price?: string;
+  stock?: string;
+}
+
 export default function ProductForm({
   initialData,
   onSubmit,
@@ -18,13 +24,14 @@ export default function ProductForm({
   /* ===============================
      Form State
   =============================== */
-
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("Category1");
   const [price, setPrice] = useState<number | "">("");
   const [stock, setStock] = useState<number | "">("");
   const [image, setImage] = useState("");
+
+  const [errors, setErrors] = useState<FormErrors>({});
 
   /* Image preview */
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -33,7 +40,6 @@ export default function ProductForm({
   /* ===============================
      Sync initialData (Edit mode)
   =============================== */
-
   useEffect(() => {
     if (!initialData) return;
 
@@ -47,27 +53,34 @@ export default function ProductForm({
   }, [initialData]);
 
   /* ===============================
-     Handlers
+     Validation
   =============================== */
+  const validate = (): boolean => {
+    const newErrors: FormErrors = {};
 
-  const handlePreview = () => {
-    if (!image.trim()) {
-      setPreviewUrl(null);
-      setImageError(false);
-      return;
+    if (!title.trim()) {
+      newErrors.title = "Product title is required";
     }
 
-    setPreviewUrl(image);
-    setImageError(false);
+    if (price === "" || price <= 0) {
+      newErrors.price = "Price must be greater than 0";
+    }
+
+    if (stock === "" || stock < 0) {
+      newErrors.stock = "Stock cannot be negative";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
+  /* ===============================
+     Handlers
+  =============================== */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title || price === "" || stock === "") {
-      alert("Please fill in all required fields.");
-      return;
-    }
+    if (!validate()) return;
 
     const formData: ProductFormData = {
       title,
@@ -81,13 +94,23 @@ export default function ProductForm({
     onSubmit(formData);
   };
 
+  const handlePreview = () => {
+    if (!image.trim()) {
+      setPreviewUrl(null);
+      setImageError(false);
+      return;
+    }
+
+    setPreviewUrl(image);
+    setImageError(false);
+  };
+
   const handleDelete = () => {
     if (!onDelete) return;
 
     const confirmed = window.confirm(
-      "Are you sure you want to delete this product? This action cannot be undone."
+      "Are you sure you want to delete this product?"
     );
-
     if (confirmed) {
       onDelete();
     }
@@ -96,11 +119,10 @@ export default function ProductForm({
   /* ===============================
      Render
   =============================== */
-
   return (
     <form className="product-form" onSubmit={handleSubmit}>
       <div className="product-form-card">
-        {/* Product name */}
+        {/* Title */}
         <div className="form-group full">
           <label className="form-label">Product name</label>
           <input
@@ -108,9 +130,12 @@ export default function ProductForm({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
+          {errors.title && (
+            <div className="form-error">{errors.title}</div>
+          )}
         </div>
 
-        {/* Product description */}
+        {/* Description */}
         <div className="form-group full">
           <label className="form-label">Product Description</label>
           <textarea
@@ -139,20 +164,22 @@ export default function ProductForm({
             <label className="form-label">Price</label>
             <input
               type="number"
-              step="0.01"
               className="form-control"
               value={price}
               onChange={(e) =>
                 setPrice(e.target.value === "" ? "" : Number(e.target.value))
               }
             />
+            {errors.price && (
+              <div className="form-error">{errors.price}</div>
+            )}
           </div>
         </div>
 
-        {/* Stock + Image link */}
-        <div className="form-row form-row--stock-image">
+        {/* Stock + Image */}
+        <div className="form-row">
           <div className="form-group">
-            <label className="form-label">In Stock Quantity</label>
+            <label className="form-label">Stock</label>
             <input
               type="number"
               className="form-control"
@@ -161,14 +188,16 @@ export default function ProductForm({
                 setStock(e.target.value === "" ? "" : Number(e.target.value))
               }
             />
+            {errors.stock && (
+              <div className="form-error">{errors.stock}</div>
+            )}
           </div>
 
           <div className="form-group">
-            <label className="form-label">Add Image Link</label>
+            <label className="form-label">Image URL</label>
             <div className="image-input-wrapper">
               <input
                 className="form-control"
-                placeholder="http://"
                 value={image}
                 onChange={(e) => setImage(e.target.value)}
               />
@@ -192,12 +221,7 @@ export default function ProductForm({
               onError={() => setImageError(true)}
             />
           ) : (
-            <>
-              <div className="placeholder-icon">🖼️</div>
-              <div>
-                {imageError ? "Invalid image URL" : "image preview!"}
-              </div>
-            </>
+            <div className="placeholder-icon">🖼️</div>
           )}
         </div>
 

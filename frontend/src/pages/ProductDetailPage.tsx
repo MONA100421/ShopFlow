@@ -2,59 +2,50 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 
-import type { Product } from "../types/Product";
 import type { AppDispatch, RootState } from "../store/store";
 import { addToCartThunk } from "../store/cartSlice";
-import { getProductById } from "../services/productService";
+import {
+  fetchProductByIdThunk,
+} from "../store/productsSlice";
 
 import "./ProductDetailPage.css";
 
 export default function ProductDetailPage() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
 
   /* =================================================
-     🔑 Auth / Role
+     Auth / Role
   ================================================= */
   const user = useSelector((state: RootState) => state.auth.user);
   const isAdmin = user?.role === "admin";
 
   /* =================================================
-     Product State
+     Product from Redux Store
   ================================================= */
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { list, loading } = useSelector(
+    (state: RootState) => state.products
+  );
+
+  const product = list.find((p) => p.id === id);
 
   /* =================================================
-     Fetch Product
+     Fetch Product by Id (Redux Thunk)
   ================================================= */
   useEffect(() => {
-    if (!id || typeof id !== "string") {
-      setLoading(false);
-      return;
+    if (!id) return;
+
+    if (!product) {
+      dispatch(fetchProductByIdThunk(id));
     }
-
-    const loadProduct = async () => {
-      try {
-        const data = await getProductById(id);
-        setProduct(data);
-      } catch (err) {
-        console.error("Failed to load product:", err);
-        setProduct(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProduct();
-  }, [id]);
+  }, [id, product, dispatch]);
 
   /* ================= Quantity ================= */
   const [quantity, setQuantity] = useState(1);
 
   /* ================= Loading ================= */
-  if (loading) {
+  if (loading || !id) {
     return (
       <div className="product-detail-page">
         <div className="product-detail-container">
@@ -117,7 +108,7 @@ export default function ProductDetailPage() {
         </h1>
 
         <div className="product-detail-card">
-          {/* Image */}
+          {/* ---------- Image ---------- */}
           <div className="product-detail-image">
             {product.image ? (
               <img
@@ -129,7 +120,7 @@ export default function ProductDetailPage() {
             )}
           </div>
 
-          {/* Info */}
+          {/* ---------- Info ---------- */}
           <div className="product-detail-info">
             <div className="product-category">
               {product.category}

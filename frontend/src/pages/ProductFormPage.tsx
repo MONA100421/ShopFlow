@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -6,6 +7,7 @@ import {
   createProductThunk,
   updateProductThunk,
   deleteProductThunk,
+  fetchProductByIdThunk,
 } from "../store/productsSlice";
 
 import type { Product } from "../types/Product";
@@ -17,67 +19,92 @@ import "./ProductFormPage.css";
 const DEFAULT_IMAGE = "/assets/react.svg";
 
 export default function ProductFormPage() {
-  const dispatch = useDispatch<AppDispatch>(); // ✅ 關鍵修正
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
   const isEditMode = Boolean(id);
 
-  /* ======================================================
-     Find product for edit mode
-  ====================================================== */
-  const product = useSelector((state: RootState) =>
-    id ? state.products.list.find((p) => p.id === id) : undefined
+  const { list, loading, error } = useSelector(
+    (state: RootState) => state.products
   );
 
+  const product = isEditMode
+    ? list.find((p) => p.id === id)
+    : undefined;
+
   /* ======================================================
-     Submit handler (Create / Edit)
+     Fetch product if edit mode + not in store
   ====================================================== */
-  const handleSubmit = (formData: ProductFormData) => {
+  useEffect(() => {
+    if (isEditMode && id && !product) {
+      dispatch(fetchProductByIdThunk(id));
+    }
+  }, [dispatch, isEditMode, id, product]);
+
+  /* ======================================================
+     Submit handler
+  ====================================================== */
+  const handleSubmit = async (formData: ProductFormData) => {
     const image = formData.image?.trim() || DEFAULT_IMAGE;
 
-    if (isEditMode && product) {
-      /* ===== Edit Product ===== */
-      const updatedProduct: Product = {
-        ...product,
-        ...formData,
-        image,
-      };
+    try {
+      if (isEditMode && product) {
+        const updatedProduct: Product = {
+          ...product,
+          ...formData,
+          image,
+        };
 
-      dispatch(updateProductThunk(updatedProduct));
-    } else {
-      /* ===== Create Product ===== */
-      const newProduct: Product = {
-        ...formData,
-        image,
-        // id / createdAt 交給 API（mock / backend）處理
-      } as Product;
+        await dispatch(updateProductThunk(updatedProduct)).unwrap();
+      } else {
+        const newProduct: Product = {
+          ...formData,
+          image,
+        } as Product;
 
-      dispatch(createProductThunk(newProduct));
+        await dispatch(createProductThunk(newProduct)).unwrap();
+      }
+
+      navigate("/");
+    } catch (err) {
+      // ❗ error 已由 redux 管理，這裡只 log
+      console.error("Save product failed:", err);
     }
-
-    navigate("/");
   };
 
   /* ======================================================
-     Delete handler (Edit only)
+     Delete handler
   ====================================================== */
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!product) return;
 
     const confirmed = window.confirm(
       "Are you sure you want to delete this product?"
     );
-
     if (!confirmed) return;
 
-    dispatch(deleteProductThunk(product.id));
-    navigate("/");
+    try {
+      await dispatch(deleteProductThunk(product.id)).unwrap();
+      navigate("/");
+    } catch (err) {
+      console.error("Delete product failed:", err);
+    }
   };
 
   /* ======================================================
-     Guard: Edit mode but product not found
+     Loading / Not Found
   ====================================================== */
+  if (isEditMode && loading && !product) {
+    return (
+      <div className="product-form-page">
+        <div className="product-form-container">
+          <h1 className="page-title">Loading...</h1>
+        </div>
+      </div>
+    );
+  }
+
   if (isEditMode && !product) {
     return (
       <div className="product-form-page">
@@ -89,7 +116,7 @@ export default function ProductFormPage() {
   }
 
   /* ======================================================
-     Map Product → ProductFormData
+     Initial form data
   ====================================================== */
   const initialFormData: ProductFormData | undefined =
     isEditMode && product
@@ -112,6 +139,13 @@ export default function ProductFormPage() {
         <h1 className="page-title">
           {isEditMode ? "Edit Product" : "Create Product"}
         </h1>
+
+        {/* 🔴 Redux / API Error */}
+        {error && (
+          <div className="page-error">
+            {error}
+          </div>
+        )}
 
         <ProductForm
           initialData={initialFormData}
