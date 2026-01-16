@@ -1,9 +1,5 @@
-import {
-  createSlice,
-  createAsyncThunk,
-} from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { CartItem } from "../types/CartItem";
-import type { Product } from "../types/Product";
 import {
   fetchCartAPI,
   addToCartAPI,
@@ -21,10 +17,10 @@ export const fetchCartThunk = createAsyncThunk<CartItem[]>(
 
 export const addToCartThunk = createAsyncThunk<
   CartItem[],
-  { product: Product; quantity: number }
->("cart/add", ({ product, quantity }) =>
-  addToCartAPI(product, quantity)
-);
+  { productId: string; quantity: number }
+>("cart/add", async ({ productId, quantity }) => {
+  return addToCartAPI(productId, quantity);
+});
 
 export const updateQuantityThunk = createAsyncThunk<
   CartItem[],
@@ -63,15 +59,10 @@ const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {},
-
   extraReducers: (builder) => {
     builder
-      .addCase(fetchCartThunk.pending, (state) => {
-        state.loading = true;
-      })
       .addCase(fetchCartThunk.fulfilled, (state, action) => {
         state.items = action.payload;
-        state.loading = false;
         state.initialized = true;
       })
       .addCase(addToCartThunk.fulfilled, (state, action) => {

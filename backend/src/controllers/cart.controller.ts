@@ -17,8 +17,9 @@ export const getCart = async (
 
     res.json(mapCartItems({ items }));
   } catch (err) {
-    res.status(500).json({
-      error: "Failed to fetch cart",
+        console.error("❌ getCart error:", err);
+        res.status(500).json({
+            error: "Failed to fetch cart",
     });
   }
 };

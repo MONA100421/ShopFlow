@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import type { RootState, AppDispatch } from "../store/store";
 import {
@@ -22,23 +22,32 @@ export default function CartDrawer({
   onClose,
 }: CartDrawerProps) {
   const dispatch = useDispatch<AppDispatch>();
-  const items = useSelector(
+
+  /** ✅ 防禦式取得 items（關鍵） */
+  const rawItems = useSelector(
     (state: RootState) => state.cart.items
   );
+
+  const items = Array.isArray(rawItems) ? rawItems : [];
 
   const [discountInput, setDiscountInput] = useState("");
   const [discountApplied, setDiscountApplied] =
     useState(false);
 
-  const subtotal = items.reduce(
-    (sum, item) =>
-      sum + item.product.price * item.quantity,
-    0
-  );
+  /* ================= Calculations ================= */
+
+  const subtotal = useMemo(() => {
+    return items.reduce(
+      (sum, item) => sum + (item.subtotal ?? 0),
+      0
+    );
+  }, [items]);
 
   const tax = subtotal * 0.1;
   const discount = discountApplied ? DISCOUNT_AMOUNT : 0;
   const total = Math.max(subtotal + tax - discount, 0);
+
+  /* ================= Effects ================= */
 
   useEffect(() => {
     document.body.style.overflowY = open ? "hidden" : "auto";
@@ -55,13 +64,15 @@ export default function CartDrawer({
     );
   };
 
+  /* ================= Render ================= */
+
   return (
     <div className="cart-overlay" onClick={onClose}>
       <aside
         className="cart-drawer"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
+        {/* ================= Header ================= */}
         <header className="drawer-header">
           <h2 className="drawer-title">
             Cart ({items.length})
@@ -75,7 +86,7 @@ export default function CartDrawer({
           </button>
         </header>
 
-        {/* Items */}
+        {/* ================= Items ================= */}
         <section className="drawer-items">
           {items.length === 0 && (
             <div className="drawer-empty">
@@ -85,13 +96,13 @@ export default function CartDrawer({
 
           {items.map((item) => (
             <div
-              key={item._id}
+              key={item.productId}
               className="drawer-item"
             >
-              {item.product.image ? (
+              {item.imageUrl ? (
                 <img
-                  src={item.product.image}
-                  alt={item.product.title}
+                  src={item.imageUrl}
+                  alt={item.name}
                 />
               ) : (
                 <div className="drawer-item-img placeholder">
@@ -102,14 +113,10 @@ export default function CartDrawer({
               <div className="drawer-item-content">
                 <div className="drawer-item-top">
                   <span className="drawer-item-name">
-                    {item.product.title}
+                    {item.name}
                   </span>
                   <span className="drawer-item-price">
-                    $
-                    {(
-                      item.product.price *
-                      item.quantity
-                    ).toFixed(2)}
+                    ${item.subtotal.toFixed(2)}
                   </span>
                 </div>
 
@@ -119,8 +126,7 @@ export default function CartDrawer({
                       onClick={() =>
                         dispatch(
                           updateQuantityThunk({
-                            productId:
-                              item.product._id,
+                            productId: item.productId,
                             delta: -1,
                           })
                         )
@@ -137,8 +143,7 @@ export default function CartDrawer({
                       onClick={() =>
                         dispatch(
                           updateQuantityThunk({
-                            productId:
-                              item.product._id,
+                            productId: item.productId,
                             delta: 1,
                           })
                         )
@@ -152,9 +157,7 @@ export default function CartDrawer({
                     className="drawer-remove"
                     onClick={() =>
                       dispatch(
-                        removeFromCartThunk(
-                          item.product._id
-                        )
+                        removeFromCartThunk(item.productId)
                       )
                     }
                   >
@@ -166,7 +169,7 @@ export default function CartDrawer({
           ))}
         </section>
 
-        {/* Footer */}
+        {/* ================= Footer ================= */}
         <footer className="drawer-footer">
           <div className="drawer-discount">
             <label>Apply Discount Code</label>

@@ -10,6 +10,7 @@
     /* =========================
        Paths
     ========================= */
+    "typeRoots": ["./node_modules/@types", "./src/types"],
     "rootDir": "src",
     "outDir": "dist",
 

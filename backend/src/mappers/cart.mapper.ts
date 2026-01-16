@@ -1,46 +1,27 @@
 // backend/src/mappers/cart.mapper.ts
-import type { Types } from "mongoose";
+export const mapCartItems = ({
+  items,
+}: {
+  items: any[];
+}) => {
+  return {
+    items: items
+      .filter((item) => item.product) // ✅ 防止 undefined
+      .map((item) => {
+        const product = item.product;
 
-/* ======================================================
-   Types (API Response Shape)
-====================================================== */
-
-export interface CartItemDTO {
-  _id: string; // cart item id
-  quantity: number;
-  product: {
-    _id: string;
-    title: string;
-    price: number;
-    image?: string;
-    stock: number;
+        return {
+          productId:
+            product._id?.toString() ??
+            product.toString(),
+          name: product.name ?? "",
+          price: product.price ?? 0,
+          imageUrl: product.imageUrl ?? "",
+          quantity: item.quantity,
+          subtotal:
+            (product.price ?? 0) *
+            item.quantity,
+        };
+      }),
   };
-}
-
-/* ======================================================
-   Mapper
-====================================================== */
-
-export function mapCartItems(cart: any): CartItemDTO[] {
-  if (!cart || !Array.isArray(cart.items)) {
-    return [];
-  }
-
-  return cart.items
-    .filter((item: any) => item.product) // 🔐 防止 product 被刪除
-    .map((item: any) => {
-      const product = item.product;
-
-      return {
-        _id: item._id.toString(),
-        quantity: item.quantity,
-        product: {
-          _id: product._id.toString(),
-          title: product.title,
-          price: product.price,
-          image: product.image || undefined,
-          stock: product.stock,
-        },
-      };
-    });
-}
+};

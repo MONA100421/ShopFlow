@@ -45,7 +45,7 @@ export default function ProductCard({
 
     dispatch(
       addToCartThunk({
-        product,
+        productId: product.id,
         quantity,
       })
     );

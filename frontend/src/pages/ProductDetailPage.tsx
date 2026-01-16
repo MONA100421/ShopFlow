@@ -105,7 +105,7 @@ export default function ProductDetailPage() {
 
     dispatch(
       addToCartThunk({
-        product,
+        productId: product.id,
         quantity,
       })
     );

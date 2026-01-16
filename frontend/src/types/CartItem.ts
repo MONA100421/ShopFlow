@@ -1,9 +1,10 @@
-import type { Product } from "./Product";
+// src/types/CartItem.ts
 
 export interface CartItem {
-  _id: string;          // ⭐ cart item id（後端來的）
-  product: Product & {
-    _id: string;        // ⭐ Mongo id（只在 cart 用）
-  };
+  productId: string;
+  name: string;
+  price: number;
+  imageUrl: string;
   quantity: number;
+  subtotal: number; // ✅ 後端已計算好
 }

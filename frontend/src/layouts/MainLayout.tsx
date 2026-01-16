@@ -4,7 +4,7 @@ import {
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import type { RootState, AppDispatch } from "../store/store";
@@ -34,13 +34,25 @@ export default function MainLayout() {
     (state: RootState) => state.auth
   );
 
-  const { items, initialized } = useSelector(
+  const cartState = useSelector(
     (state: RootState) => state.cart
   );
 
+  /**
+   * 🛡️ 核心防禦：
+   * - 不信任 cart.items
+   * - 任何不是 array 的情況，一律當成空陣列
+   */
+  const items = useMemo(() => {
+    return Array.isArray(cartState.items)
+      ? cartState.items
+      : [];
+  }, [cartState.items]);
+
+  const initialized = cartState.initialized;
+
   /* =================================================
-     ✅ 初始化 Cart（只做一次）
-     - 重新整理頁面也能拿到 cart
+     ✅ 初始化 Cart（只跑一次）
   ================================================= */
   useEffect(() => {
     if (!initialized) {
@@ -63,16 +75,31 @@ export default function MainLayout() {
   };
 
   /* ================= Cart Summary ================= */
-  const totalQuantity = items.reduce(
-    (sum, item) => sum + item.quantity,
-    0
-  );
 
-  const totalPrice = items.reduce(
-    (sum, item) =>
-      sum + item.product.price * item.quantity,
-    0
-  );
+  /**
+   * ✅ total quantity（100% 不會炸）
+   */
+  const totalQuantity = useMemo(() => {
+    return items.reduce(
+      (sum, item) => sum + (item.quantity ?? 0),
+      0
+    );
+  }, [items]);
+
+  /**
+   * ✅ total price
+   * - 優先使用 backend 算好的 subtotal
+   * - 若不存在，安全 fallback 為 0
+   */
+  const totalPrice = useMemo(() => {
+    return items.reduce((sum, item) => {
+      const subtotal =
+        typeof (item as any).subtotal === "number"
+          ? (item as any).subtotal
+          : 0;
+      return sum + subtotal;
+    }, 0);
+  }, [items]);
 
   return (
     <div className="app">
@@ -203,30 +230,21 @@ export default function MainLayout() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <img
-                src={youtubeIcon}
-                alt="YouTube"
-              />
+              <img src={youtubeIcon} alt="YouTube" />
             </a>
             <a
               href="https://twitter.com"
               target="_blank"
               rel="noopener noreferrer"
             >
-              <img
-                src={twitterIcon}
-                alt="Twitter"
-              />
+              <img src={twitterIcon} alt="Twitter" />
             </a>
             <a
               href="https://www.facebook.com"
               target="_blank"
               rel="noopener noreferrer"
             >
-              <img
-                src={facebookIcon}
-                alt="Facebook"
-              />
+              <img src={facebookIcon} alt="Facebook" />
             </a>
           </div>
 

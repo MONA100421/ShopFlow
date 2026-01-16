@@ -1,18 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 
-/**
- * TEMP auth middleware (DEV ONLY)
- * 先假裝使用者已登入
- */
-export const auth = (
+export function authMiddleware(
   req: Request,
-  _res: Response,
+  res: Response,
   next: NextFunction
-) => {
-  req.user = {
-    id: "000000000000000000000001", // 假 userId（ObjectId 格式）
-    email: "dev@test.com",
-  };
+) {
+  if (!req.session.userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
 
   next();
-};
+}

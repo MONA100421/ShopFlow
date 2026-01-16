@@ -8,7 +8,12 @@ import Product from "../models/Product.model";
 ====================================================== */
 
 const populateCart = async (cart: any) => {
-  await cart.populate("items.product");
+  if (!cart) return cart;
+
+  await cart.populate({
+    path: "items.product",
+  });
+
   return cart;
 };
 
@@ -25,13 +30,14 @@ const getOrCreateCart = async (userId: string) => {
   return populateCart(cart);
 };
 
-const findItemByProductId = (
-  cart: any,
-  productId: string
-) =>
-  cart.items.find(
-    (i: any) => i.product.toString() === productId
-  );
+const findItemByProductId = (cart: any, productId: string) =>
+  cart.items.find((i: any) => {
+    const pid =
+      typeof i.product === "object"
+        ? i.product._id.toString()
+        : i.product.toString();
+    return pid === productId;
+  });
 
 /* ======================================================
    Get cart items
@@ -102,7 +108,9 @@ export const updateCartItem = async (
   item.quantity += delta;
 
   if (item.quantity <= 0) {
-    cart.items.pull({ product: item.product });
+    cart.items.pull({
+        product: new mongoose.Types.ObjectId(productId),
+    });
   } else {
     item.quantity = Math.min(item.quantity, product.stock);
   }
