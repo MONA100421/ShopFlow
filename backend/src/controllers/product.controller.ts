@@ -1,32 +1,24 @@
 import { Request, Response } from "express";
-import mongoose from "mongoose";
-import Product from "../models/Product.model";
+import * as productService from "../services/product.service";
 
 /* ======================================================
    GET /api/products
-   Get all active products
 ====================================================== */
 export const getAllProducts = async (
   _req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    const products = await Product.find({ isActive: true }).sort({
-      createdAt: -1,
-    });
-
+    const products = await productService.getAllProducts();
     res.status(200).json(products);
   } catch (error) {
     console.error("getAllProducts error:", error);
-    res.status(500).json({
-      error: "Failed to fetch products",
-    });
+    res.status(500).json({ error: "Failed to fetch products" });
   }
 };
 
 /* ======================================================
    GET /api/products/:id
-   Get single product by id
 ====================================================== */
 export const getProductById = async (
   req: Request,
@@ -35,9 +27,9 @@ export const getProductById = async (
   const id = String(req.params.id);
 
   try {
-    const product = await Product.findById(id);
+    const product = await productService.getProductById(id);
 
-    if (!product || !product.isActive) {
+    if (!product) {
       res.status(404).json({ error: "Product not found" });
       return;
     }
@@ -45,36 +37,28 @@ export const getProductById = async (
     res.status(200).json(product);
   } catch (error) {
     console.error("getProductById error:", error);
-    res.status(500).json({
-      error: "Failed to fetch product",
-    });
+    res.status(500).json({ error: "Failed to fetch product" });
   }
 };
 
 /* ======================================================
    POST /api/products
-   Create new product (Admin)
 ====================================================== */
 export const createProduct = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    const newProduct = new Product(req.body);
-    const savedProduct = await newProduct.save();
-
-    res.status(201).json(savedProduct);
+    const product = await productService.createProduct(req.body);
+    res.status(201).json(product);
   } catch (error) {
     console.error("createProduct error:", error);
-    res.status(500).json({
-      error: "Failed to create product",
-    });
+    res.status(500).json({ error: "Failed to create product" });
   }
 };
 
 /* ======================================================
    PUT /api/products/:id
-   Update product (Admin)
 ====================================================== */
 export const updateProduct = async (
   req: Request,
@@ -82,35 +66,23 @@ export const updateProduct = async (
 ): Promise<void> => {
   const id = String(req.params.id);
 
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    res.status(400).json({ error: "Invalid product id" });
-    return;
-  }
-
   try {
-    const updatedProduct = await Product.findByIdAndUpdate(
-      id,
-      { $set: req.body },
-      { new: true, runValidators: true }
-    );
+    const product = await productService.updateProduct(id, req.body);
 
-    if (!updatedProduct) {
+    if (!product) {
       res.status(404).json({ error: "Product not found" });
       return;
     }
 
-    res.status(200).json(updatedProduct);
+    res.status(200).json(product);
   } catch (error) {
     console.error("updateProduct error:", error);
-    res.status(500).json({
-      error: "Failed to update product",
-    });
+    res.status(500).json({ error: "Failed to update product" });
   }
 };
 
 /* ======================================================
    DELETE /api/products/:id
-   Soft delete product (isActive = false)
 ====================================================== */
 export const deleteProduct = async (
   req: Request,
@@ -118,28 +90,17 @@ export const deleteProduct = async (
 ): Promise<void> => {
   const id = String(req.params.id);
 
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    res.status(400).json({ error: "Invalid product id" });
-    return;
-  }
-
   try {
-    const deletedProduct = await Product.findByIdAndUpdate(
-      id,
-      { isActive: false },
-      { new: true }
-    );
+    const product = await productService.deleteProduct(id);
 
-    if (!deletedProduct) {
+    if (!product) {
       res.status(404).json({ error: "Product not found" });
       return;
     }
 
-    res.status(200).json(deletedProduct);
+    res.status(200).json(product);
   } catch (error) {
     console.error("deleteProduct error:", error);
-    res.status(500).json({
-      error: "Failed to delete product",
-    });
+    res.status(500).json({ error: "Failed to delete product" });
   }
 };
