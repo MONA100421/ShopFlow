@@ -2,8 +2,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 
 import type { RootState, AppDispatch } from "../store/store";
-
-/* ✅ 正確：只 dispatch thunk */
 import {
   updateQuantityThunk,
   removeFromCartThunk,
@@ -23,20 +21,14 @@ export default function CartDrawer({
   open,
   onClose,
 }: CartDrawerProps) {
-  /* ================= Redux ================= */
-
   const dispatch = useDispatch<AppDispatch>();
   const items = useSelector(
     (state: RootState) => state.cart.items
   );
 
-  /* ================= Local State ================= */
-
   const [discountInput, setDiscountInput] = useState("");
   const [discountApplied, setDiscountApplied] =
     useState(false);
-
-  /* ================= Price ================= */
 
   const subtotal = items.reduce(
     (sum, item) =>
@@ -48,8 +40,6 @@ export default function CartDrawer({
   const discount = discountApplied ? DISCOUNT_AMOUNT : 0;
   const total = Math.max(subtotal + tax - discount, 0);
 
-  /* ================= Scroll Lock ================= */
-
   useEffect(() => {
     document.body.style.overflowY = open ? "hidden" : "auto";
     return () => {
@@ -59,15 +49,11 @@ export default function CartDrawer({
 
   if (!open) return null;
 
-  /* ================= Discount ================= */
-
   const handleApplyDiscount = () => {
     setDiscountApplied(
       discountInput.trim().toUpperCase() === DISCOUNT_CODE
     );
   };
-
-  /* ================= Render ================= */
 
   return (
     <div className="cart-overlay" onClick={onClose}>
@@ -99,7 +85,7 @@ export default function CartDrawer({
 
           {items.map((item) => (
             <div
-              key={item.product.id}
+              key={item._id}
               className="drawer-item"
             >
               {item.product.image ? (
@@ -134,7 +120,7 @@ export default function CartDrawer({
                         dispatch(
                           updateQuantityThunk({
                             productId:
-                              item.product.id,
+                              item.product._id,
                             delta: -1,
                           })
                         )
@@ -152,7 +138,7 @@ export default function CartDrawer({
                         dispatch(
                           updateQuantityThunk({
                             productId:
-                              item.product.id,
+                              item.product._id,
                             delta: 1,
                           })
                         )
@@ -167,7 +153,7 @@ export default function CartDrawer({
                     onClick={() =>
                       dispatch(
                         removeFromCartThunk(
-                          item.product.id
+                          item.product._id
                         )
                       )
                     }

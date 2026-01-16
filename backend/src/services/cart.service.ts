@@ -4,32 +4,31 @@ import Cart from "../models/Cart.model";
 import Product from "../models/Product.model";
 
 /* ======================================================
-   Helpers
+   Internal helper: get or create cart
+   （目前單一 cart，未來可接 user）
 ====================================================== */
-
-const getCart = async () => {
+const getOrCreateCart = async () => {
   let cart = await Cart.findOne().populate("items.product");
 
   if (!cart) {
     cart = await Cart.create({ items: [] });
+    await cart.populate("items.product");
   }
 
   return cart;
 };
 
 /* ======================================================
-   Get cart
+   Get cart items
 ====================================================== */
-
 export const getCartItems = async () => {
-  const cart = await getCart();
+  const cart = await getOrCreateCart();
   return cart.items;
 };
 
 /* ======================================================
    Add to cart
 ====================================================== */
-
 export const addToCart = async (
   productId: string,
   quantity: number
@@ -38,21 +37,25 @@ export const addToCart = async (
     throw new Error("Invalid product id");
   }
 
+  if (!Number.isInteger(quantity) || quantity <= 0) {
+    throw new Error("Invalid quantity");
+  }
+
   const product = await Product.findById(productId);
 
   if (!product || !product.isActive) {
     throw new Error("Product not found");
   }
 
-  const cart = await getCart();
+  const cart = await getOrCreateCart();
 
-  const existingItem = cart.items.find(
-    (item) => item.product.toString() === productId
+  const item = cart.items.find(
+    (i) => i.product.toString() === productId
   );
 
-  if (existingItem) {
-    existingItem.quantity = Math.min(
-      existingItem.quantity + quantity,
+  if (item) {
+    item.quantity = Math.min(
+      item.quantity + quantity,
       product.stock
     );
   } else {
@@ -69,14 +72,21 @@ export const addToCart = async (
 };
 
 /* ======================================================
-   Update quantity
+   Update cart item quantity (+1 / -1)
 ====================================================== */
-
 export const updateCartItem = async (
   productId: string,
   delta: 1 | -1
 ) => {
-  const cart = await getCart();
+  if (!mongoose.Types.ObjectId.isValid(productId)) {
+    throw new Error("Invalid product id");
+  }
+
+  if (delta !== 1 && delta !== -1) {
+    throw new Error("Invalid delta");
+  }
+
+  const cart = await getOrCreateCart();
 
   const item = cart.items.find(
     (i) => i.product.toString() === productId
@@ -86,12 +96,20 @@ export const updateCartItem = async (
     throw new Error("Cart item not found");
   }
 
+  const product = await Product.findById(item.product);
+
+  if (!product) {
+    throw new Error("Product not found");
+  }
+
   item.quantity += delta;
 
   if (item.quantity <= 0) {
     cart.items = cart.items.filter(
       (i) => i.product.toString() !== productId
     );
+  } else {
+    item.quantity = Math.min(item.quantity, product.stock);
   }
 
   await cart.save();
@@ -101,11 +119,14 @@ export const updateCartItem = async (
 };
 
 /* ======================================================
-   Remove item
+   Remove item from cart
 ====================================================== */
-
 export const removeCartItem = async (productId: string) => {
-  const cart = await getCart();
+  if (!mongoose.Types.ObjectId.isValid(productId)) {
+    throw new Error("Invalid product id");
+  }
+
+  const cart = await getOrCreateCart();
 
   cart.items = cart.items.filter(
     (i) => i.product.toString() !== productId
@@ -120,9 +141,8 @@ export const removeCartItem = async (productId: string) => {
 /* ======================================================
    Clear cart
 ====================================================== */
-
 export const clearCart = async () => {
-  const cart = await getCart();
+  const cart = await getOrCreateCart();
   cart.items = [];
   await cart.save();
   return [];
