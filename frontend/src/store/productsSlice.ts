@@ -29,7 +29,7 @@ export const fetchProductsThunk = createAsyncThunk<
   }
 });
 
-/** GET /api/products/:id ✅ NEW */
+/** GET /api/products/:id */
 export const fetchProductByIdThunk = createAsyncThunk<
   Product,
   string,
@@ -45,7 +45,7 @@ export const fetchProductByIdThunk = createAsyncThunk<
 /** POST /api/products */
 export const createProductThunk = createAsyncThunk<
   Product,
-  Product,
+  Omit<Product, "id" | "createdAt">,
   { rejectValue: string }
 >("products/create", async (product, { rejectWithValue }) => {
   try {
@@ -112,6 +112,7 @@ const productsSlice = createSlice({
     clearProducts(state) {
       state.list = [];
       state.initialized = false;
+      state.error = null;
     },
   },
 
@@ -140,7 +141,7 @@ const productsSlice = createSlice({
       })
 
       /* =====================
-         Fetch Product By Id ✅
+         Fetch Product By Id
       ====================== */
       .addCase(fetchProductByIdThunk.pending, (state) => {
         state.loading = true;
@@ -156,10 +157,8 @@ const productsSlice = createSlice({
           );
 
           if (index !== -1) {
-            // 已存在 → 更新
             state.list[index] = action.payload;
           } else {
-            // 不存在 → 加入
             state.list.push(action.payload);
           }
         }
@@ -171,25 +170,71 @@ const productsSlice = createSlice({
       })
 
       /* =====================
-         Create / Update / Delete
+         Create Product
       ====================== */
-      .addCase(createProductThunk.fulfilled, (state, action) => {
-        state.list.unshift(action.payload);
+      .addCase(createProductThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
       })
-
-      .addCase(updateProductThunk.fulfilled, (state, action) => {
-        const index = state.list.findIndex(
-          (p) => p.id === action.payload.id
-        );
-        if (index !== -1) {
-          state.list[index] = action.payload;
+      .addCase(
+        createProductThunk.fulfilled,
+        (state, action: PayloadAction<Product>) => {
+          state.loading = false;
+          state.list.unshift(action.payload);
         }
+      )
+      .addCase(createProductThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          action.payload ?? "Create product failed";
       })
 
-      .addCase(deleteProductThunk.fulfilled, (state, action) => {
-        state.list = state.list.filter(
-          (p) => p.id !== action.payload
-        );
+      /* =====================
+         Update Product
+      ====================== */
+      .addCase(updateProductThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        updateProductThunk.fulfilled,
+        (state, action: PayloadAction<Product>) => {
+          state.loading = false;
+
+          const index = state.list.findIndex(
+            (p) => p.id === action.payload.id
+          );
+          if (index !== -1) {
+            state.list[index] = action.payload;
+          }
+        }
+      )
+      .addCase(updateProductThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          action.payload ?? "Update product failed";
+      })
+
+      /* =====================
+         Delete Product
+      ====================== */
+      .addCase(deleteProductThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        deleteProductThunk.fulfilled,
+        (state, action: PayloadAction<string>) => {
+          state.loading = false;
+          state.list = state.list.filter(
+            (p) => p.id !== action.payload
+          );
+        }
+      )
+      .addCase(deleteProductThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          action.payload ?? "Delete product failed";
       });
   },
 });

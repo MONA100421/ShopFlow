@@ -14,7 +14,7 @@ const USE_MOCK_API = false;
 /**
  * Express API base
  * 對齊後端：
- * app.use("/api/products", productRouter)
+ * app.use("/api/products", productRoutes)
  */
 const API_BASE_URL = "http://localhost:4000/api/products";
 
@@ -28,12 +28,12 @@ let mockProducts: Product[] = [];
    Helpers
 ====================================================== */
 
-const delay = (ms = 600) =>
+const delay = (ms = 500) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * 將後端資料（MongoDB / Express）
- * 正規化成前端 Product
+ * 將後端 Product（MongoDB）
+ * 正規化成前端 Product 型別
  */
 const normalizeProduct = (raw: any): Product => ({
   id: raw._id, // ✅ MongoDB ObjectId
@@ -42,7 +42,7 @@ const normalizeProduct = (raw: any): Product => ({
   category: raw.category ?? "general",
   price: Number(raw.price),
   stock: Number(raw.stock ?? 0),
-  image: raw.imageUrl ?? "", // ✅ 對齊後端 imageUrl
+  image: raw.imageUrl ?? "",
   createdAt: raw.createdAt,
 });
 
@@ -77,12 +77,15 @@ export async function getProductById(
 ): Promise<Product> {
   if (USE_MOCK_API) {
     await delay();
+
     const found = mockProducts.find(
       (p) => p.id === id
     );
+
     if (!found) {
       throw new Error("Product not found");
     }
+
     return found;
   }
 
@@ -98,7 +101,7 @@ export async function getProductById(
 
 /**
  * POST /api/products
- * admin only
+ * Admin only（目前未加 auth header）
  */
 export async function createProductAPI(
   payload: Omit<Product, "id" | "createdAt">
@@ -141,7 +144,7 @@ export async function createProductAPI(
 
 /**
  * PUT /api/products/:id
- * admin only
+ * Admin only
  */
 export async function updateProductAPI(
   product: Product
@@ -184,7 +187,7 @@ export async function updateProductAPI(
 
 /**
  * DELETE /api/products/:id
- * admin only
+ * Admin only（soft delete）
  */
 export async function deleteProductAPI(
   id: string

@@ -4,9 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import type { AppDispatch, RootState } from "../store/store";
 import { addToCartThunk } from "../store/cartSlice";
-import {
-  fetchProductByIdThunk,
-} from "../store/productsSlice";
+import { fetchProductByIdThunk } from "../store/productsSlice";
 
 import "./ProductDetailPage.css";
 
@@ -31,21 +29,33 @@ export default function ProductDetailPage() {
   const product = list.find((p) => p.id === id);
 
   /* =================================================
-     Fetch Product by Id (Redux Thunk)
+     Local state: not found flag
+  ================================================= */
+  const [notFound, setNotFound] = useState(false);
+
+  /* =================================================
+     Fetch Product by Id (Redux Thunk + error handling)
   ================================================= */
   useEffect(() => {
-    if (!id) return;
-
-    if (!product) {
-      dispatch(fetchProductByIdThunk(id));
+    if (!id) {
+      navigate("/not-found", { replace: true });
+      return;
     }
-  }, [id, product, dispatch]);
 
-  /* ================= Quantity ================= */
-  const [quantity, setQuantity] = useState(1);
+    if (product) return;
 
-  /* ================= Loading ================= */
-  if (loading || !id) {
+    dispatch(fetchProductByIdThunk(id))
+      .unwrap()
+      .catch(() => {
+        // ✅ 真的 fetch 失敗（404 / backend error）
+        setNotFound(true);
+      });
+  }, [id, product, dispatch, navigate]);
+
+  /* =================================================
+     Loading
+  ================================================= */
+  if (loading && !product && !notFound) {
     return (
       <div className="product-detail-page">
         <div className="product-detail-container">
@@ -55,22 +65,26 @@ export default function ProductDetailPage() {
     );
   }
 
-  /* ================= Not Found ================= */
-  if (!product) {
-    return (
-      <div className="product-detail-page">
-        <div className="product-detail-container">
-          <div className="product-not-found">
-            Product not found
-          </div>
-        </div>
-      </div>
-    );
+  /* =================================================
+     Not Found → 導向 NotFoundPage
+  ================================================= */
+  if (notFound) {
+    navigate("/not-found", { replace: true });
+    return null;
   }
 
   /* =================================================
-     Stock / Quantity Rules
+     Safety guard（理論上不會走到）
   ================================================= */
+  if (!product) {
+    return null;
+  }
+
+  /* =================================================
+     Quantity / Stock Rules
+  ================================================= */
+  const [quantity, setQuantity] = useState(1);
+
   const isOutOfStock = product.stock === 0;
   const maxQuantity = product.stock;
   const isMaxReached = quantity >= maxQuantity;

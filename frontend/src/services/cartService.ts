@@ -49,7 +49,10 @@ export async function addToCartAPI(
   const res = await fetch(API_BASE_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ product, quantity }),
+    body: JSON.stringify({
+      productId: product.id,
+      quantity,
+     }),
   });
 
   if (!res.ok) throw new Error("Add to cart failed");
