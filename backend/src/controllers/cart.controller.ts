@@ -1,19 +1,25 @@
-// src/controllers/cart.controller.ts
+// backend/src/controllers/cart.controller.ts
 import { Request, Response } from "express";
 import * as cartService from "../services/cart.service";
+import { mapCartItems } from "../mappers/cart.mapper";
 
 /* ======================================================
    GET /api/cart
 ====================================================== */
 export const getCart = async (
-  _req: Request,
+  req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    const items = await cartService.getCartItems();
-    res.json(items);
-  } catch {
-    res.status(500).json({ error: "Failed to fetch cart" });
+    const userId = req.user!.id;
+
+    const items = await cartService.getCartItems(userId);
+
+    res.json(mapCartItems({ items }));
+  } catch (err) {
+    res.status(500).json({
+      error: "Failed to fetch cart",
+    });
   }
 };
 
@@ -31,18 +37,30 @@ export const addToCart = async (
   };
 
   if (!productId || typeof quantity !== "number") {
-    res.status(400).json({ error: "Invalid cart payload" });
+    res.status(400).json({
+      error: "Invalid cart payload",
+    });
     return;
   }
 
   try {
+    const userId = req.user!.id;
+
     const items = await cartService.addToCart(
+      userId,
       productId,
       quantity
     );
-    res.status(201).json(items);
+
+    res.status(201).json(
+      mapCartItems({ items })
+    );
   } catch (err: any) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({
+      error:
+        err.message ??
+        "Failed to add item to cart",
+    });
   }
 };
 
@@ -55,21 +73,36 @@ export const updateCartItem = async (
   res: Response
 ): Promise<void> => {
   const productId = String(req.params.productId);
-  const { delta } = req.body as { delta?: 1 | -1 };
+  const { delta } = req.body as {
+    delta?: 1 | -1;
+  };
 
   if (delta !== 1 && delta !== -1) {
-    res.status(400).json({ error: "Delta must be 1 or -1" });
+    res.status(400).json({
+      error: "Delta must be 1 or -1",
+    });
     return;
   }
 
   try {
-    const items = await cartService.updateCartItem(
-      productId,
-      delta
+    const userId = req.user!.id;
+
+    const items =
+      await cartService.updateCartItem(
+        userId,
+        productId,
+        delta
+      );
+
+    res.json(
+      mapCartItems({ items })
     );
-    res.json(items);
   } catch (err: any) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({
+      error:
+        err.message ??
+        "Failed to update cart item",
+    });
   }
 };
 
@@ -83,10 +116,23 @@ export const deleteCartItem = async (
   const productId = String(req.params.productId);
 
   try {
-    const items = await cartService.removeCartItem(productId);
-    res.json(items);
+    const userId = req.user!.id;
+
+    const items =
+      await cartService.removeCartItem(
+        userId,
+        productId
+      );
+
+    res.json(
+      mapCartItems({ items })
+    );
   } catch (err: any) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({
+      error:
+        err.message ??
+        "Failed to remove cart item",
+    });
   }
 };
 
@@ -94,9 +140,21 @@ export const deleteCartItem = async (
    DELETE /api/cart
 ====================================================== */
 export const clearCart = async (
-  _req: Request,
+  req: Request,
   res: Response
 ): Promise<void> => {
-  const items = await cartService.clearCart();
-  res.json(items);
+  try {
+    const userId = req.user!.id;
+
+    const items =
+      await cartService.clearCart(userId);
+
+    res.json(
+      mapCartItems({ items })
+    );
+  } catch {
+    res.status(500).json({
+      error: "Failed to clear cart",
+    });
+  }
 };

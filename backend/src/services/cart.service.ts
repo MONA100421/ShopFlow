@@ -1,28 +1,43 @@
-// src/services/cart.service.ts
+// backend/src/services/cart.service.ts
 import mongoose from "mongoose";
 import Cart from "../models/Cart.model";
 import Product from "../models/Product.model";
 
 /* ======================================================
-   Internal helper: get or create cart
-   （目前單一 cart，未來可接 user）
+   Helpers
 ====================================================== */
-const getOrCreateCart = async () => {
-  let cart = await Cart.findOne().populate("items.product");
 
-  if (!cart) {
-    cart = await Cart.create({ items: [] });
-    await cart.populate("items.product");
-  }
-
+const populateCart = async (cart: any) => {
+  await cart.populate("items.product");
   return cart;
 };
+
+const getOrCreateCart = async (userId: string) => {
+  let cart = await Cart.findOne({ user: userId });
+
+  if (!cart) {
+    cart = await Cart.create({
+      user: userId,
+      items: [],
+    });
+  }
+
+  return populateCart(cart);
+};
+
+const findItemByProductId = (
+  cart: any,
+  productId: string
+) =>
+  cart.items.find(
+    (i: any) => i.product.toString() === productId
+  );
 
 /* ======================================================
    Get cart items
 ====================================================== */
-export const getCartItems = async () => {
-  const cart = await getOrCreateCart();
+export const getCartItems = async (userId: string) => {
+  const cart = await getOrCreateCart(userId);
   return cart.items;
 };
 
@@ -30,6 +45,7 @@ export const getCartItems = async () => {
    Add to cart
 ====================================================== */
 export const addToCart = async (
+  userId: string,
   productId: string,
   quantity: number
 ) => {
@@ -37,21 +53,13 @@ export const addToCart = async (
     throw new Error("Invalid product id");
   }
 
-  if (!Number.isInteger(quantity) || quantity <= 0) {
-    throw new Error("Invalid quantity");
-  }
-
   const product = await Product.findById(productId);
-
   if (!product || !product.isActive) {
     throw new Error("Product not found");
   }
 
-  const cart = await getOrCreateCart();
-
-  const item = cart.items.find(
-    (i) => i.product.toString() === productId
-  );
+  const cart = await getOrCreateCart(userId);
+  const item = findItemByProductId(cart, productId);
 
   if (item) {
     item.quantity = Math.min(
@@ -66,38 +74,27 @@ export const addToCart = async (
   }
 
   await cart.save();
-  await cart.populate("items.product");
+  await populateCart(cart);
 
   return cart.items;
 };
 
 /* ======================================================
-   Update cart item quantity (+1 / -1)
+   Update cart item
 ====================================================== */
 export const updateCartItem = async (
+  userId: string,
   productId: string,
   delta: 1 | -1
 ) => {
-  if (!mongoose.Types.ObjectId.isValid(productId)) {
-    throw new Error("Invalid product id");
-  }
-
-  if (delta !== 1 && delta !== -1) {
-    throw new Error("Invalid delta");
-  }
-
-  const cart = await getOrCreateCart();
-
-  const item = cart.items.find(
-    (i) => i.product.toString() === productId
-  );
+  const cart = await getOrCreateCart(userId);
+  const item = findItemByProductId(cart, productId);
 
   if (!item) {
     throw new Error("Cart item not found");
   }
 
-  const product = await Product.findById(item.product);
-
+  const product = await Product.findById(productId);
   if (!product) {
     throw new Error("Product not found");
   }
@@ -105,35 +102,30 @@ export const updateCartItem = async (
   item.quantity += delta;
 
   if (item.quantity <= 0) {
-    cart.items = cart.items.filter(
-      (i) => i.product.toString() !== productId
-    );
+    cart.items.pull({ product: item.product });
   } else {
     item.quantity = Math.min(item.quantity, product.stock);
   }
 
   await cart.save();
-  await cart.populate("items.product");
+  await populateCart(cart);
 
   return cart.items;
 };
 
 /* ======================================================
-   Remove item from cart
+   Remove item
 ====================================================== */
-export const removeCartItem = async (productId: string) => {
-  if (!mongoose.Types.ObjectId.isValid(productId)) {
-    throw new Error("Invalid product id");
-  }
+export const removeCartItem = async (
+  userId: string,
+  productId: string
+) => {
+  const cart = await getOrCreateCart(userId);
 
-  const cart = await getOrCreateCart();
-
-  cart.items = cart.items.filter(
-    (i) => i.product.toString() !== productId
-  );
+  cart.items.pull({ product: productId });
 
   await cart.save();
-  await cart.populate("items.product");
+  await populateCart(cart);
 
   return cart.items;
 };
@@ -141,9 +133,13 @@ export const removeCartItem = async (productId: string) => {
 /* ======================================================
    Clear cart
 ====================================================== */
-export const clearCart = async () => {
-  const cart = await getOrCreateCart();
-  cart.items = [];
+export const clearCart = async (userId: string) => {
+  const cart = await getOrCreateCart(userId);
+
+  cart.items.splice(0); // ✅ 正確清空方式
+
   await cart.save();
-  return [];
+  await populateCart(cart);
+
+  return cart.items;
 };
