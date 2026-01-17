@@ -13,6 +13,14 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
 
+    /**
+     * 🔐 Password hash (bcrypt)
+     */
+    passwordHash: {
+      type: String,
+      required: true,
+    },
+
     name: {
       type: String,
       trim: true,
@@ -20,8 +28,6 @@ const userSchema = new mongoose.Schema(
 
     /**
      * 🔑 Role-based authorization
-     * - user: default
-     * - admin: can manage products
      */
     role: {
       type: String,

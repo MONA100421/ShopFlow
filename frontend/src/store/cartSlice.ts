@@ -1,3 +1,4 @@
+// frontend/src/store/cartSlice.ts
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { CartItem } from "../types/CartItem";
 import {
@@ -7,6 +8,7 @@ import {
   removeFromCartAPI,
   clearCartAPI,
 } from "../services/cartService";
+import { logoutThunk } from "./authSlice";
 
 /* ================= Thunks ================= */
 
@@ -91,7 +93,7 @@ const cartSlice = createSlice({
         state.loading = false;
         state.initialized = true;
 
-        // ✅ 401：未登入，忽略
+        // ✅ 401：未登入，安靜忽略
         if (action.payload === 401) {
           return;
         }
@@ -111,6 +113,14 @@ const cartSlice = createSlice({
       })
       .addCase(clearCartThunk.fulfilled, (state) => {
         state.items = [];
+      })
+
+      /* ===== 🔥 Logout → 清空前端 cart ===== */
+      .addCase(logoutThunk.fulfilled, (state) => {
+        state.items = [];
+        state.loading = false;
+        state.initialized = false;
+        state.error = null;
       });
   },
 });
