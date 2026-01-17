@@ -6,69 +6,104 @@ import {
   addToCartAPI,
   updateCartQuantityAPI,
   removeFromCartAPI,
-  clearCartAPI,
 } from "../services/cartService";
 import { logoutThunk } from "./authSlice";
+import {
+  getGuestCart,
+  addToGuestCart,
+  updateGuestCartQuantity,
+  removeFromGuestCart,
+} from "../utils/guestCart";
 
 /* ================= Thunks ================= */
 
 /**
  * Fetch cart
- * - 401 = 未登入 → 安靜忽略
+ * - 登入：API
+ * - 未登入：guest cart
  */
 export const fetchCartThunk = createAsyncThunk<
   CartItem[],
   void,
-  { rejectValue: number }
->("cart/fetch", async (_, { rejectWithValue }) => {
-  try {
-    return await fetchCartAPI();
-  } catch (err: any) {
-    if (err.message?.includes("401")) {
-      return rejectWithValue(401);
-    }
-    throw err;
+  { state: any }
+>("cart/fetch", async (_, { getState }) => {
+  const isAuthenticated =
+    getState().auth.isAuthenticated;
+
+  if (!isAuthenticated) {
+    return getGuestCart();
   }
+
+  return await fetchCartAPI();
 });
 
+/**
+ * Add to cart
+ */
 export const addToCartThunk = createAsyncThunk<
   CartItem[],
-  { productId: string; quantity: number }
->("cart/add", async ({ productId, quantity }) => {
-  return addToCartAPI(productId, quantity);
+  CartItem,
+  { state: any }
+>("cart/add", async (item, { getState }) => {
+  const isAuthenticated =
+    getState().auth.isAuthenticated;
+
+  if (!isAuthenticated) {
+    return addToGuestCart(item);
+  }
+
+  return await addToCartAPI(
+    item.productId,
+    item.quantity
+  );
 });
 
+/**
+ * Update quantity
+ */
 export const updateQuantityThunk = createAsyncThunk<
   CartItem[],
-  { productId: string; delta: 1 | -1 }
->("cart/update", ({ productId, delta }) =>
-  updateCartQuantityAPI(productId, delta)
-);
+  { productId: string; delta: 1 | -1 },
+  { state: any }
+>("cart/update", async ({ productId, delta }, { getState }) => {
+  const isAuthenticated =
+    getState().auth.isAuthenticated;
 
+  if (!isAuthenticated) {
+    return updateGuestCartQuantity(productId, delta);
+  }
+
+  return await updateCartQuantityAPI(productId, delta);
+});
+
+/**
+ * Remove item
+ */
 export const removeFromCartThunk = createAsyncThunk<
   CartItem[],
-  string
->("cart/remove", removeFromCartAPI);
+  string,
+  { state: any }
+>("cart/remove", async (productId, { getState }) => {
+  const isAuthenticated =
+    getState().auth.isAuthenticated;
 
-export const clearCartThunk = createAsyncThunk(
-  "cart/clear",
-  clearCartAPI
-);
+  if (!isAuthenticated) {
+    return removeFromGuestCart(productId);
+  }
+
+  return await removeFromCartAPI(productId);
+});
 
 /* ================= State ================= */
 
 interface CartState {
   items: CartItem[];
-  loading: boolean;
   initialized: boolean;
-  error: string | null;
 }
 
 const initialState: CartState = {
   items: [],
-  loading: false,
   initialized: false,
-  error: null,
 };
 
 /* ================= Slice ================= */
@@ -79,48 +114,27 @@ const cartSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      /* ===== Fetch ===== */
-      .addCase(fetchCartThunk.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
       .addCase(fetchCartThunk.fulfilled, (state, action) => {
         state.items = action.payload;
-        state.loading = false;
         state.initialized = true;
       })
-      .addCase(fetchCartThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.initialized = true;
 
-        // ✅ 401：未登入，安靜忽略
-        if (action.payload === 401) {
-          return;
-        }
-
-        state.error = "Failed to load cart";
-      })
-
-      /* ===== Mutations ===== */
       .addCase(addToCartThunk.fulfilled, (state, action) => {
         state.items = action.payload;
       })
+
       .addCase(updateQuantityThunk.fulfilled, (state, action) => {
         state.items = action.payload;
       })
+
       .addCase(removeFromCartThunk.fulfilled, (state, action) => {
         state.items = action.payload;
       })
-      .addCase(clearCartThunk.fulfilled, (state) => {
-        state.items = [];
-      })
 
-      /* ===== 🔥 Logout → 清空前端 cart ===== */
+      /* 🔥 Logout：只清前端 cart，不動 MongoDB */
       .addCase(logoutThunk.fulfilled, (state) => {
         state.items = [];
-        state.loading = false;
         state.initialized = false;
-        state.error = null;
       });
   },
 });

@@ -1,3 +1,4 @@
+import type { CartItem } from "../types/CartItem";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
@@ -101,15 +102,18 @@ export default function ProductDetailPage() {
   };
 
   const handleAddToCart = () => {
-    if (isOutOfStock) return;
+    if (!product) return;
 
-    dispatch(
-      addToCartThunk({
-        productId: product.id,
-        quantity,
-      })
-    );
+    const item: CartItem = {
+      productId: product.id,
+      name: product.title,          // ✅ 修正
+      price: product.price,
+      imageUrl: product.image,      // ✅ 修正
+      quantity,
+      subtotal: product.price * quantity,
+    };
 
+    dispatch(addToCartThunk(item));
     setQuantity(1);
   };
 

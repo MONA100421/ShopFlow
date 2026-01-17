@@ -1,3 +1,4 @@
+import type { CartItem } from "../types/CartItem";
 import "./ProductCard.css";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -41,17 +42,18 @@ export default function ProductCard({
   };
 
   const handleAddToCart = () => {
-    if (isOutOfStock) return;
+    const item: CartItem = {
+      productId: product.id,
+      name: product.title,
+      price: product.price,
+      imageUrl: product.image,
+      quantity: 1,
+      subtotal: product.price,
+    };
 
-    dispatch(
-      addToCartThunk({
-        productId: product.id,
-        quantity,
-      })
-    );
-
-    setQuantity(1);
+    dispatch(addToCartThunk(item));
   };
+
 
   return (
     <div className="product-card">
