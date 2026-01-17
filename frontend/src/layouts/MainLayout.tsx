@@ -55,10 +55,10 @@ export default function MainLayout() {
      ✅ 初始化 Cart（只跑一次）
   ================================================= */
   useEffect(() => {
-    if (!initialized) {
+    if (isAuthenticated) {
       dispatch(fetchCartThunk());
     }
-  }, [dispatch, initialized]);
+  }, [isAuthenticated]);
 
   /* ================= Search (IME Safe) ================= */
   const [value, setValue] = useState(searchParams.get("q") || "");
