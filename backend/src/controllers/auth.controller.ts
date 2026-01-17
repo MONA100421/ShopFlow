@@ -1,3 +1,4 @@
+// backend/src/controllers/auth.controller.ts
 import { Request, Response } from "express";
 import { UserModel } from "../models/User.model";
 
@@ -24,7 +25,7 @@ export async function login(req: Request, res: Response) {
       user = await UserModel.create({ email });
     }
 
-    // 🔥 核心：session 綁定 User._id（不是隨機 id）
+    // 🔥 核心：session 綁定 User._id
     req.session.userId = user._id.toString();
 
     res.json({
@@ -32,6 +33,7 @@ export async function login(req: Request, res: Response) {
       user: {
         id: user._id.toString(),
         email: user.email,
+        role: user.role, // ✅ 關鍵
       },
     });
   } catch (err) {
@@ -76,6 +78,7 @@ export async function me(req: Request, res: Response) {
     res.json({
       id: user._id.toString(),
       email: user.email,
+      role: user.role, // ✅ 關鍵
     });
   } catch (err) {
     console.error("❌ me error:", err);
