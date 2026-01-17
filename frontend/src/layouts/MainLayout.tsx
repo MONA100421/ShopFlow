@@ -4,12 +4,11 @@ import {
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import type { RootState, AppDispatch } from "../store/store";
 import { logoutThunk } from "../store/authSlice";
-import { fetchCartThunk } from "../store/cartSlice";
 
 import CartDrawer from "../components/CartDrawer";
 
@@ -30,25 +29,23 @@ export default function MainLayout() {
   const [searchParams] = useSearchParams();
 
   /* ================= Redux ================= */
-  const { isAuthenticated } = useSelector(
-    (state: RootState) => state.auth
-  );
-
-  const cartState = useSelector(
-    (state: RootState) => state.cart
-  );
+  const auth = useSelector((state: RootState) => state.auth);
+  const cart = useSelector((state: RootState) => state.cart);
 
   /**
-   * 🛡️ 核心防禦：
-   * - 不信任 cart.items
-   * - 任何不是 array 的情況，一律當成空陣列
+   * 🔐 Cart ready guard
+   * - auth.initialized：登入狀態已恢復
+   * - cart.items 已 hydrate（不管 user / guest）
+   */
+  const cartReady = cart.ready;
+
+  /**
+   * 🛡️ 防禦式取得 items
    */
   const items = useMemo(() => {
-    return Array.isArray(cartState.items)
-      ? cartState.items
-      : [];
-  }, [cartState.items]);
-
+    if (!cartReady) return [];
+    return Array.isArray(cart.items) ? cart.items : [];
+  }, [cart.items, cartReady]);
 
   /* ================= Search (IME Safe) ================= */
   const [value, setValue] = useState(searchParams.get("q") || "");
@@ -66,9 +63,6 @@ export default function MainLayout() {
 
   /* ================= Cart Summary ================= */
 
-  /**
-   * ✅ total quantity（100% 不會炸）
-   */
   const totalQuantity = useMemo(() => {
     return items.reduce(
       (sum, item) => sum + (item.quantity ?? 0),
@@ -76,11 +70,6 @@ export default function MainLayout() {
     );
   }, [items]);
 
-  /**
-   * ✅ total price
-   * - 優先使用 backend 算好的 subtotal
-   * - 若不存在，安全 fallback 為 0
-   */
   const totalPrice = useMemo(() => {
     return items.reduce((sum, item) => {
       const subtotal =
@@ -146,7 +135,7 @@ export default function MainLayout() {
           {/* ===== Right Actions ===== */}
           <div className="header-actions">
             {/* ---------- User ---------- */}
-            {!isAuthenticated ? (
+            {!auth.isAuthenticated ? (
               <Link
                 to="/auth/login"
                 className="header-user"
@@ -178,6 +167,7 @@ export default function MainLayout() {
               type="button"
               className="header-cart"
               onClick={() => setCartOpen(true)}
+              disabled={!cartReady}
             >
               <span className="cart-icon-wrapper">
                 <img
@@ -185,7 +175,7 @@ export default function MainLayout() {
                   alt="Cart"
                   className="cart-icon"
                 />
-                {totalQuantity > 0 && (
+                {cartReady && totalQuantity > 0 && (
                   <span className="cart-badge">
                     {totalQuantity}
                   </span>
@@ -193,7 +183,7 @@ export default function MainLayout() {
               </span>
 
               <span className="cart-total">
-                ${totalPrice.toFixed(2)}
+                ${cartReady ? totalPrice.toFixed(2) : "0.00"}
               </span>
             </button>
           </div>
@@ -247,10 +237,12 @@ export default function MainLayout() {
       </footer>
 
       {/* ================= Cart Drawer ================= */}
-      <CartDrawer
-        open={cartOpen}
-        onClose={() => setCartOpen(false)}
-      />
+      {cartReady && (
+        <CartDrawer
+          open={cartOpen}
+          onClose={() => setCartOpen(false)}
+        />
+      )}
     </div>
   );
 }

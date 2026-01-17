@@ -32,7 +32,6 @@ export const addToCartThunk = createAsyncThunk<
   { state: any }
 >("cart/add", async (item, { getState }) => {
   const { isAuthenticated } = getState().auth;
-
   return isAuthenticated
     ? addToCartAPI(item.productId, item.quantity)
     : addToGuestCart(item);
@@ -44,7 +43,6 @@ export const updateQuantityThunk = createAsyncThunk<
   { state: any }
 >("cart/update", async ({ productId, delta }, { getState }) => {
   const { isAuthenticated } = getState().auth;
-
   return isAuthenticated
     ? updateCartQuantityAPI(productId, delta)
     : updateGuestCartQuantity(productId, delta);
@@ -56,7 +54,6 @@ export const removeFromCartThunk = createAsyncThunk<
   { state: any }
 >("cart/remove", async (productId, { getState }) => {
   const { isAuthenticated } = getState().auth;
-
   return isAuthenticated
     ? removeFromCartAPI(productId)
     : removeFromGuestCart(productId);
@@ -66,10 +63,12 @@ export const removeFromCartThunk = createAsyncThunk<
 
 interface CartState {
   items: CartItem[];
+  ready: boolean; // 🔥 關鍵
 }
 
 const initialState: CartState = {
   items: [],
+  ready: false,   // 尚未 hydrate
 };
 
 /* ================= Slice ================= */
@@ -80,20 +79,30 @@ const cartSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // hydrate
       .addCase(fetchCartThunk.fulfilled, (state, action) => {
         state.items = action.payload;
+        state.ready = true;
       })
+
+      // mutations
       .addCase(addToCartThunk.fulfilled, (state, action) => {
         state.items = action.payload;
+        state.ready = true;
       })
       .addCase(updateQuantityThunk.fulfilled, (state, action) => {
         state.items = action.payload;
+        state.ready = true;
       })
       .addCase(removeFromCartThunk.fulfilled, (state, action) => {
         state.items = action.payload;
+        state.ready = true;
       })
+
+      // logout → 回到未 hydrate 狀態
       .addCase(logoutThunk.fulfilled, (state) => {
         state.items = [];
+        state.ready = false;
       });
   },
 });
