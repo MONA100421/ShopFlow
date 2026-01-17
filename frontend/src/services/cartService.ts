@@ -3,12 +3,24 @@ import type { CartItem } from "../types/CartItem";
 
 const API_BASE_URL = "http://localhost:4000/api/cart";
 
+/* ================= Helpers ================= */
+
+async function handleResponse(res: Response) {
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Cart API error");
+  }
+  const data = await res.json();
+  return data.items as CartItem[];
+}
+
+/* ================= APIs ================= */
+
 export async function fetchCartAPI(): Promise<CartItem[]> {
   const res = await fetch(API_BASE_URL, {
-    credentials: "include", // 🔥 必須
+    credentials: "include",
   });
-  if (!res.ok) throw new Error("Fetch cart failed");
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function addToCartAPI(
@@ -17,13 +29,14 @@ export async function addToCartAPI(
 ): Promise<CartItem[]> {
   const res = await fetch(API_BASE_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include", // 🔥 必須
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
     body: JSON.stringify({ productId, quantity }),
   });
 
-  if (!res.ok) throw new Error("Add to cart failed");
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function updateCartQuantityAPI(
@@ -32,13 +45,14 @@ export async function updateCartQuantityAPI(
 ): Promise<CartItem[]> {
   const res = await fetch(`${API_BASE_URL}/${productId}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include", // 🔥
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
     body: JSON.stringify({ delta }),
   });
 
-  if (!res.ok) throw new Error("Update quantity failed");
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function removeFromCartAPI(
@@ -46,18 +60,17 @@ export async function removeFromCartAPI(
 ): Promise<CartItem[]> {
   const res = await fetch(`${API_BASE_URL}/${productId}`, {
     method: "DELETE",
-    credentials: "include", // 🔥
+    credentials: "include",
   });
 
-  if (!res.ok) throw new Error("Remove item failed");
-  return res.json();
+  return handleResponse(res);
 }
 
-export async function clearCartAPI(): Promise<void> {
+export async function clearCartAPI(): Promise<CartItem[]> {
   const res = await fetch(API_BASE_URL, {
     method: "DELETE",
-    credentials: "include", // 🔥
+    credentials: "include",
   });
 
-  if (!res.ok) throw new Error("Clear cart failed");
+  return handleResponse(res);
 }

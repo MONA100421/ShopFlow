@@ -40,7 +40,7 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false, // local dev = false
+      secure: false, // local dev
       sameSite: "lax",
       maxAge: 1000 * 60 * 60 * 24, // 1 day
     },
@@ -63,6 +63,7 @@ app.get("/api/health", (_req, res) => {
 
 /* ================= API Routes ================= */
 
+// ✅ 關鍵：所有 API 都統一掛在 /api
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);

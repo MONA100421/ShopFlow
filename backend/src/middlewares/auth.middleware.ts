@@ -1,13 +1,30 @@
+// backend/src/middlewares/auth.middleware.ts
 import { Request, Response, NextFunction } from "express";
 
-export function authMiddleware(
+export const authMiddleware = (
   req: Request,
   res: Response,
   next: NextFunction
-) {
-  if (!req.session.userId) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
+) => {
+  try {
+    const userId = (req.session as any)?.userId;
 
-  next();
-}
+    if (!userId) {
+      return res.status(401).json({
+        error: "Not authenticated",
+      });
+    }
+
+    // ✅ Demo 專案：只補最小必要資訊
+    req.user = {
+      id: userId,
+    };
+
+    next();
+  } catch (err) {
+    console.error("❌ authMiddleware error:", err);
+    res.status(500).json({
+      error: "Authentication middleware failed",
+    });
+  }
+};

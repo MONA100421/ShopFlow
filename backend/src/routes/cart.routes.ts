@@ -1,15 +1,24 @@
 import { Router } from "express";
-import * as cartController from "../controllers/cart.controller";
+import {
+  getCart,
+  addToCart,
+  updateCartItem,
+  deleteCartItem,
+  clearCart,
+} from "../controllers/cart.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 
 const router = Router();
 
+/**
+ * ⚠️ 關鍵：所有 cart API 都必須先過 auth
+ */
 router.use(authMiddleware);
 
-router.get("/", cartController.getCart);
-router.post("/", cartController.addToCart);
-router.put("/:productId", cartController.updateCartItem);
-router.delete("/:productId", cartController.deleteCartItem);
-router.delete("/", cartController.clearCart);
+router.get("/", getCart);
+router.post("/", addToCart);
+router.put("/:productId", updateCartItem);
+router.delete("/:productId", deleteCartItem);
+router.delete("/", clearCart);
 
 export default router;
