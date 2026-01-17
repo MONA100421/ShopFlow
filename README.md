@@ -6,7 +6,7 @@ A production-ready full-stack e-commerce platform built with TypeScript, featuri
 
 ### 🔐 Authentication System
 - User registration, login, and password management
-- Session-based authentication with `express-session` and `connect-mongo` [1](#1-0) 
+- Session-based authentication with `express-session` and `connect-mongo`
 - Role-based access control (Admin vs Regular User)
 - Persistent login state across browser sessions
 
@@ -15,14 +15,14 @@ A production-ready full-stack e-commerce platform built with TypeScript, featuri
 - Admin-only product creation, editing, and deletion
 - Product search and pagination
 - Stock management and validation
-- Soft delete functionality (isActive flag) [2](#1-1) 
+- Soft delete functionality (isActive flag)
 
 ### 🛒 Shopping Cart
 - Real-time cart synchronization across pages
 - Quantity adjustment with stock validation
 - Promotion code support
 - Cart persistence using Redux Toolkit and localStorage
-- Session-based cart storage in MongoDB [3](#1-2) 
+- Session-based cart storage in MongoDB
 
 ### 🎨 User Interface
 - Responsive design for desktop and mobile
@@ -33,15 +33,15 @@ A production-ready full-stack e-commerce platform built with TypeScript, featuri
 ## 🏗️ Architecture
 
 ### Frontend (React + TypeScript)
-- **State Management**: Redux Toolkit with slices for auth, products, and cart [4](#1-3) 
-- **Routing**: React Router with protected routes for admin features [5](#1-4) 
-- **API Client**: Custom services with fetch API and credential handling [6](#1-5) 
+- **State Management**: Redux Toolkit with slices for auth, products, and cart
+- **Routing**: React Router with protected routes for admin features
+- **API Client**: Custom services with fetch API and credential handling 
 
 ### Backend (Express + TypeScript)
-- **Framework**: Express.js with comprehensive middleware setup [7](#1-6) 
+- **Framework**: Express.js with comprehensive middleware setup
 - **Database**: MongoDB with Mongoose ODM
 - **Authentication**: Session-based with secure cookie handling
-- **API Routes**: RESTful endpoints for auth, products, cart, and orders [8](#1-7) 
+- **API Routes**: RESTful endpoints for auth, products, cart, and orders 
 
 ### Data Flow
 ```mermaid
@@ -87,7 +87,7 @@ npm run dev
 4. **Access the application**
     - Frontend: http://localhost:5173
     - Backend API: http://localhost:4000
-    - Health Check: http://localhost:4000/api/health [9](#1-8) 
+    - Health Check: http://localhost:4000/api/health
 
 ## 📁 Project Structure
 
@@ -141,13 +141,13 @@ PORT=4000
 - `GET /api/products/:id` - Get product by ID
 - `POST /api/products` - Create product (Admin only)
 - `PUT /api/products/:id` - Update product (Admin only)
-- `DELETE /api/products/:id` - Delete product (Admin only) [10](#1-9) 
+- `DELETE /api/products/:id` - Delete product (Admin only) 
 
 ### Cart
 - `GET /api/cart` - Get user cart
 - `POST /api/cart` - Add item to cart
 - `PUT /api/cart/:id` - Update item quantity
-- `DELETE /api/cart/:id` - Remove item from cart [11](#1-10) 
+- `DELETE /api/cart/:id` - Remove item from cart
 
 ## 👥 User Roles
 
@@ -189,7 +189,7 @@ PORT=4000
 ## 🔒 Security Features
 
 - Session-based authentication with secure cookies
-- CORS configuration for cross-origin requests [12](#1-11) 
+- CORS configuration for cross-origin requests
 - Input validation and sanitization
 - Role-based access control
 - Protection against common web vulnerabilities
