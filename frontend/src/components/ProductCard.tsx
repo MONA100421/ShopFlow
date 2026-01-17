@@ -47,8 +47,8 @@ export default function ProductCard({
       name: product.title,
       price: product.price,
       imageUrl: product.image,
-      quantity: 1,
-      subtotal: product.price,
+      quantity,
+      subtotal: product.price * quantity,
     };
 
     dispatch(addToCartThunk(item));

@@ -49,16 +49,6 @@ export default function MainLayout() {
       : [];
   }, [cartState.items]);
 
-  const initialized = cartState.initialized;
-
-  /* =================================================
-     ✅ 初始化 Cart（只跑一次）
-  ================================================= */
-  useEffect(() => {
-    if (isAuthenticated) {
-      dispatch(fetchCartThunk());
-    }
-  }, [isAuthenticated]);
 
   /* ================= Search (IME Safe) ================= */
   const [value, setValue] = useState(searchParams.get("q") || "");

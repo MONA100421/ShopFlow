@@ -7,103 +7,69 @@ import {
   updateCartQuantityAPI,
   removeFromCartAPI,
 } from "../services/cartService";
-import { logoutThunk } from "./authSlice";
 import {
   getGuestCart,
   addToGuestCart,
   updateGuestCartQuantity,
   removeFromGuestCart,
 } from "../utils/guestCart";
+import { logoutThunk } from "./authSlice";
 
 /* ================= Thunks ================= */
 
-/**
- * Fetch cart
- * - 登入：API
- * - 未登入：guest cart
- */
 export const fetchCartThunk = createAsyncThunk<
   CartItem[],
   void,
   { state: any }
 >("cart/fetch", async (_, { getState }) => {
-  const isAuthenticated =
-    getState().auth.isAuthenticated;
-
-  if (!isAuthenticated) {
-    return getGuestCart();
-  }
-
-  return await fetchCartAPI();
+  const { isAuthenticated } = getState().auth;
+  return isAuthenticated ? fetchCartAPI() : getGuestCart();
 });
 
-/**
- * Add to cart
- */
 export const addToCartThunk = createAsyncThunk<
   CartItem[],
   CartItem,
   { state: any }
 >("cart/add", async (item, { getState }) => {
-  const isAuthenticated =
-    getState().auth.isAuthenticated;
+  const { isAuthenticated } = getState().auth;
 
-  if (!isAuthenticated) {
-    return addToGuestCart(item);
-  }
-
-  return await addToCartAPI(
-    item.productId,
-    item.quantity
-  );
+  return isAuthenticated
+    ? addToCartAPI(item.productId, item.quantity)
+    : addToGuestCart(item);
 });
 
-/**
- * Update quantity
- */
 export const updateQuantityThunk = createAsyncThunk<
   CartItem[],
   { productId: string; delta: 1 | -1 },
   { state: any }
 >("cart/update", async ({ productId, delta }, { getState }) => {
-  const isAuthenticated =
-    getState().auth.isAuthenticated;
+  const { isAuthenticated } = getState().auth;
 
-  if (!isAuthenticated) {
-    return updateGuestCartQuantity(productId, delta);
-  }
-
-  return await updateCartQuantityAPI(productId, delta);
+  return isAuthenticated
+    ? updateCartQuantityAPI(productId, delta)
+    : updateGuestCartQuantity(productId, delta);
 });
 
-/**
- * Remove item
- */
 export const removeFromCartThunk = createAsyncThunk<
   CartItem[],
   string,
   { state: any }
 >("cart/remove", async (productId, { getState }) => {
-  const isAuthenticated =
-    getState().auth.isAuthenticated;
+  const { isAuthenticated } = getState().auth;
 
-  if (!isAuthenticated) {
-    return removeFromGuestCart(productId);
-  }
-
-  return await removeFromCartAPI(productId);
+  return isAuthenticated
+    ? removeFromCartAPI(productId)
+    : removeFromGuestCart(productId);
 });
 
 /* ================= State ================= */
 
 interface CartState {
   items: CartItem[];
-  initialized: boolean;
 }
 
 const initialState: CartState = {
   items: [],
-  initialized: false,
 };
 
 /* ================= Slice ================= */
@@ -116,25 +82,18 @@ const cartSlice = createSlice({
     builder
       .addCase(fetchCartThunk.fulfilled, (state, action) => {
         state.items = action.payload;
-        state.initialized = true;
       })
-
       .addCase(addToCartThunk.fulfilled, (state, action) => {
         state.items = action.payload;
       })
-
       .addCase(updateQuantityThunk.fulfilled, (state, action) => {
         state.items = action.payload;
       })
-
       .addCase(removeFromCartThunk.fulfilled, (state, action) => {
         state.items = action.payload;
       })
-
-      /* 🔥 Logout：只清前端 cart，不動 MongoDB */
       .addCase(logoutThunk.fulfilled, (state) => {
         state.items = [];
-        state.initialized = false;
       });
   },
 });

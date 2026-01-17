@@ -159,3 +159,39 @@ export const clearCart = async (
     });
   }
 };
+
+/* ======================================================
+   POST /api/cart/merge
+   body: { items: [{ productId, quantity }] }
+====================================================== */
+export const mergeCart = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = req.user!.id;
+    const { items } = req.body as {
+      items?: { productId: string; quantity: number }[];
+    };
+
+    if (!Array.isArray(items)) {
+      res.status(400).json({
+        error: "Invalid merge payload",
+      });
+      return;
+    }
+
+    const merged =
+      await cartService.mergeCartItems(
+        userId,
+        items
+      );
+
+    res.json(mapCartItems({ items: merged }));
+  } catch (err) {
+    console.error("❌ mergeCart error:", err);
+    res.status(500).json({
+      error: "Failed to merge cart",
+    });
+  }
+};

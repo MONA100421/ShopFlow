@@ -74,3 +74,22 @@ export async function clearCartAPI(): Promise<CartItem[]> {
 
   return handleResponse(res);
 }
+
+export async function mergeCartAPI(
+  items: { productId: string; quantity: number }[]
+): Promise<CartItem[]> {
+  const res = await fetch(
+    `${API_BASE_URL}/merge`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ items }),
+    }
+  );
+
+  return handleResponse(res);
+}
+

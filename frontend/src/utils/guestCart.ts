@@ -3,9 +3,12 @@ import type { CartItem } from "../types/CartItem";
 
 const STORAGE_KEY = "guest_cart";
 
-/**
- * 取得 guest cart
- */
+/* ================= Helpers ================= */
+
+function save(items: CartItem[]) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+}
+
 export function getGuestCart(): CartItem[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -17,83 +20,58 @@ export function getGuestCart(): CartItem[] {
   }
 }
 
-/**
- * 儲存 guest cart
- */
-function saveGuestCart(items: CartItem[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+export function clearGuestCart() {
+  localStorage.removeItem(STORAGE_KEY);
 }
 
-/**
- * 加入商品
- */
-export function addToGuestCart(
-  item: CartItem
-): CartItem[] {
-  const items = getGuestCart();
+/* ================= Mutations ================= */
 
-  const existing = items.find(
+export function addToGuestCart(item: CartItem): CartItem[] {
+  const cart = getGuestCart();
+  const existing = cart.find(
     (i) => i.productId === item.productId
   );
 
   if (existing) {
     existing.quantity += item.quantity;
     existing.subtotal =
-      existing.quantity * (item.subtotal / item.quantity);
+      existing.price * existing.quantity;
   } else {
-    items.push(item);
+    cart.push(item);
   }
 
-  saveGuestCart(items);
-  return items;
+  save(cart);
+  return cart;
 }
 
-/**
- * 更新數量
- */
 export function updateGuestCartQuantity(
   productId: string,
   delta: 1 | -1
 ): CartItem[] {
-  const items = getGuestCart();
-
-  const target = items.find(
+  const cart = getGuestCart();
+  const item = cart.find(
     (i) => i.productId === productId
   );
 
-  if (!target) return items;
+  if (!item) return cart;
 
-  target.quantity += delta;
+  item.quantity += delta;
 
-  if (target.quantity <= 0) {
+  if (item.quantity <= 0) {
     return removeFromGuestCart(productId);
   }
 
-  target.subtotal =
-    (target.subtotal / (target.quantity - delta)) *
-    target.quantity;
-
-  saveGuestCart(items);
-  return items;
+  item.subtotal = item.price * item.quantity;
+  save(cart);
+  return cart;
 }
 
-/**
- * 移除商品
- */
 export function removeFromGuestCart(
   productId: string
 ): CartItem[] {
-  const items = getGuestCart().filter(
+  const cart = getGuestCart().filter(
     (i) => i.productId !== productId
   );
-
-  saveGuestCart(items);
-  return items;
-}
-
-/**
- * 清空 guest cart
- */
-export function clearGuestCart() {
-  localStorage.removeItem(STORAGE_KEY);
+  save(cart);
+  return cart;
 }

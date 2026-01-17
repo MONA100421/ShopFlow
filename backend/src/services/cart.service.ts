@@ -151,3 +151,46 @@ export const clearCart = async (userId: string) => {
 
   return cart.items;
 };
+
+/* ======================================================
+   Merge guest cart into user cart
+====================================================== */
+export const mergeCartItems = async (
+  userId: string,
+  guestItems: { productId: string; quantity: number }[]
+) => {
+  const cart = await getOrCreateCart(userId);
+
+  for (const guestItem of guestItems) {
+    const { productId, quantity } = guestItem;
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      continue;
+    }
+
+    const product = await Product.findById(productId);
+    if (!product || !product.isActive) continue;
+
+    const existing = findItemByProductId(
+      cart,
+      productId
+    );
+
+    if (existing) {
+      existing.quantity = Math.min(
+        existing.quantity + quantity,
+        product.stock
+      );
+    } else {
+      cart.items.push({
+        product: product._id,
+        quantity: Math.min(quantity, product.stock),
+      });
+    }
+  }
+
+  await cart.save();
+  await populateCart(cart);
+
+  return cart.items;
+};

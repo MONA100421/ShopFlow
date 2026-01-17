@@ -5,6 +5,7 @@ import {
   updateCartItem,
   deleteCartItem,
   clearCart,
+  mergeCart
 } from "../controllers/cart.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 
@@ -20,5 +21,6 @@ router.post("/", addToCart);
 router.put("/:productId", updateCartItem);
 router.delete("/:productId", deleteCartItem);
 router.delete("/", clearCart);
+router.post("/merge", authMiddleware, mergeCart);
 
 export default router;
