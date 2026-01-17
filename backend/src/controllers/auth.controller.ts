@@ -1,8 +1,10 @@
+// backend/src/controllers/auth.controller.ts
 import { Request, Response } from "express";
+import mongoose from "mongoose";
 
 export async function login(req: Request, res: Response) {
-  // ✅ 最小可用：假設任何人都登入成功
-  const fakeUserId = "demo-user-123";
+  // ✅ 用合法的 MongoDB ObjectId
+  const fakeUserId = new mongoose.Types.ObjectId().toString();
 
   req.session.userId = fakeUserId;
 

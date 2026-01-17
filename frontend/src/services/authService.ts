@@ -2,29 +2,29 @@
    Config
 ======================== */
 
-// 🔁 切換 mock / real API（之後接 Express 只要改這行）
-const USE_MOCK_API = true;
+// ❗現在一定要關 mock，否則永遠不會打到後端 session
+const USE_MOCK_API = false;
 
-// 未來 Express API base
-const API_BASE_URL = "/api/auth";
+// Express API base（對應 backend: /api/auth）
+const API_BASE_URL = "http://localhost:4000/api/auth";
 
 /* ========================
    Types
 ======================== */
 
 export interface User {
-  _id: string;
-  email: string;
-  role: "admin" | "user";
+  id: string;
+  email?: string;
+  role?: "admin" | "user"; // ✅ optional
 }
 
 export interface AuthResponse {
-  user: User;
-  token: string;
+  ok: boolean;
+  userId: string;
 }
 
 /* ========================
-   Mock Helpers
+   Mock Helpers（保留，之後可再用）
 ======================== */
 
 async function mockDelay(ms = 800) {
@@ -33,9 +33,8 @@ async function mockDelay(ms = 800) {
 
 function generateMockUser(email: string): User {
   return {
-    _id: crypto.randomUUID(),
+    id: crypto.randomUUID(),
     email,
-    role: email.toLowerCase().includes("admin") ? "admin" : "user",
   };
 }
 
@@ -43,9 +42,11 @@ function generateMockUser(email: string): User {
    Auth APIs
 ======================== */
 
-export async function loginAPI(
-  payload: { email: string; password: string }
-): Promise<AuthResponse> {
+export async function loginAPI(payload: {
+  email: string;
+  password: string;
+}): Promise<AuthResponse> {
+  /* ===== Mock API ===== */
   if (USE_MOCK_API) {
     await mockDelay();
 
@@ -60,29 +61,34 @@ export async function loginAPI(
     }
 
     return {
-      user: generateMockUser(email),
-      token: "mock-jwt-token",
+      ok: true,
+      userId: generateMockUser(email).id,
     };
   }
 
-  /* ===== Real Express API ===== */
+  /* ===== Real Express Session API ===== */
   const res = await fetch(`${API_BASE_URL}/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(payload),
+    credentials: "include", // 🔥 這一行是關鍵
   });
 
   if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.message || "Login failed");
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.error || "Login failed");
   }
 
   return res.json();
 }
 
-export async function registerAPI(
-  payload: { email: string; password: string }
-): Promise<AuthResponse> {
+export async function registerAPI(payload: {
+  email: string;
+  password: string;
+}): Promise<AuthResponse> {
+  /* ===== Mock API ===== */
   if (USE_MOCK_API) {
     await mockDelay();
 
@@ -97,25 +103,43 @@ export async function registerAPI(
     }
 
     return {
-      user: {
-        _id: crypto.randomUUID(),
-        email,
-        role: "user",
-      },
-      token: "mock-register-jwt-token",
+      ok: true,
+      userId: crypto.randomUUID(),
     };
   }
 
-  /* ===== Real Express API ===== */
+  /* ===== Real Express Session API ===== */
   const res = await fetch(`${API_BASE_URL}/register`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(payload),
+    credentials: "include", // 🔥 同樣必須
   });
 
   if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.message || "Register failed");
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.error || "Register failed");
+  }
+
+  return res.json();
+}
+
+export async function logoutAPI(): Promise<void> {
+  await fetch(`${API_BASE_URL}/logout`, {
+    method: "POST",
+    credentials: "include",
+  });
+}
+
+export async function meAPI(): Promise<User | null> {
+  const res = await fetch(`${API_BASE_URL}/me`, {
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    return null;
   }
 
   return res.json();

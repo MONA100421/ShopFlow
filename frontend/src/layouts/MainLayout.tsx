@@ -8,7 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import type { RootState, AppDispatch } from "../store/store";
-import { logout } from "../store/authSlice";
+import { logoutThunk } from "../store/authSlice";
 import { fetchCartThunk } from "../store/cartSlice";
 
 import CartDrawer from "../components/CartDrawer";
@@ -70,7 +70,7 @@ export default function MainLayout() {
 
   /* ================= Auth ================= */
   const handleLogout = () => {
-    dispatch(logout());
+    dispatch(logoutThunk());
     navigate("/auth/login");
   };
 
