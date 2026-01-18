@@ -7,24 +7,25 @@ A production-ready e-commerce platform built with the MERN stack, demonstrating 
 - **Chenyi Weng**
 - **Bingchen Li**
 
-## 🛠 Tech Stack
+## 🚀 Tech Stack
 
 ### Frontend
-![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-blue?logo=typescript&logoColor=white)
 ![CSS](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
 
 ### Backend
-![Node.js](https://img.shields.io/badge/Node.js-18-339933?logo=node.js&logoColor=white)
-![Express](https://img.shields.io/badge/Express.js-000000?logo=express&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express-000000?logo=express&logoColor=white)
 
 ### Database
 ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white)
 
-### Tooling
+### Architecture / Other
+![REST API](https://img.shields.io/badge/REST-API-orange)
+![MVC](https://img.shields.io/badge/Architecture-MVC-informational)
 ![Git](https://img.shields.io/badge/Git-F05032?logo=git&logoColor=white)
 ![npm](https://img.shields.io/badge/npm-CB3837?logo=npm&logoColor=white)
-
 
 ## 🚀 Live Demo
 
