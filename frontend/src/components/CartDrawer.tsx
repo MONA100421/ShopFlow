@@ -23,12 +23,14 @@ export default function CartDrawer({
 }: CartDrawerProps) {
   const dispatch = useDispatch<AppDispatch>();
 
-  /** ✅ 防禦式取得 items（關鍵） */
+  /* ================= Redux ================= */
+
   const rawItems = useSelector(
     (state: RootState) => state.cart.items
   );
-
   const items = Array.isArray(rawItems) ? rawItems : [];
+
+  /* ================= Local State ================= */
 
   const [discountInput, setDiscountInput] = useState("");
   const [discountApplied, setDiscountApplied] =
@@ -99,17 +101,22 @@ export default function CartDrawer({
               key={item.productId}
               className="drawer-item"
             >
-              {item.imageUrl ? (
-                <img
-                  src={item.imageUrl}
-                  alt={item.name}
-                />
-              ) : (
-                <div className="drawer-item-img placeholder">
-                  No Image
-                </div>
-              )}
+              {/* ✅ Image wrapper（關鍵） */}
+              <div className="drawer-item-image">
+                {item.imageUrl ? (
+                  <img
+                    src={item.imageUrl}
+                    alt={item.name}
+                    className="drawer-item-img"
+                  />
+                ) : (
+                  <div className="drawer-item-img placeholder">
+                    No Image
+                  </div>
+                )}
+              </div>
 
+              {/* Content */}
               <div className="drawer-item-content">
                 <div className="drawer-item-top">
                   <span className="drawer-item-name">

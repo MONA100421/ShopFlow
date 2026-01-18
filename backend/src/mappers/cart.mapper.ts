@@ -14,7 +14,7 @@ export const mapCartItems = ({
           productId:
             product._id?.toString() ??
             product.toString(),
-          name: product.name ?? "",
+          name: product.title ?? "",
           price: product.price ?? 0,
           imageUrl: product.imageUrl ?? "",
           quantity: item.quantity,
