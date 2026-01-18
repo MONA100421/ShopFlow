@@ -1,248 +1,234 @@
-# 🛒 ShopFlow
+# ShopFlow - MERN E-Commerce Platform
 
-A production-ready full-stack e-commerce platform built with TypeScript, featuring role-based access control, real-time cart management, and a modern React frontend with Express backend.
-
-## ✨ Features
-
-### 🔐 Authentication System
-- User registration, login, and password management
-- Session-based authentication with `express-session` and `connect-mongo`
-- Role-based access control (Admin vs Regular User)
-- Persistent login state across browser sessions
-
-### 📦 Product Management
-- Full CRUD operations for products
-- Admin-only product creation, editing, and deletion
-- Product search and pagination
-- Stock management and validation
-- Soft delete functionality (isActive flag)
-
-### 🛒 Shopping Cart
-- Real-time cart synchronization across pages
-- Quantity adjustment with stock validation
-- Promotion code support
-- Cart persistence using Redux Toolkit and localStorage
-- Session-based cart storage in MongoDB
-
-### 🎨 User Interface
-- Responsive design for desktop and mobile
-- Component-based architecture with reusable UI elements
-- Real-time search with IME support
-- Admin-only UI controls and routes
-
-## 🏗️ Architecture
-
-### Frontend (React + TypeScript)
-- **State Management**: Redux Toolkit with slices for auth, products, and cart
-- **Routing**: React Router with protected routes for admin features
-- **API Client**: Custom services with fetch API and credential handling 
-
-### Backend (Express + TypeScript)
-- **Framework**: Express.js with comprehensive middleware setup
-- **Database**: MongoDB with Mongoose ODM
-- **Authentication**: Session-based with secure cookie handling
-- **API Routes**: RESTful endpoints for auth, products, cart, and orders 
-
-### Data Flow
-```mermaid
-graph LR
-    A[React Components] --> B[Redux Actions]
-    B --> C[API Services]
-    C --> D[Express Routes]
-    D --> E[Controllers]
-    E --> F[Services]
-    F --> G[MongoDB]
-```
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Node.js (v16 or higher)
-- MongoDB (local or cloud instance)
-- npm or yarn
-
-### Installation
-
-1. **Clone the repository**
-```bash
-git clone https://github.com/your-username/ShopFlow.git
-cd ShopFlow
-```
-
-2. **Backend Setup**
-```bash
-cd backend
-npm install
-cp .env.example .env
-npm run dev
-```
-
-3. **Frontend Setup**
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-4. **Access the application**
-    - Frontend: http://localhost:5173
-    - Backend API: http://localhost:4000
-    - Health Check: http://localhost:4000/api/health
-
-## 📁 Project Structure
-
-```
-ShopFlow/
-├── frontend/
-│   ├── src/
-│   │   ├── components/        # Reusable UI components
-│   │   ├── pages/            # Route components
-│   │   ├── layouts/          # Layout components
-│   │   ├── store/            # Redux store and slices
-│   │   ├── services/         # API client services
-│   │   ├── context/          # React Context providers
-│   │   ├── types/            # TypeScript type definitions
-│   │   ├── App.tsx           # Root component
-│   │   └── main.tsx          # Application entry point
-│   ├── package.json
-│   └── vite.config.ts
-├── backend/
-│   ├── src/
-│   │   ├── controllers/      # Route controllers
-│   │   ├── services/         # Business logic
-│   │   ├── models/           # Mongoose models
-│   │   ├── routes/           # API routes
-│   │   ├── middleware/       # Custom middleware
-│   │   ├── validations/      # Input validation schemas
-│   │   └── server.ts         # Server entry point
-│   ├── package.json
-│   └── tsconfig.json
-└── README.md
-```
-
-## 🔧 Environment Variables
-
-### Backend (.env)
-```env
-MONGODB_URI=
-SESSION_SECRET=
-PORT=4000
-```
-
-## 📚 API Documentation
-
-### Authentication
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/logout` - User logout
-
-### Products
-- `GET /api/products` - Get all products
-- `GET /api/products/:id` - Get product by ID
-- `POST /api/products` - Create product (Admin only)
-- `PUT /api/products/:id` - Update product (Admin only)
-- `DELETE /api/products/:id` - Delete product (Admin only) 
-
-### Cart
-- `GET /api/cart` - Get user cart
-- `POST /api/cart` - Add item to cart
-- `PUT /api/cart/:id` - Update item quantity
-- `DELETE /api/cart/:id` - Remove item from cart
-
-## 👥 User Roles
-
-### Regular User
-- Browse products and view details
-- Add items to cart
-- Manage cart quantities
-- Apply promotion codes
-- Update account password
-
-### Admin User
-- All regular user permissions
-- Create, edit, and delete products
-- Manage product inventory
-- Access admin dashboard
-
-## 🛠️ Technology Stack
-
-### Frontend
-- **React 18** - UI framework
-- **TypeScript** - Type safety
-- **Redux Toolkit** - State management
-- **React Router** - Client-side routing
-- **Vite** - Build tool and dev server
-
-### Backend
-- **Express.js** - Web framework
-- **TypeScript** - Type safety
-- **MongoDB** - Database
-- **Mongoose** - ODM
-- **express-session** - Session management
-- **connect-mongo** - Session store
-
-### Development
-- **ts-node-dev** - Backend hot-reload
-- **ESLint** - Code linting
-- **Prettier** - Code formatting
-
-## 🔒 Security Features
-
-- Session-based authentication with secure cookies
-- CORS configuration for cross-origin requests
-- Input validation and sanitization
-- Role-based access control
-- Protection against common web vulnerabilities
-
-## 🧪 Development
-
-### Running Tests
-```bash
-# Frontend tests
-cd frontend
-npm test
-
-# Backend tests
-cd backend
-npm test
-```
-
-### Code Quality
-```bash
-# Linting
-npm run lint
-
-# Formatting
-npm run format
-```
-
-## 📈 Performance Features
-
-- Optimistic UI updates for better UX
-- Lazy loading for components
-- Efficient Redux state management
-- Database indexing for queries
-- Image optimization and caching
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+A production-ready e-commerce platform built with the MERN stack, demonstrating full-stack development capabilities with TypeScript, Redux state management, and secure session-based authentication.
 
 ## 👨‍💻 Authors
 
 - **Chenyi Weng**
 - **Bingchen Li**
 
-## 🙏 Acknowledgments
+## 🚀 Live Demo
 
-- Built following modern full-stack development practices
-- Inspired by e-commerce platforms like Walmart
-- Designed with scalability and maintainability in mind
+**Frontend**: http://localhost:5173  
+**Backend API**: http://localhost:4000  
+**Health Check**: http://localhost:4000/api/health
+
+## 🔄 Data Flow Architecture
+
+### Authentication Flow
+```mermaid
+graph LR
+    A[User Input] --> B[AuthForm Component]
+    B --> C[authSlice Thunks]
+    C --> D[authService API]
+    D --> E[Backend Controller]
+    E --> F[bcrypt Hashing]
+    F --> G[Session Creation]
+    G --> H[Redux State Update]
+    H --> I[UI Re-render]
+```
+
+### Cart Management Flow
+```mermaid
+graph LR
+    A[Add to Cart] --> B{User Authenticated?}
+    B -->|No| C[localStorage Guest Cart]
+    B -->|Yes| D[cartSlice Thunk]
+    C --> E[Guest Cart Utils]
+    D --> F[cartService API]
+    E --> G[Cart Merge on Login]
+    F --> H[Backend Cart Service]
+    G --> H
+    H --> I[MongoDB Storage]
+    I --> J[Redux State Update]
+```
+
+### Product Management Flow
+```mermaid
+graph LR
+    A[Product Form] --> B[productsSlice Thunks]
+    B --> C[productService API]
+    C --> D[Zod Validation]
+    D --> E[Backend Controller]
+    E --> F[Product Service]
+    F --> G[MongoDB Operations]
+    G --> H[Redux State Update]
+    H --> I[UI Re-render]
+```
+
+## 🛠️ Quick Setup
+
+### Install Prerequisites
+```bash
+# Install Node.js (v18 or higher)
+# Using nvm (recommended)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+nvm install 18
+nvm use 18
+
+# Install MongoDB locally
+# macOS
+brew install mongodb-community
+brew services start mongodb-community
+
+# Ubuntu/Debian
+sudo apt-get install mongodb
+sudo systemctl start mongodb
+
+# Create free cluster at: https://www.mongodb.com/atlas
+```
+
+### Project Setup
+```bash
+# Clone and setup project
+git clone https://github.com/MONA100421/ShopFlow
+cd ShopFlow
+
+# Install frontend dependencies
+cd frontend
+npm install
+
+# Install backend dependencies
+cd ../backend
+npm install
+
+# Setup environment variables
+cat > .env << EOF
+MONGODB_URI=mongodb://localhost:27017/your-db-name
+PORT=4000
+SESSION_SECRET=your-super-secret-session-key
+EOF
+
+# Start development servers
+npm run dev &
+cd ../frontend
+npm run dev
+```
+
+## 🛍️ Implemented Features
+
+### User Authentication
+- **Session-based authentication** with MongoDB store
+- **User registration** with email validation and bcrypt password hashing
+- **Automatic admin role assignment** for emails containing "admin"
+- **Protected routes** with authentication middleware
+
+### Product Management
+- **Full CRUD operations** for products
+- **Soft delete functionality** (sets `isActive` to false)
+- **Product validation** with Zod schemas
+- **Admin-only product management** with route protection
+
+### Shopping Cart System
+- **Guest cart support** using localStorage for non-authenticated users
+- **Automatic cart merging** when guests log in
+- **Real-time cart updates** with Redux state management
+- **Stock validation** preventing over-ordering 
+
+### Search & Discovery
+- **Unicode-normalized search** supporting international characters
+- **Multi-dimensional sorting**: Price (asc/desc), Latest first
+- **Pagination** with 10 items per page
+
+### Order Processing
+- **Order creation** from cart items (in-memory storage only)
+- **Order history** with GET endpoints
+- **Cart summary** with tax calculation (10%) and discount support
+
+## 🏗️ Technical Architecture
+
+### Frontend Stack
+- **React 19** with TypeScript
+- **Vite** for fast development and building
+- **Redux Toolkit** for state management
+- **React Router DOM** for navigation
+- **CSS Modules** for component styling
+
+### Backend Stack
+- **Node.js** with Express and TypeScript
+- **MongoDB** with Mongoose ODM
+- **Express Session** with MongoDB store for persistence
+- **bcrypt** for secure password hashing
+- **Zod** for runtime validation
+
+## 📁 Project Structure
+
+```
+ShopFlow/
+├── frontend/                 # React frontend application
+│   ├── src/
+│   │   ├── components/      # Reusable UI components
+│   │   │   ├── AuthForm.tsx
+│   │   │   ├── CartDrawer.tsx
+│   │   │   ├── ProductCard.tsx
+│   │   │   ├── ProductForm.tsx
+│   │   │   └── RequireAdmin.tsx
+│   │   ├── pages/          # Page components
+│   │   │   ├── ProductListPage.tsx
+│   │   │   ├── ProductDetailPage.tsx
+│   │   │   ├── ProductFormPage.tsx
+│   │   │   └── AuthPage.tsx
+│   │   ├── store/          # Redux store and slices
+│   │   │   ├── authSlice.ts
+│   │   │   ├── cartSlice.ts
+│   │   │   └── productsSlice.ts
+│   │   ├── services/       # API service functions
+│   │   ├── types/          # TypeScript type definitions
+│   │   └── utils/          # Utility functions
+│   │       └── guestCart.ts
+│   └── package.json
+└── backend/                 # Express backend API
+    ├── src/
+    │   ├── models/         # Mongoose data models
+    │   │   ├── User.model.ts
+    │   │   ├── Product.model.ts
+    │   │   └── Cart.model.ts
+    │   ├── routes/         # API route definitions
+    │   │   ├── auth.routes.ts
+    │   │   ├── product.routes.ts
+    │   │   ├── cart.routes.ts
+    │   │   └── order.routes.ts
+    │   ├── controllers/    # Route controller logic
+    │   │   ├── auth.controller.ts
+    │   │   ├── product.controller.ts
+    │   │   └── cart.controller.ts
+    │   ├── services/       # Business logic layer
+    │   │   ├── auth.service.ts
+    │   │   ├── product.service.ts
+    │   │   └── cart.service.ts
+    │   ├── middlewares/    # Custom middleware
+    │   │   └── auth.middleware.ts
+    │   ├── validations/    # Zod schemas
+    │   │   └── product.validation.ts
+    │   ├── mappers/        # Data transformation
+    │   │   └── cart.mapper.ts
+    │   └── server.ts       # Server entry point
+    └── package.json
+```
+
+## 📊 API Endpoints
+
+### Authentication
+- `POST /api/auth/register` - User registration 
+- `POST /api/auth/login` - User login 
+- `POST /api/auth/logout` - User logout
+- `GET /api/auth/me` - Get current user
+
+### Products
+- `GET /api/products` - Get all active products
+- `GET /api/products/:id` - Get product by ID
+- `POST /api/products` - Create product (admin only)
+- `PUT /api/products/:id` - Update product (admin only)
+- `DELETE /api/products/:id` - Soft delete product (admin only)
+
+### Cart
+- `GET /api/cart` - Get user cart
+- `POST /api/cart` - Add item to cart 
+- `PUT /api/cart/:productId` - Update item quantity
+- `DELETE /api/cart/:productId` - Remove item from cart
+- `POST /api/cart/merge` - Merge guest cart to user cart
+
+### Orders
+- `POST /api/orders` - Create order from cart 
+- `GET /api/orders` - Get all orders
+- `GET /api/orders/:orderId` - Get order by ID 
