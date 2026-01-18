@@ -108,8 +108,12 @@ export const updateCartItem = async (
   item.quantity += delta;
 
   if (item.quantity <= 0) {
-    cart.items.pull({
-        product: new mongoose.Types.ObjectId(productId),
+    cart.items = cart.items.filter((i: any) => {
+      const pid =
+        typeof i.product === "object"
+          ? i.product._id.toString()
+          : i.product.toString();
+      return pid !== productId;
     });
   } else {
     item.quantity = Math.min(item.quantity, product.stock);
@@ -122,7 +126,7 @@ export const updateCartItem = async (
 };
 
 /* ======================================================
-   Remove item
+   ✅ Remove item（🔥 關鍵修正）
 ====================================================== */
 export const removeCartItem = async (
   userId: string,
@@ -130,7 +134,13 @@ export const removeCartItem = async (
 ) => {
   const cart = await getOrCreateCart(userId);
 
-  cart.items.pull({ product: productId });
+  cart.items = cart.items.filter((item: any) => {
+    const pid =
+      typeof item.product === "object"
+        ? item.product._id.toString()
+        : item.product.toString();
+    return pid !== productId;
+  });
 
   await cart.save();
   await populateCart(cart);
@@ -144,7 +154,7 @@ export const removeCartItem = async (
 export const clearCart = async (userId: string) => {
   const cart = await getOrCreateCart(userId);
 
-  cart.items.splice(0); // ✅ 正確清空方式
+  cart.items = [];
 
   await cart.save();
   await populateCart(cart);
@@ -171,10 +181,7 @@ export const mergeCartItems = async (
     const product = await Product.findById(productId);
     if (!product || !product.isActive) continue;
 
-    const existing = findItemByProductId(
-      cart,
-      productId
-    );
+    const existing = findItemByProductId(cart, productId);
 
     if (existing) {
       existing.quantity = Math.min(
