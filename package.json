@@ -2,6 +2,8 @@
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "connect-mongo": "^6.0.0",
-    "express-session": "^1.18.2"
+    "dotenv": "^17.2.3",
+    "express-session": "^1.18.2",
+    "nodemailer": "^7.0.12"
   }
 }
