@@ -1,3 +1,4 @@
+import ProductImage from "./ProductImage";
 import type { CartItem } from "../types/CartItem";
 import "./ProductCard.css";
 import { useState } from "react";
@@ -62,13 +63,10 @@ export default function ProductCard({
         to={`/products/${product.id}`}
         className="product-image"
       >
-        {product.image ? (
-          <img src={product.image} alt={product.title} />
-        ) : (
-          <div className="image-placeholder">
-            No Image
-          </div>
-        )}
+        <ProductImage
+          src={product.image}
+          alt={product.title}
+        />
       </Link>
 
       {/* Content */}

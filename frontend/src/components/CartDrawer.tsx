@@ -1,3 +1,4 @@
+import ProductImage from "./ProductImage";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useMemo, useState } from "react";
 
@@ -103,19 +104,11 @@ export default function CartDrawer({
             >
               {/* ✅ Image wrapper（關鍵） */}
               <div className="drawer-item-image">
-                {item.imageUrl ? (
-                  <img
-                    src={item.imageUrl}
-                    alt={item.name}
-                    className="drawer-item-img"
-                  />
-                ) : (
-                  <div className="drawer-item-img placeholder">
-                    No Image
-                  </div>
-                )}
+                <ProductImage
+                  src={item.imageUrl}
+                  alt={item.name}
+                />
               </div>
-
               {/* Content */}
               <div className="drawer-item-content">
                 <div className="drawer-item-top">
@@ -200,7 +193,7 @@ export default function CartDrawer({
               <span>${subtotal.toFixed(2)}</span>
             </div>
             <div>
-              <span>Tax</span>
+              <span>Tax (10%)</span>
               <span>${tax.toFixed(2)}</span>
             </div>
 

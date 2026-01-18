@@ -71,12 +71,6 @@
     overflow: hidden;
 }
 
-.product-detail-page .product-detail-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
 /* =========================================================
    Product Info (Right)
 ========================================================= */

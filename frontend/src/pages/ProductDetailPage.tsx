@@ -1,3 +1,4 @@
+import ProductImage from "../components/ProductImage";
 import type { CartItem } from "../types/CartItem";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -128,16 +129,11 @@ export default function ProductDetailPage() {
         <div className="product-detail-card">
           {/* ---------- Image ---------- */}
           <div className="product-detail-image">
-            {product.image ? (
-              <img
-                src={product.image}
-                alt={product.title}
-              />
-            ) : (
-              <div className="no-image">No Image</div>
-            )}
+            <ProductImage
+              src={product.image}
+              alt={product.title}
+            />
           </div>
-
           {/* ---------- Info ---------- */}
           <div className="product-detail-info">
             <div className="product-category">
