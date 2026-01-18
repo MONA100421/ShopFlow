@@ -9,17 +9,24 @@ export const authMiddleware = (
   try {
     const userId = (req.session as any)?.userId;
 
+    // 🔥 對 cart 的 GET，允許「未 attach 完」的情況
     if (!userId) {
+      // ⚠️ 僅允許 GET /api/cart
+      if (
+        req.method === "GET" &&
+        req.originalUrl === "/api/cart"
+      ) {
+        // 標記為 guest-like，但不 throw
+        (req as any).user = null;
+        return next();
+      }
+
       return res.status(401).json({
         error: "Not authenticated",
       });
     }
 
-    // ✅ Demo 專案：只補最小必要資訊
-    req.user = {
-      id: userId,
-    };
-
+    req.user = { id: userId };
     next();
   } catch (err) {
     console.error("❌ authMiddleware error:", err);

@@ -11,15 +11,20 @@ export const getCart = async (
   res: Response
 ): Promise<void> => {
   try {
-    const userId = req.user!.id;
+    // 🔥 如果 session 還沒 ready，回空但不 throw
+    if (!req.user) {
+      res.json({ items: [] });
+      return;
+    }
 
+    const userId = req.user.id;
     const items = await cartService.getCartItems(userId);
 
     res.json(mapCartItems({ items }));
   } catch (err) {
-        console.error("❌ getCart error:", err);
-        res.status(500).json({
-            error: "Failed to fetch cart",
+    console.error("❌ getCart error:", err);
+    res.status(500).json({
+      error: "Failed to fetch cart",
     });
   }
 };

@@ -17,43 +17,67 @@ import { logoutThunk } from "./authSlice";
 
 /* ================= Thunks ================= */
 
-export const fetchCartThunk = createAsyncThunk<
-  CartItem[],
-  void,
-  { state: any }
->("cart/fetch", async (_, { getState }) => {
-  const { isAuthenticated } = getState().auth;
-  return isAuthenticated ? fetchCartAPI() : getGuestCart();
-});
+/**
+ * 🔁 Hydrate user cart（明確入口）
+ */
+export const fetchUserCartThunk = createAsyncThunk<CartItem[]>(
+  "cart/fetchUser",
+  async () => {
+    return fetchCartAPI();
+  }
+);
 
+/**
+ * 🔁 Hydrate guest cart
+ */
+export const fetchGuestCartThunk = createAsyncThunk<CartItem[]>(
+  "cart/fetchGuest",
+  async () => {
+    return getGuestCart();
+  }
+);
+
+/**
+ * ➕ Add to cart
+ * 🔥 mutation 時用 getState() 是安全的
+ */
 export const addToCartThunk = createAsyncThunk<
   CartItem[],
   CartItem,
   { state: any }
 >("cart/add", async (item, { getState }) => {
-  const { isAuthenticated } = getState().auth;
+  const isAuthenticated = getState().auth.isAuthenticated;
+
   return isAuthenticated
     ? addToCartAPI(item.productId, item.quantity)
     : addToGuestCart(item);
 });
 
+/**
+ * 🔼🔽 Update quantity
+ */
 export const updateQuantityThunk = createAsyncThunk<
   CartItem[],
   { productId: string; delta: 1 | -1 },
   { state: any }
 >("cart/update", async ({ productId, delta }, { getState }) => {
-  const { isAuthenticated } = getState().auth;
+  const isAuthenticated = getState().auth.isAuthenticated;
+
   return isAuthenticated
     ? updateCartQuantityAPI(productId, delta)
     : updateGuestCartQuantity(productId, delta);
 });
 
+/**
+ * ❌ Remove item
+ */
 export const removeFromCartThunk = createAsyncThunk<
   CartItem[],
   string,
   { state: any }
 >("cart/remove", async (productId, { getState }) => {
-  const { isAuthenticated } = getState().auth;
+  const isAuthenticated = getState().auth.isAuthenticated;
+
   return isAuthenticated
     ? removeFromCartAPI(productId)
     : removeFromGuestCart(productId);
@@ -63,12 +87,12 @@ export const removeFromCartThunk = createAsyncThunk<
 
 interface CartState {
   items: CartItem[];
-  ready: boolean; // 🔥 關鍵
+  ready: boolean;
 }
 
 const initialState: CartState = {
   items: [],
-  ready: false,   // 尚未 hydrate
+  ready: false,
 };
 
 /* ================= Slice ================= */
@@ -80,7 +104,11 @@ const cartSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // hydrate
-      .addCase(fetchCartThunk.fulfilled, (state, action) => {
+      .addCase(fetchUserCartThunk.fulfilled, (state, action) => {
+        state.items = action.payload;
+        state.ready = true;
+      })
+      .addCase(fetchGuestCartThunk.fulfilled, (state, action) => {
         state.items = action.payload;
         state.ready = true;
       })
@@ -88,21 +116,12 @@ const cartSlice = createSlice({
       // mutations
       .addCase(addToCartThunk.fulfilled, (state, action) => {
         state.items = action.payload;
-        state.ready = true;
       })
       .addCase(updateQuantityThunk.fulfilled, (state, action) => {
         state.items = action.payload;
-        state.ready = true;
       })
       .addCase(removeFromCartThunk.fulfilled, (state, action) => {
         state.items = action.payload;
-        state.ready = true;
-      })
-
-      // logout → 回到未 hydrate 狀態
-      .addCase(logoutThunk.fulfilled, (state) => {
-        state.items = [];
-        state.ready = false;
       });
   },
 });

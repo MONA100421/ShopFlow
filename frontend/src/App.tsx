@@ -1,11 +1,10 @@
 // frontend/src/App.tsx
 import { Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
-import type { AppDispatch, RootState } from "./store/store";
+import type { AppDispatch } from "./store/store";
 import { restoreAuthThunk } from "./store/authSlice";
-import { fetchCartThunk } from "./store/cartSlice";
 
 import MainLayout from "./layouts/MainLayout";
 import RequireAdmin from "./components/RequireAdmin";
@@ -18,21 +17,15 @@ import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
-  const authInitialized = useSelector(
-    (state: RootState) => state.auth.initialized
-  );
 
-  // ① restore auth
+  /**
+   * 🔁 App 啟動只做一件事：
+   * - restore auth（session）
+   * - cart hydrate 由 auth thunk 內部負責
+   */
   useEffect(() => {
     dispatch(restoreAuthThunk());
   }, [dispatch]);
-
-  // ② auth ready → hydrate cart（唯一入口）
-  useEffect(() => {
-    if (authInitialized) {
-      dispatch(fetchCartThunk());
-    }
-  }, [authInitialized, dispatch]);
 
   return (
     <Routes>
