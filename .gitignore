@@ -32,9 +32,12 @@ lerna-debug.log*
 # OS / Editor / IDE
 ####################################
 .DS_Store
+**/.DS_Store
+
 .vscode/*
 !.vscode/extensions.json
-.idea
+
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
