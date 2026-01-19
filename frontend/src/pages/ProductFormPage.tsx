@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import ProductForm from "../components/ProductForm";
@@ -13,8 +13,6 @@ import type { ProductFormData } from "../types/ProductFormData";
 import type { RootState, AppDispatch } from "../store/store";
 import "./ProductFormPage.css";
 
-const DEFAULT_IMAGE = "/assets/react.svg";
-
 export default function ProductFormPage() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -22,7 +20,7 @@ export default function ProductFormPage() {
 
   const isEditMode = Boolean(id);
 
-  const { list, loading, error } = useSelector(
+  const { list, loading } = useSelector(
     (state: RootState) => state.products
   );
 
@@ -30,36 +28,54 @@ export default function ProductFormPage() {
     ? list.find((p) => p.id === id)
     : undefined;
 
+  const [pageError, setPageError] = useState("");
+
   useEffect(() => {
     if (isEditMode && id && !product) {
       dispatch(fetchProductByIdThunk(id));
     }
   }, [dispatch, isEditMode, id, product]);
 
+  /** 🔑 Image URL validation */
+  const isValidImageUrl = (url: string) => {
+    try {
+      const parsed = new URL(url);
+      return ["http:", "https:"].includes(parsed.protocol);
+    } catch {
+      return false;
+    }
+  };
+
   const handleSubmit = async (formData: ProductFormData) => {
-    const image = formData.image?.trim() || DEFAULT_IMAGE;
+    setPageError("");
+
+    // ✅ Image 必填 + 必須是合法 URL
+    if (!formData.image || !isValidImageUrl(formData.image)) {
+      setPageError("Image URL is required and must be a valid URL");
+      return;
+    }
 
     try {
       if (isEditMode && product) {
         const updatedProduct: Product = {
           ...product,
           ...formData,
-          image,
+          image: formData.image,
         };
 
         await dispatch(updateProductThunk(updatedProduct)).unwrap();
       } else {
         const newProduct: Product = {
           ...formData,
-          image,
+          image: formData.image,
         } as Product;
 
         await dispatch(createProductThunk(newProduct)).unwrap();
       }
 
-      navigate("/");
-    } catch (err) {
-      console.error("Save product failed:", err);
+      navigate("/products");
+    } catch {
+      setPageError("Save product failed. Please check your input.");
     }
   };
 
@@ -73,18 +89,16 @@ export default function ProductFormPage() {
 
     try {
       await dispatch(deleteProductThunk(product.id)).unwrap();
-      navigate("/");
-    } catch (err) {
-      console.error("Delete product failed:", err);
+      navigate("/products");
+    } catch {
+      setPageError("Delete product failed.");
     }
   };
 
   if (isEditMode && loading && !product) {
     return (
       <div className="product-form-page">
-        <div className="product-form-container">
-          <h1 className="page-title">Loading...</h1>
-        </div>
+        <h1 className="page-title">Loading...</h1>
       </div>
     );
   }
@@ -92,9 +106,7 @@ export default function ProductFormPage() {
   if (isEditMode && !product) {
     return (
       <div className="product-form-page">
-        <div className="product-form-container">
-          <h1 className="page-title">Product Not Found</h1>
-        </div>
+        <h1 className="page-title">Product Not Found</h1>
       </div>
     );
   }
@@ -118,9 +130,9 @@ export default function ProductFormPage() {
           {isEditMode ? "Edit Product" : "Create Product"}
         </h1>
 
-        {error && (
+        {pageError && (
           <div className="page-error">
-            {error}
+            {pageError}
           </div>
         )}
 

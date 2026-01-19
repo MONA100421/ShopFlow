@@ -13,6 +13,7 @@ interface FormErrors {
   title?: string;
   price?: string;
   stock?: string;
+  image?: string;
 }
 
 export default function ProductForm({
@@ -29,7 +30,6 @@ export default function ProductForm({
   const [image, setImage] = useState("");
 
   const [errors, setErrors] = useState<FormErrors>({});
-
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
 
@@ -44,6 +44,15 @@ export default function ProductForm({
     setImage(initialData.image ?? "");
     setPreviewUrl(initialData.image ?? null);
   }, [initialData]);
+
+  const isValidImageUrl = (url: string) => {
+    try {
+      const parsed = new URL(url);
+      return ["http:", "https:"].includes(parsed.protocol);
+    } catch {
+      return false;
+    }
+  };
 
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
@@ -60,6 +69,12 @@ export default function ProductForm({
       newErrors.stock = "Stock cannot be negative";
     }
 
+    if (!image.trim()) {
+      newErrors.image = "Image URL is required";
+    } else if (!isValidImageUrl(image)) {
+      newErrors.image = "Image URL must be a valid URL (http / https)";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -74,16 +89,17 @@ export default function ProductForm({
       category,
       price: Number(price),
       stock: Number(stock),
-      image: image.trim() ? image : undefined,
+      image,
     });
   };
 
   const handlePreview = () => {
-    if (!image.trim()) {
+    if (!image.trim() || !isValidImageUrl(image)) {
       setPreviewUrl(null);
-      setImageError(false);
+      setImageError(true);
       return;
     }
+
     setPreviewUrl(image);
     setImageError(false);
   };
@@ -93,27 +109,19 @@ export default function ProductForm({
       <div className="product-form-card">
         {/* Title */}
         <div className="form-group full">
-          <label htmlFor="product-title" className="form-label">
-            Product name
-          </label>
+          <label className="form-label">Product name</label>
           <input
-            id="product-title"
-            name="title"
             className={`form-control ${errors.title ? "error" : ""}`}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
-          {errors.title && (
-            <div className="form-error">{errors.title}</div>
-          )}
+          {errors.title && <div className="form-error">{errors.title}</div>}
         </div>
 
         {/* Description */}
         <div className="form-group full">
-          <label htmlFor="product-description" className="form-label">Product Description</label>
+          <label className="form-label">Product Description</label>
           <textarea
-            id="product-description"
-            name="description"
             className="form-control textarea"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -123,10 +131,8 @@ export default function ProductForm({
         {/* Category + Price */}
         <div className="form-row">
           <div className="form-group">
-            <label htmlFor="product-category" className="form-label">Category</label>
+            <label className="form-label">Category</label>
             <select
-              id="product-category"
-              name="category"
               className="form-control"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
@@ -138,10 +144,8 @@ export default function ProductForm({
           </div>
 
           <div className="form-group">
-            <label htmlFor="product-price" className="form-label">Price</label>
+            <label className="form-label">Price</label>
             <input
-              id="product-price"
-              name="price"
               type="number"
               className={`form-control ${errors.price ? "error" : ""}`}
               value={price}
@@ -149,19 +153,15 @@ export default function ProductForm({
                 setPrice(e.target.value === "" ? "" : Number(e.target.value))
               }
             />
-            {errors.price && (
-              <div className="form-error">{errors.price}</div>
-            )}
+            {errors.price && <div className="form-error">{errors.price}</div>}
           </div>
         </div>
 
         {/* Stock + Image */}
         <div className="form-row">
           <div className="form-group">
-            <label htmlFor="product-stock" className="form-label">Stock</label>
+            <label className="form-label">Stock</label>
             <input
-              id="product-stock"
-              name="stock"
               type="number"
               className={`form-control ${errors.stock ? "error" : ""}`}
               value={stock}
@@ -169,40 +169,29 @@ export default function ProductForm({
                 setStock(e.target.value === "" ? "" : Number(e.target.value))
               }
             />
-            {errors.stock && (
-              <div className="form-error">{errors.stock}</div>
-            )}
+            {errors.stock && <div className="form-error">{errors.stock}</div>}
           </div>
 
           <div className="form-group">
-            <label htmlFor="product-image" className="form-label">Image URL</label>
+            <label className="form-label">Image URL</label>
             <div className="image-input-wrapper">
               <input
-                id="product-image"
-                name="image"
-                className="form-control"  
+                className={`form-control ${errors.image ? "error" : ""}`}
                 value={image}
                 onChange={(e) => setImage(e.target.value)}
               />
-              <button
-                type="button"
-                className="preview-btn"
-                onClick={handlePreview}
-              >
+              <button type="button" className="preview-btn" onClick={handlePreview}>
                 Preview
               </button>
             </div>
+            {errors.image && <div className="form-error">{errors.image}</div>}
           </div>
         </div>
 
         {/* Image preview */}
         <div className="image-preview">
           {previewUrl && !imageError ? (
-            <img
-              src={previewUrl}
-              alt="Preview"
-              onError={() => setImageError(true)}
-            />
+            <img src={previewUrl} alt="Preview" />
           ) : (
             <div className="placeholder-icon">🖼️</div>
           )}
@@ -211,11 +200,7 @@ export default function ProductForm({
         {/* Actions */}
         <div className="form-actions">
           {onDelete && (
-            <button
-              type="button"
-              className="delete-btn"
-              onClick={onDelete}
-            >
+            <button type="button" className="delete-btn" onClick={onDelete}>
               Delete
             </button>
           )}
