@@ -1,16 +1,21 @@
-// backend/src/server.ts
+// ✅ 一定要在最上面
+import dotenv from "dotenv";
+dotenv.config();
+
+// 下面才開始 import 其他東西
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import mongoose from "mongoose";
 import session from "express-session";
 import MongoStore from "connect-mongo";
 
-/* ================= Routes ================= */
+// routes
 import productRoutes from "./routes/product.routes";
 import cartRoutes from "./routes/cart.routes";
 import orderRoutes from "./routes/order.routes";
 import authRoutes from "./routes/auth.routes";
+import emailRoutes from "./routes/email.routes";
+
 
 dotenv.config();
 
@@ -69,6 +74,8 @@ app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 
+app.use("/api/email", emailRoutes);
+
 /* ================= 404 Handler ================= */
 
 app.use((req, res) => {
@@ -101,3 +108,5 @@ mongoose
     console.error("❌ MongoDB connection failed:", err);
     process.exit(1);
   });
+
+

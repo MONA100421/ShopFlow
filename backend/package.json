@@ -8,6 +8,7 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
+    "@sendgrid/mail": "^8.1.6",
     "connect-mongo": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
