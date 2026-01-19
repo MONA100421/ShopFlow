@@ -93,8 +93,12 @@ export default function ProductForm({
       <div className="product-form-card">
         {/* Title */}
         <div className="form-group full">
-          <label className="form-label">Product name</label>
+          <label className="form-label" htmlFor="product-title">
+            Product name
+          </label>
           <input
+            id="product-title"
+            name="title"
             className={`form-control ${errors.title ? "error" : ""}`}
             value={title}
             onChange={(e) => setTitle(e.target.value)}

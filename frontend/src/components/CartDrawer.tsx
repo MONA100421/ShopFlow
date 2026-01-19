@@ -83,6 +83,8 @@ export default function CartDrawer({
             <label>Apply Discount Code</label>
             <div className="drawer-discount-row">
               <input
+                id="discount-code"
+                name="discountCode"
                 value={discountInput}
                 onChange={(e) =>
                   setDiscountInput(e.target.value)

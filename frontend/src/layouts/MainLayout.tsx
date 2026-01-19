@@ -105,6 +105,8 @@ export default function MainLayout() {
           <div className="header-search">
             <div className="search-input-wrapper">
               <input
+                id="global-search"
+                name="search"
                 className="search-input"
                 placeholder="Search"
                 value={value}

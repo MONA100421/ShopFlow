@@ -135,14 +135,8 @@
 }
 
 /* =========================================================
-   Amount Button (🔥 Figma TRUE 1:1)
+   Amount Button (Figma TRUE 1:1 – FIXED)
 ========================================================= */
-
-/*
-  重點：
-  - 外框只畫一次（88 x 26）
-  - 內部用分隔線，不是三個獨立框
-*/
 
 .cart-qty-control {
   display: grid;
@@ -154,6 +148,9 @@
   border: 1px solid #cccccc;
   border-radius: 4px;
   background: #ffffff;
+
+  overflow: hidden;
+  /* 🔑 關鍵：讓分隔線不塌 */
 }
 
 .cart-qty-btn {
@@ -161,37 +158,35 @@
   width: 30px;
   height: 26px;
 
-  background: transparent;
-  border: none;
+  display: grid;
+  place-items: center;
+  /* 🔥 絕對上下左右置中 */
 
+  font-family: Inter, system-ui, sans-serif;
   font-size: 16px;
   font-weight: 600;
-  line-height: 1;
+  line-height: 16px;
+  /* 🔥 明確鎖 glyph 高度 */
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
   color: #111827;
   cursor: pointer;
 }
 
-.cart-qty-btn.minus {
-  border-right: 1px solid #cccccc;
-}
-
-.cart-qty-btn.plus {
-  border-left: 1px solid #cccccc;
-}
 
 .cart-qty-count {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
 
+  font-family: Inter, system-ui, sans-serif;
   font-size: 16px;
   font-weight: 500;
+  line-height: 16px;
+  /* 🔥 與符號一致 */
+
   color: #111827;
+  
+  border-left: 1px solid #cccccc;
+  border-right: 1px solid #cccccc;
 }
 
 /* =========================================================
@@ -288,7 +283,7 @@
 }
 
 /* =========================================================
-   Summary
+   Summary 
 ========================================================= */
 
 .drawer-summary {
@@ -300,13 +295,26 @@
   justify-content: space-between;
   margin-bottom: 10px;
 
+  font-family: Inter, system-ui, sans-serif;
   font-size: 14px;
-  color: #374151;
+  font-weight: 600;
+  /* 🔥 標題與金額都加粗 */
+  color: #111827;
+  /* 🔥 Figma 深色 */
 }
 
+/* Discount 金額維持負號視覺（可讀性） */
+.drawer-summary>div span:last-child {
+  font-weight: 600;
+}
+
+/* Estimated total（最終重點） */
 .drawer-total {
+  margin-top: 4px;
+
   font-size: 16px;
   font-weight: 700;
+  /* 🔥 比其他行更粗 */
   color: #111827;
 }
 
