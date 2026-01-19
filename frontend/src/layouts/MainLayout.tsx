@@ -203,7 +203,7 @@ export default function MainLayout() {
       <footer className="site-footer">
         <div className="container footer-inner">
           <span className="footer-left">
-            © 2022 All Rights Reserved.
+            © {new Date().getFullYear()} All Rights Reserved.
           </span>
 
           <div className="footer-social">
