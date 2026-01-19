@@ -21,9 +21,6 @@ export default function ProductForm({
   onDelete,
   submitLabel = "Add Product",
 }: ProductFormProps) {
-  /* ===============================
-     Form State
-  =============================== */
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("Category1");
@@ -33,13 +30,9 @@ export default function ProductForm({
 
   const [errors, setErrors] = useState<FormErrors>({});
 
-  /* Image preview */
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
 
-  /* ===============================
-     Sync initialData (Edit mode)
-  =============================== */
   useEffect(() => {
     if (!initialData) return;
 
@@ -52,9 +45,6 @@ export default function ProductForm({
     setPreviewUrl(initialData.image ?? null);
   }, [initialData]);
 
-  /* ===============================
-     Validation
-  =============================== */
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
 
@@ -74,24 +64,18 @@ export default function ProductForm({
     return Object.keys(newErrors).length === 0;
   };
 
-  /* ===============================
-     Handlers
-  =============================== */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validate()) return;
 
-    const formData: ProductFormData = {
+    onSubmit({
       title,
       description,
       category,
       price: Number(price),
       stock: Number(stock),
       image: image.trim() ? image : undefined,
-    };
-
-    onSubmit(formData);
+    });
   };
 
   const handlePreview = () => {
@@ -100,25 +84,10 @@ export default function ProductForm({
       setImageError(false);
       return;
     }
-
     setPreviewUrl(image);
     setImageError(false);
   };
 
-  const handleDelete = () => {
-    if (!onDelete) return;
-
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this product?"
-    );
-    if (confirmed) {
-      onDelete();
-    }
-  };
-
-  /* ===============================
-     Render
-  =============================== */
   return (
     <form className="product-form" onSubmit={handleSubmit}>
       <div className="product-form-card">
@@ -126,7 +95,7 @@ export default function ProductForm({
         <div className="form-group full">
           <label className="form-label">Product name</label>
           <input
-            className="form-control"
+            className={`form-control ${errors.title ? "error" : ""}`}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
@@ -164,7 +133,7 @@ export default function ProductForm({
             <label className="form-label">Price</label>
             <input
               type="number"
-              className="form-control"
+              className={`form-control ${errors.price ? "error" : ""}`}
               value={price}
               onChange={(e) =>
                 setPrice(e.target.value === "" ? "" : Number(e.target.value))
@@ -182,7 +151,7 @@ export default function ProductForm({
             <label className="form-label">Stock</label>
             <input
               type="number"
-              className="form-control"
+              className={`form-control ${errors.stock ? "error" : ""}`}
               value={stock}
               onChange={(e) =>
                 setStock(e.target.value === "" ? "" : Number(e.target.value))
@@ -231,12 +200,11 @@ export default function ProductForm({
             <button
               type="button"
               className="delete-btn"
-              onClick={handleDelete}
+              onClick={onDelete}
             >
               Delete
             </button>
           )}
-
           <button type="submit" className="submit-btn">
             {submitLabel}
           </button>
