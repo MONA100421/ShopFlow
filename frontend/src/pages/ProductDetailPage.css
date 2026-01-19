@@ -1,6 +1,5 @@
 /* =========================================================
-   Product Detail Page (SCOPED)
-   ✔ 完全不影響 ProductList / ProductCard
+   Product Detail Page (FINAL – CLEAN, NO GLYPH OVERRIDE)
 ========================================================= */
 
 .product-detail-page {
@@ -9,34 +8,23 @@
     box-sizing: border-box;
 }
 
-/* =========================================================
-   Container
-========================================================= */
-
-.product-detail-page .product-detail-container {
+/* Container */
+.product-detail-container {
     max-width: 1323px;
     margin: 0 auto;
 }
 
-/* =========================================================
-   Page Header
-========================================================= */
-
-.product-detail-page .product-detail-page-title {
+/* Page Header */
+.product-detail-page-title {
     margin: 128px 0 24px;
-
-    font-family: Inter, system-ui, sans-serif;
     font-size: 32px;
     font-weight: 700;
     line-height: 138%;
     color: #111827;
 }
 
-/* =========================================================
-   Card (Figma: 1323 × 682)
-========================================================= */
-
-.product-detail-page .product-detail-card {
+/* Card */
+.product-detail-card {
     width: 100%;
     min-height: 682px;
 
@@ -52,317 +40,129 @@
     box-sizing: border-box;
 }
 
-/* =========================================================
-   Product Image (Left)
-========================================================= */
-
-.product-detail-page .product-detail-image {
+/* Image */
+.product-detail-image {
     width: 100%;
     max-width: 662px;
     height: 597px;
 
     background: #f3f4f6;
+    border-radius: 4px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    border-radius: 4px;
     overflow: hidden;
 }
 
-/* =========================================================
-   Product Info (Right)
-========================================================= */
-
-.product-detail-page .product-detail-info {
+/* Info */
+.product-detail-info {
     display: flex;
     flex-direction: column;
-    min-width: 0;
 }
 
-/* =========================================================
-   Category
-========================================================= */
-
-.product-detail-page .product-category {
+/* Text */
+.product-category {
     margin-bottom: 8px;
-
-    font-family: Inter, system-ui, sans-serif;
     font-size: 16px;
-    font-weight: 500;
-    line-height: 138%;
     color: #6b7280;
 }
 
-/* =========================================================
-   Title
-========================================================= */
-
-.product-detail-page .product-title {
+.product-title {
     margin: 0 0 12px;
-
-    font-family: Inter, system-ui, sans-serif;
     font-size: 32px;
     font-weight: 700;
     line-height: 138%;
     color: #535353;
-
-    word-break: break-word;
-    overflow-wrap: anywhere;
 }
 
-/* =========================================================
-   Price
-========================================================= */
-
-.product-detail-page .product-price {
+.product-price {
     margin-bottom: 12px;
-
-    font-family: Inter, system-ui, sans-serif;
     font-size: 32px;
     font-weight: 700;
     line-height: 138%;
     color: #111827;
 }
 
-/* =========================================================
-   Out of Stock Badge
-========================================================= */
-
-.product-detail-page .out-of-stock-badge {
-    width: 76px;
-    height: 30px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: rgba(234, 61, 47, 0.13);
-    border-radius: 4px;
-
-    margin-bottom: 20px;
-}
-
-.product-detail-page .out-of-stock-text {
-    font-family: Inter, system-ui, sans-serif;
-    font-weight: 500;
-    font-size: 10px;
-    line-height: 138%;
-    color: rgba(234, 61, 47, 1);
-}
-
-/* =========================================================
-   Description
-========================================================= */
-
-.product-detail-page .product-description {
+.product-description {
     max-width: 428px;
     margin-bottom: 32px;
-
-    font-family: Inter, system-ui, sans-serif;
     font-size: 16px;
-    font-weight: 500;
     line-height: 138%;
     color: #6b7280;
-
-    word-break: break-word;
 }
 
-/* =========================================================
-   Quantity Selector
-========================================================= */
+/* ================= Actions ================= */
+/* ❗ 只控制排版與尺寸，不碰 glyph */
 
-.product-detail-page .product-quantity {
+.product-detail-actions {
     display: flex;
     align-items: center;
-    gap: 12px;
-
-    margin-bottom: 32px;
-}
-
-.product-detail-page .product-quantity button {
-    width: 32px;
-    height: 32px;
-
-    background: #ffffff;
-    border: 1px solid #d1d5db;
-    border-radius: 4px;
-
-    font-size: 18px;
-    line-height: 1;
-    color: #111827;
-
-    cursor: pointer;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.product-detail-page .product-quantity button:hover {
-    background: #f3f4f6;
-}
-
-.product-detail-page .product-quantity button:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-.product-detail-page .product-quantity span {
-    min-width: 24px;
-    text-align: center;
-
-    font-family: Inter, system-ui, sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-/* =========================================================
-   Actions
-========================================================= */
-
-.product-detail-page .product-actions {
-    display: flex;
     gap: 16px;
+    margin-top: 8px;
 }
 
-/* =========================================================
-   Add to Cart
-========================================================= */
-
-.product-detail-page .add-to-cart-btn {
+.product-detail-actions>.qty-btn {
     width: 133px;
     height: 40px;
-
-    background: #5048e5;
-    color: #ffffff;
-
-    border: none;
-    border-radius: 4px;
-
-    font-family: Inter, system-ui, sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 24px;
-
-    cursor: pointer;
 }
 
-.product-detail-page .add-to-cart-btn:hover {
-    opacity: 0.9;
-}
-
-.product-detail-page .add-to-cart-btn:disabled {
-    background: #cccccc;
-    color: #6b7280;
-    cursor: not-allowed;
-}
-
-/* =========================================================
-   Back / Edit Button
-========================================================= */
-
-.product-detail-page .back-btn {
+.product-detail-actions>.edit-product-btn {
     width: 133px;
     height: 40px;
-
-    background: #ffffff;
-    color: #535353;
-
-    border: 1px solid #cccccc;
-    border-radius: 4px;
-
-    font-family: Inter, system-ui, sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 24px;
-
-    cursor: pointer;
 }
 
-.product-detail-page .back-btn:hover {
-    background: #f9fafb;
-}
-
-/* =========================================================
-   Not Found
-========================================================= */
-
-.product-detail-page .product-not-found {
-    width: 100%;
-    height: 682px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border: 1px solid #cccccc;
-    border-radius: 4px;
-
-    font-family: Inter, system-ui, sans-serif;
-    font-size: 16px;
-    color: #6b7280;
-}
-
-/* =========================================================
-   Responsive
-========================================================= */
-
+/* Tablet */
 @media (max-width: 1024px) {
     .product-detail-page {
         padding: 0 24px;
     }
 
-    .product-detail-page .product-detail-card {
+    .product-detail-card {
         grid-template-columns: 1fr;
         gap: 32px;
     }
 
-    .product-detail-page .product-detail-image {
+    .product-detail-image {
         height: 360px;
     }
 
-    .product-detail-page .product-description {
+    .product-description {
         max-width: 100%;
     }
 }
 
-/* =========================================================
-   Mobile – ONLY image full visible (no side effects)
-========================================================= */
-
+/* Mobile */
 @media (max-width: 640px) {
-
-    .product-detail-page .product-detail-page-title {
+    .product-detail-page-title {
         margin-top: 96px;
         font-size: 28px;
     }
 
-    .product-detail-page .product-title,
-    .product-detail-page .product-price {
+    .product-title,
+    .product-price {
         font-size: 24px;
     }
 
-    .product-detail-page .product-actions {
-        flex-direction: column;
+    .product-detail-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: 12px;
     }
 
-    .product-detail-page .add-to-cart-btn,
-    .product-detail-page .back-btn {
+    .product-detail-actions>.qty-btn,
+    .product-detail-actions>.edit-product-btn {
         width: 100%;
+        height: 44px;
     }
 
-    /* 🔑 關鍵：手機商品圖完整顯示 */
-    .product-detail-page .product-detail-image {
+    .product-detail-image {
         height: auto;
         aspect-ratio: 1 / 1;
     }
 
-    .product-detail-page .product-detail-image img {
-        height: auto;
-        max-height: 100%;
+    .product-detail-image img {
         object-fit: contain;
     }
 }

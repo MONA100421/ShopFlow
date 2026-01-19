@@ -101,7 +101,7 @@ export default function ProductDetailPage() {
   const isMaxReached = quantity >= product.stock;
 
   /* =================================================
-     Handlers (Redux-driven)
+     Handlers (Redux-driven – SINGLE SOURCE)
   ================================================= */
   const handleAdd = () => {
     dispatch(
@@ -185,29 +185,28 @@ export default function ProductDetailPage() {
               </p>
             )}
 
-            {/* ===== Quantity Button (Figma aligned) ===== */}
-            <QuantityButton
-              quantity={quantity}
-              onAdd={handleAdd}
-              onIncrease={handleIncrease}
-              onDecrease={handleDecrease}
-              disabled={isOutOfStock}
-            />
+            {/* ================= Actions (LOCKED) ================= */}
+            <div className="product-detail-actions">
+              <QuantityButton
+                quantity={quantity}
+                onAdd={handleAdd}
+                onIncrease={handleIncrease}
+                onDecrease={handleDecrease}
+                disabled={isOutOfStock}
+              />
 
-            {/* ---------- Actions ---------- */}
-            <div className="product-actions">
-              <button
-                className="back-btn"
-                onClick={() =>
-                  isAdmin
-                    ? navigate(
-                        `/products/${product.id}/edit`
-                      )
-                    : navigate("/")
-                }
-              >
-                {isAdmin ? "Edit" : "Back"}
-              </button>
+              {isAdmin && (
+                <button
+                  className="edit-product-btn"
+                  onClick={() =>
+                    navigate(
+                      `/products/${product.id}/edit`
+                    )
+                  }
+                >
+                  Edit
+                </button>
+              )}
             </div>
           </div>
         </div>

@@ -95,22 +95,25 @@ export default function ProductCard({
           ${product.price.toFixed(2)}
         </p>
 
-        <QuantityButton
-          quantity={quantity}
-          onAdd={handleAdd}
-          onIncrease={handleIncrease}
-          onDecrease={handleDecrease}
-          disabled={isOutOfStock}
-        />
+        {/* ⭐ 關鍵：同一 row */}
+        <div className="product-card-actions">
+          <QuantityButton
+            quantity={quantity}
+            onAdd={handleAdd}
+            onIncrease={handleIncrease}
+            onDecrease={handleDecrease}
+            disabled={isOutOfStock}
+          />
 
-        {isAdmin && onEdit && (
-          <button
-            className="edit-product-btn"
-            onClick={() => onEdit(product.id)}
-          >
-            Edit
-          </button>
-        )}
+          {isAdmin && onEdit && (
+            <button
+              className="edit-product-btn"
+              onClick={() => onEdit(product.id)}
+            >
+              Edit
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
