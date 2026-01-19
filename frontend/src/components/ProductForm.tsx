@@ -45,10 +45,13 @@ export default function ProductForm({
     setPreviewUrl(initialData.image ?? null);
   }, [initialData]);
 
-  const isValidImageUrl = (url: string) => {
+  /* ✅ SINGLE SOURCE OF TRUTH */
+  const isValidImageSource = (value: string) => {
+    if (value.startsWith("data:image/")) return true;
+
     try {
-      const parsed = new URL(url);
-      return ["http:", "https:"].includes(parsed.protocol);
+      const url = new URL(value);
+      return ["http:", "https:"].includes(url.protocol);
     } catch {
       return false;
     }
@@ -71,8 +74,8 @@ export default function ProductForm({
 
     if (!image.trim()) {
       newErrors.image = "Image URL is required";
-    } else if (!isValidImageUrl(image)) {
-      newErrors.image = "Image URL must be a valid URL (http / https)";
+    } else if (!isValidImageSource(image)) {
+      newErrors.image = "Image must be a valid URL or data:image";
     }
 
     setErrors(newErrors);
@@ -94,7 +97,13 @@ export default function ProductForm({
   };
 
   const handlePreview = () => {
-    if (!image.trim() || !isValidImageUrl(image)) {
+    if (!image.trim()) {
+      setPreviewUrl(null);
+      setImageError(false);
+      return;
+    }
+
+    if (!isValidImageSource(image)) {
       setPreviewUrl(null);
       setImageError(true);
       return;

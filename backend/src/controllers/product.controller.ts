@@ -15,7 +15,9 @@ export const getAllProducts = async (
   }
 };
 
-// GET /api/products/:id
+/* ======================================================
+   GET /api/products/:id
+====================================================== */
 export const getProductById = async (
   req: Request,
   res: Response
@@ -37,7 +39,9 @@ export const getProductById = async (
   }
 };
 
-// POST /api/products
+/* ======================================================
+   POST /api/products
+====================================================== */
 export const createProduct = async (
   req: Request,
   res: Response
@@ -51,7 +55,9 @@ export const createProduct = async (
   }
 };
 
-// PUT /api/products/:id
+/* ======================================================
+   PUT /api/products/:id
+====================================================== */
 export const updateProduct = async (
   req: Request,
   res: Response
@@ -73,7 +79,9 @@ export const updateProduct = async (
   }
 };
 
-// DELETE /api/products/:id
+/* ======================================================
+   DELETE /api/products/:id
+====================================================== */
 export const deleteProduct = async (
   req: Request,
   res: Response

@@ -20,7 +20,7 @@ export default function ProductFormPage() {
 
   const isEditMode = Boolean(id);
 
-  const { list, loading } = useSelector(
+  const { list, loading, error } = useSelector(
     (state: RootState) => state.products
   );
 
@@ -30,55 +30,44 @@ export default function ProductFormPage() {
 
   const [pageError, setPageError] = useState("");
 
+  /* Fetch product if editing and not in store */
   useEffect(() => {
     if (isEditMode && id && !product) {
       dispatch(fetchProductByIdThunk(id));
     }
   }, [dispatch, isEditMode, id, product]);
 
-  /** 🔑 Image URL validation */
-  const isValidImageUrl = (url: string) => {
-    try {
-      const parsed = new URL(url);
-      return ["http:", "https:"].includes(parsed.protocol);
-    } catch {
-      return false;
-    }
-  };
-
+  /* Submit handler */
   const handleSubmit = async (formData: ProductFormData) => {
     setPageError("");
-
-    // ✅ Image 必填 + 必須是合法 URL
-    if (!formData.image || !isValidImageUrl(formData.image)) {
-      setPageError("Image URL is required and must be a valid URL");
-      return;
-    }
 
     try {
       if (isEditMode && product) {
         const updatedProduct: Product = {
           ...product,
           ...formData,
-          image: formData.image,
+          image: formData.image!, // 已在 ProductForm 驗證
         };
 
         await dispatch(updateProductThunk(updatedProduct)).unwrap();
       } else {
         const newProduct: Product = {
           ...formData,
-          image: formData.image,
+          image: formData.image!, // 已在 ProductForm 驗證
         } as Product;
 
         await dispatch(createProductThunk(newProduct)).unwrap();
       }
 
-      navigate("/products");
-    } catch {
+      // ✅ 關鍵修正：回首頁（而不是 /products）
+      navigate("/");
+    } catch (err) {
+      console.error("Save product failed:", err);
       setPageError("Save product failed. Please check your input.");
     }
   };
 
+  /* Delete handler */
   const handleDelete = async () => {
     if (!product) return;
 
@@ -89,24 +78,31 @@ export default function ProductFormPage() {
 
     try {
       await dispatch(deleteProductThunk(product.id)).unwrap();
-      navigate("/products");
-    } catch {
+      navigate("/"); // ✅ 同樣回首頁
+    } catch (err) {
+      console.error("Delete product failed:", err);
       setPageError("Delete product failed.");
     }
   };
 
+  /* Loading */
   if (isEditMode && loading && !product) {
     return (
       <div className="product-form-page">
-        <h1 className="page-title">Loading...</h1>
+        <div className="product-form-container">
+          <h1 className="page-title">Loading...</h1>
+        </div>
       </div>
     );
   }
 
+  /* Not found */
   if (isEditMode && !product) {
     return (
       <div className="product-form-page">
-        <h1 className="page-title">Product Not Found</h1>
+        <div className="product-form-container">
+          <h1 className="page-title">Product Not Found</h1>
+        </div>
       </div>
     );
   }
@@ -130,11 +126,8 @@ export default function ProductFormPage() {
           {isEditMode ? "Edit Product" : "Create Product"}
         </h1>
 
-        {pageError && (
-          <div className="page-error">
-            {pageError}
-          </div>
-        )}
+        {pageError && <div className="page-error">{pageError}</div>}
+        {error && <div className="page-error">{error}</div>}
 
         <ProductForm
           initialData={initialFormData}
