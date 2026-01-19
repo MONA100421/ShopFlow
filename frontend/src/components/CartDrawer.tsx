@@ -1,12 +1,12 @@
 import ProductImage from "./ProductImage";
-import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useMemo, useState } from "react";
+import QuantityButton from "./QuantityButton";
+import { useSelector } from "react-redux";
+import { useEffect } from "react";
 
-import type { RootState, AppDispatch } from "../store/store";
-import {
-  updateQuantityThunk,
-  removeFromCartThunk,
-} from "../store/cartSlice";
+import type { RootState } from "../store/store";
+import type { Product } from "../types/Product";
+import { useCartItem } from "../hooks/useCartItem";
+import { useCartTotal } from "../hooks/useCartTotal";
 
 import "./CartDrawer.css";
 
@@ -15,45 +15,31 @@ interface CartDrawerProps {
   onClose: () => void;
 }
 
-const DISCOUNT_CODE = "20 DOLLAR OFF";
-const DISCOUNT_AMOUNT = 20;
-
 export default function CartDrawer({
   open,
   onClose,
 }: CartDrawerProps) {
-  const dispatch = useDispatch<AppDispatch>();
-
-  /* ================= Redux ================= */
-
-  const rawItems = useSelector(
+  const items = useSelector(
     (state: RootState) => state.cart.items
   );
-  const items = Array.isArray(rawItems) ? rawItems : [];
 
-  /* ================= Local State ================= */
-
-  const [discountInput, setDiscountInput] = useState("");
-  const [discountApplied, setDiscountApplied] =
-    useState(false);
-
-  /* ================= Calculations ================= */
-
-  const subtotal = useMemo(() => {
-    return items.reduce(
-      (sum, item) => sum + (item.subtotal ?? 0),
-      0
-    );
-  }, [items]);
-
-  const tax = subtotal * 0.1;
-  const discount = discountApplied ? DISCOUNT_AMOUNT : 0;
-  const total = Math.max(subtotal + tax - discount, 0);
+  /* ================= Cart Total Hook ================= */
+  const {
+    subtotal,
+    tax,
+    discount,
+    total,
+    discountInput,
+    setDiscountInput,
+    discountApplied,
+    applyDiscount,
+  } = useCartTotal();
 
   /* ================= Effects ================= */
-
   useEffect(() => {
-    document.body.style.overflowY = open ? "hidden" : "auto";
+    document.body.style.overflowY = open
+      ? "hidden"
+      : "auto";
     return () => {
       document.body.style.overflowY = "auto";
     };
@@ -61,14 +47,7 @@ export default function CartDrawer({
 
   if (!open) return null;
 
-  const handleApplyDiscount = () => {
-    setDiscountApplied(
-      discountInput.trim().toUpperCase() === DISCOUNT_CODE
-    );
-  };
-
   /* ================= Render ================= */
-
   return (
     <div className="cart-overlay" onClick={onClose}>
       <aside
@@ -97,76 +76,56 @@ export default function CartDrawer({
             </div>
           )}
 
-          {items.map((item) => (
-            <div
-              key={item.productId}
-              className="drawer-item"
-            >
-              {/* ✅ Image wrapper（關鍵） */}
-              <div className="drawer-item-image">
-                <ProductImage
-                  src={item.imageUrl}
-                  alt={item.name}
-                />
-              </div>
-              {/* Content */}
-              <div className="drawer-item-content">
-                <div className="drawer-item-top">
-                  <span className="drawer-item-name">
-                    {item.name}
-                  </span>
-                  <span className="drawer-item-price">
-                    ${item.subtotal.toFixed(2)}
-                  </span>
+          {items.map((item) => {
+            const product = {
+              id: item.productId,
+              title: item.name,
+              price: item.price,
+              image: item.imageUrl,
+              stock: Infinity,
+            } as Product;
+
+            const {
+              quantity,
+              add,
+              increase,
+              decrease,
+            } = useCartItem(product);
+
+            return (
+              <div
+                key={item.productId}
+                className="drawer-item"
+              >
+                <div className="drawer-item-image">
+                  <ProductImage
+                    src={item.imageUrl}
+                    alt={item.name}
+                  />
                 </div>
 
-                <div className="drawer-item-bottom">
-                  <div className="drawer-item-actions">
-                    <button
-                      onClick={() =>
-                        dispatch(
-                          updateQuantityThunk({
-                            productId: item.productId,
-                            delta: -1,
-                          })
-                        )
-                      }
-                    >
-                      −
-                    </button>
-
-                    <span className="drawer-qty">
-                      {item.quantity}
+                <div className="drawer-item-content">
+                  <div className="drawer-item-top">
+                    <span className="drawer-item-name">
+                      {item.name}
                     </span>
-
-                    <button
-                      onClick={() =>
-                        dispatch(
-                          updateQuantityThunk({
-                            productId: item.productId,
-                            delta: 1,
-                          })
-                        )
-                      }
-                    >
-                      +
-                    </button>
+                    <span className="drawer-item-price">
+                      ${item.subtotal.toFixed(2)}
+                    </span>
                   </div>
 
-                  <button
-                    className="drawer-remove"
-                    onClick={() =>
-                      dispatch(
-                        removeFromCartThunk(item.productId)
-                      )
-                    }
-                  >
-                    Remove
-                  </button>
+                  <div className="drawer-item-bottom">
+                    <QuantityButton
+                      quantity={quantity}
+                      onAdd={add}
+                      onIncrease={increase}
+                      onDecrease={decrease}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </section>
 
         {/* ================= Footer ================= */}
@@ -181,7 +140,7 @@ export default function CartDrawer({
                 }
                 placeholder="Enter code"
               />
-              <button onClick={handleApplyDiscount}>
+              <button onClick={applyDiscount}>
                 Apply
               </button>
             </div>
@@ -201,7 +160,7 @@ export default function CartDrawer({
               <div>
                 <span>Discount</span>
                 <span>
-                  - ${DISCOUNT_AMOUNT.toFixed(2)}
+                  - ${discount.toFixed(2)}
                 </span>
               </div>
             )}
