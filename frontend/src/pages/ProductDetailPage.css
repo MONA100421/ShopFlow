@@ -103,6 +103,7 @@
 }
 
 .product-description {
+    white-space: pre-line;
     max-width: 428px;
     margin-bottom: 32px;
     font-size: 16px;
