@@ -31,7 +31,6 @@ export default function ProductForm({
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     if (!initialData) return;
@@ -45,7 +44,7 @@ export default function ProductForm({
     setPreviewUrl(initialData.image ?? null);
   }, [initialData]);
 
-  /* ✅ SINGLE SOURCE OF TRUTH */
+  /* SINGLE SOURCE OF TRUTH: image validation */
   const isValidImageSource = (value: string) => {
     if (value.startsWith("data:image/")) return true;
 
@@ -55,6 +54,33 @@ export default function ProductForm({
     } catch {
       return false;
     }
+  };
+
+  const handlePreview = () => {
+    const trimmed = image.trim();
+
+    // reset previous image error
+    setErrors((prev) => ({ ...prev, image: undefined }));
+
+    if (!trimmed) {
+      setPreviewUrl(null);
+      setErrors((prev) => ({
+        ...prev,
+        image: "Image URL is required",
+      }));
+      return;
+    }
+
+    if (!isValidImageSource(trimmed)) {
+      setPreviewUrl(null);
+      setErrors((prev) => ({
+        ...prev,
+        image: "Image must be a valid URL or data:image",
+      }));
+      return;
+    }
+
+    setPreviewUrl(trimmed);
   };
 
   const validate = (): boolean => {
@@ -94,23 +120,6 @@ export default function ProductForm({
       stock: Number(stock),
       image,
     });
-  };
-
-  const handlePreview = () => {
-    if (!image.trim()) {
-      setPreviewUrl(null);
-      setImageError(false);
-      return;
-    }
-
-    if (!isValidImageSource(image)) {
-      setPreviewUrl(null);
-      setImageError(true);
-      return;
-    }
-
-    setPreviewUrl(image);
-    setImageError(false);
   };
 
   return (
@@ -189,7 +198,11 @@ export default function ProductForm({
                 value={image}
                 onChange={(e) => setImage(e.target.value)}
               />
-              <button type="button" className="preview-btn" onClick={handlePreview}>
+              <button
+                type="button"
+                className="preview-btn"
+                onClick={handlePreview}
+              >
                 Preview
               </button>
             </div>
@@ -199,8 +212,18 @@ export default function ProductForm({
 
         {/* Image preview */}
         <div className="image-preview">
-          {previewUrl && !imageError ? (
-            <img src={previewUrl} alt="Preview" />
+          {previewUrl ? (
+            <img
+              src={previewUrl}
+              alt="Preview"
+              onError={() => {
+                setPreviewUrl(null);
+                setErrors((prev) => ({
+                  ...prev,
+                  image: "Image failed to load",
+                }));
+              }}
+            />
           ) : (
             <div className="placeholder-icon">🖼️</div>
           )}
