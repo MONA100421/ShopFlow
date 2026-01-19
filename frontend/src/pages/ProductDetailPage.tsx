@@ -179,12 +179,7 @@ export default function ProductDetailPage() {
                 </span>
               )}
             </div>
-            {isOutOfStock && (
-              <div className="out-of-stock-badge">
-                Out of Stock
-              </div>
-            )}
-
+            
             {product.description && (
               <p className="product-description">
                 {product.description}
