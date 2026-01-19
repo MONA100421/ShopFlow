@@ -1,7 +1,19 @@
 {
+  "name": "shopflow",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ShopFlow MERN E-Commerce Monorepo",
+  "scripts": {
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:all": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\""
+  },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "connect-mongo": "^6.0.0",
     "express-session": "^1.18.2"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }

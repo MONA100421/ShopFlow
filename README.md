@@ -77,6 +77,8 @@ graph LR
 ```
 
 ## 🛠️ Quick Setup
+> This repository is a **Monorepo** containing separate frontend and backend
+> applications. Each application manages its own dependencies.
 
 ### Install Prerequisites
 ```bash
@@ -120,9 +122,9 @@ SESSION_SECRET=your-super-secret-session-key
 EOF
 
 # Start development servers
-npm run dev &
-cd ../frontend
-npm run dev
+# From the project root
+npm install
+npm run dev:all
 ```
 
 ## 🛍️ Implemented Features
