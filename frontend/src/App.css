@@ -150,6 +150,10 @@
   text-decoration: none;
 }
 
+.header-user span {
+  font-weight: 700;
+}
+
 .header-user:hover {
   opacity: 0.85;
 }
@@ -328,7 +332,6 @@
   /* ================= 🔑 Mobile Main Fix ================= */
 
   .site-main {
-    /* ✔ 關鍵：避開「實際高度的 mobile header」 */
     padding-top: 128px;
     padding-bottom: 140px;
   }
@@ -363,5 +366,19 @@
     order: 3;
     font-size: 14px;
     opacity: 0.85;
+  }
+}
+
+/* =========================================================
+   🔑 MOBILE PAGE TITLE CENTERING (NEW, SAFE)
+========================================================= */
+
+@media (max-width: 640px) {
+
+  .page-title,
+  .product-detail-page-title,
+  .product-header .product-title {
+    text-align: center;
+    width: 100%;
   }
 }
