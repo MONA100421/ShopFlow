@@ -99,6 +99,7 @@
     font-weight: 500;
     line-height: 138%;
     white-space: nowrap;
+    transform: translateY(-5px);
 }
 
 .product-description {
