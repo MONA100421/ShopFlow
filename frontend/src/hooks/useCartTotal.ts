@@ -11,36 +11,27 @@ export function useCartTotal() {
     (state: RootState) => state.cart.items
   );
 
-  const [discountInput, setDiscountInput] =
-    useState("");
-  const [discountApplied, setDiscountApplied] =
-    useState(false);
-
+  const [discountInput, setDiscountInput] = useState("");
+  const [discountApplied, setDiscountApplied] = useState(false);
   const subtotal = useMemo(() => {
     return items.reduce(
       (sum, item) => sum + (item.subtotal ?? 0),
       0
     );
   }, [items]);
-
   const tax = useMemo(() => {
     return subtotal * TAX_RATE;
   }, [subtotal]);
-
   const discount = discountApplied
     ? DISCOUNT_AMOUNT
     : 0;
-
-  const total = Math.max(
-    subtotal + tax - discount,
-    0
-  );
-
+  const total = Math.max(subtotal + tax - discount, 0);
   const applyDiscount = () => {
-    setDiscountApplied(
-      discountInput.trim().toUpperCase() ===
-        DISCOUNT_CODE
-    );
+    if (discountInput === DISCOUNT_CODE) {
+      setDiscountApplied(true);
+    } else {
+      setDiscountApplied(false);
+    }
   };
 
   return {
