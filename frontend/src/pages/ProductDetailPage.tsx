@@ -1,11 +1,16 @@
 import ProductImage from "../components/ProductImage";
-import type { CartItem } from "../types/CartItem";
+import QuantityButton from "../components/QuantityButton";
+
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 
 import type { AppDispatch, RootState } from "../store/store";
-import { addToCartThunk } from "../store/cartSlice";
+import {
+  addToCartThunk,
+  updateQuantityThunk,
+  removeFromCartThunk,
+} from "../store/cartSlice";
 import { fetchProductByIdThunk } from "../store/productsSlice";
 
 import "./ProductDetailPage.css";
@@ -31,12 +36,23 @@ export default function ProductDetailPage() {
   const product = list.find((p) => p.id === id);
 
   /* =================================================
+     Cart Item (single source of truth)
+  ================================================= */
+  const cartItem = useSelector((state: RootState) =>
+    state.cart.items.find(
+      (item) => item.productId === id
+    )
+  );
+
+  const quantity = cartItem?.quantity ?? 0;
+
+  /* =================================================
      Local state: not found flag
   ================================================= */
   const [notFound, setNotFound] = useState(false);
 
   /* =================================================
-     Fetch Product by Id (Redux Thunk + error handling)
+     Fetch Product by Id
   ================================================= */
   useEffect(() => {
     if (!id) {
@@ -49,7 +65,6 @@ export default function ProductDetailPage() {
     dispatch(fetchProductByIdThunk(id))
       .unwrap()
       .catch(() => {
-        // ✅ 真的 fetch 失敗（404 / backend error）
         setNotFound(true);
       });
   }, [id, product, dispatch, navigate]);
@@ -61,64 +76,73 @@ export default function ProductDetailPage() {
     return (
       <div className="product-detail-page">
         <div className="product-detail-container">
-          <div className="product-not-found">Loading...</div>
+          <div className="product-not-found">
+            Loading...
+          </div>
         </div>
       </div>
     );
   }
 
   /* =================================================
-     Not Found → 導向 NotFoundPage
+     Not Found
   ================================================= */
   if (notFound) {
     navigate("/not-found", { replace: true });
     return null;
   }
 
-  /* =================================================
-     Safety guard（理論上不會走到）
-  ================================================= */
-  if (!product) {
-    return null;
-  }
+  if (!product) return null;
 
   /* =================================================
-     Quantity / Stock Rules
+     Stock rules
   ================================================= */
-  const [quantity, setQuantity] = useState(1);
-
   const isOutOfStock = product.stock === 0;
-  const maxQuantity = product.stock;
-  const isMaxReached = quantity >= maxQuantity;
+  const isMaxReached = quantity >= product.stock;
 
-  /* ================= Handlers ================= */
+  /* =================================================
+     Handlers (Redux-driven)
+  ================================================= */
+  const handleAdd = () => {
+    dispatch(
+      addToCartThunk({
+        productId: product.id,
+        name: product.title,
+        price: product.price,
+        imageUrl: product.image,
+        quantity: 1,
+        subtotal: product.price,
+      })
+    );
+  };
+
   const handleIncrease = () => {
-    if (isOutOfStock || isMaxReached) return;
-    setQuantity((q) => q + 1);
+    if (isMaxReached) return;
+
+    dispatch(
+      updateQuantityThunk({
+        productId: product.id,
+        delta: 1,
+      })
+    );
   };
 
   const handleDecrease = () => {
-    if (isOutOfStock) return;
-    setQuantity((q) => Math.max(1, q - 1));
+    if (quantity <= 1) {
+      dispatch(removeFromCartThunk(product.id));
+    } else {
+      dispatch(
+        updateQuantityThunk({
+          productId: product.id,
+          delta: -1,
+        })
+      );
+    }
   };
 
-  const handleAddToCart = () => {
-    if (!product) return;
-
-    const item: CartItem = {
-      productId: product.id,
-      name: product.title,          // ✅ 修正
-      price: product.price,
-      imageUrl: product.image,      // ✅ 修正
-      quantity,
-      subtotal: product.price * quantity,
-    };
-
-    dispatch(addToCartThunk(item));
-    setQuantity(1);
-  };
-
-  /* ================= Render ================= */
+  /* =================================================
+     Render
+  ================================================= */
   return (
     <div className="product-detail-page">
       <div className="product-detail-container">
@@ -134,6 +158,7 @@ export default function ProductDetailPage() {
               alt={product.title}
             />
           </div>
+
           {/* ---------- Info ---------- */}
           <div className="product-detail-info">
             <div className="product-category">
@@ -160,42 +185,24 @@ export default function ProductDetailPage() {
               </p>
             )}
 
-            {/* Quantity */}
-            <div className="product-quantity">
-              <button
-                type="button"
-                onClick={handleDecrease}
-                disabled={isOutOfStock}
-              >
-                −
-              </button>
+            {/* ===== Quantity Button (Figma aligned) ===== */}
+            <QuantityButton
+              quantity={quantity}
+              onAdd={handleAdd}
+              onIncrease={handleIncrease}
+              onDecrease={handleDecrease}
+              disabled={isOutOfStock}
+            />
 
-              <span>{quantity}</span>
-
-              <button
-                type="button"
-                onClick={handleIncrease}
-                disabled={isOutOfStock || isMaxReached}
-              >
-                +
-              </button>
-            </div>
-
-            {/* Actions */}
+            {/* ---------- Actions ---------- */}
             <div className="product-actions">
-              <button
-                className="add-to-cart-btn"
-                onClick={handleAddToCart}
-                disabled={isOutOfStock}
-              >
-                {isOutOfStock ? "Out of Stock" : "Add to Cart"}
-              </button>
-
               <button
                 className="back-btn"
                 onClick={() =>
                   isAdmin
-                    ? navigate(`/products/${product.id}/edit`)
+                    ? navigate(
+                        `/products/${product.id}/edit`
+                      )
                     : navigate("/")
                 }
               >
