@@ -13,7 +13,7 @@
 ========================================================= */
 
 .product-header {
-    margin-top: 128px;
+    margin-top: 32px;
     margin-bottom: 24px;
 
     display: flex;
@@ -312,7 +312,7 @@
     }
 
     .product-header {
-        margin-top: 96px;
+        margin-top: 32px;
     }
 
     .product-header .product-title {
