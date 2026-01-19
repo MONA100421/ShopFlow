@@ -16,7 +16,7 @@
 
 /* Page Header */
 .product-detail-page-title {
-    margin: 128px 0 24px;
+    margin: 32px 0 24px;
     font-size: 32px;
     font-weight: 700;
     line-height: 138%;
@@ -79,7 +79,7 @@
 
 .product-price {
     margin-bottom: 12px;
-    font-size: 32px;
+    font-size: px;
     font-weight: 700;
     line-height: 138%;
     color: #111827;
@@ -101,6 +101,41 @@
     align-items: center;
     gap: 16px;
     margin-top: 8px;
+}
+
+/* =========================================================
+   Product Detail – Quantity & Edit Button Font Size Override
+   （只影響 Product Detail Page）
+========================================================= */
+
+/* 整顆 QuantityButton */
+.product-detail-actions .qty-btn {
+    height: 40px;
+    /* Figma */
+    font-size: 14px;
+    /* base */
+}
+
+/* + / − */
+.product-detail-actions .qty-btn__icon {
+    font-size: 18px;
+    /* 🔥 放大 + / − */
+    font-weight: 600;
+}
+
+/* 中間數字 */
+.product-detail-actions .qty-btn__count {
+    font-size: 16px;
+    /* 🔥 放大數字 */
+    font-weight: 600;
+}
+
+/* Edit 按鈕 */
+.product-detail-actions .edit-product-btn {
+    height: 40px;
+    font-size: 16px;
+    /* 🔥 Edit 字樣放大 */
+    font-weight: 600;
 }
 
 .product-detail-actions>.qty-btn {
@@ -136,7 +171,7 @@
 /* Mobile */
 @media (max-width: 640px) {
     .product-detail-page-title {
-        margin-top: 96px;
+        margin-top: 32px;
         font-size: 28px;
     }
 
