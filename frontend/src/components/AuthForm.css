@@ -13,7 +13,7 @@
     width: 600px;
     height: 528px;
 
-    margin: 32px auto 0;
+    margin: 60px auto 0;
 
     background: #ffffff;
     border-radius: 10px;
@@ -46,15 +46,26 @@
 
 .close-btn {
     position: absolute;
-    top: 14px;
-    right: 14px;
+    top: 16px;
+    /* ✅ 對齊 Figma */
+    right: 16px;
+    /* ✅ 對齊 Figma */
 
-    width: 40px;
-    height: 40px;
-    padding: 10px;
+    width: 32px;
+    /* ✅ Figma 常見 icon hit area */
+    height: 32px;
+
+    padding: 0;
+    /* 🔥 移除 padding（重點） */
 
     background: transparent;
     border: none;
+
+    display: flex;
+    /* 🔥 用 flex 置中 */
+    align-items: center;
+    justify-content: center;
+
     cursor: pointer;
 }
 
@@ -389,27 +400,33 @@
 
 @media (max-width: 640px) {
 
-    /* Modal becomes page container */
+    /* Modal still looks like a card */
     .login-modal {
-        width: 100%;
+        width: calc(100% - 32px);
         height: auto;
-        margin: 0;
+
+        margin: 16px auto;
         padding: 24px 20px 32px;
 
-        border-radius: 0;
-        border: none;
-        box-shadow: none;
+        background: #ffffff;
+
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+
+        /* ✅ 關鍵：保留陰影 */
+        box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.08);
     }
 
     /* Header spacing */
     .sign-in-header {
         width: 100%;
-        margin: 8px 0 24px;
+        margin: 15px 0 24px;
     }
 
     .sign-in-title {
         font-size: 24px;
         line-height: 130%;
+        margin: 15px
     }
 
     /* Form groups full width */
@@ -424,7 +441,6 @@
         width: 100%;
     }
 
-    /* Reduce form spacing */
     .email-group,
     .password-group {
         margin-bottom: 20px;
@@ -436,7 +452,6 @@
         font-size: 16px;
     }
 
-    /* Footer links stack */
     .auth-links {
         flex-direction: column;
         gap: 12px;
@@ -447,7 +462,6 @@
         justify-content: center;
     }
 
-    /* Reset success spacing */
     .reset-icon {
         margin-top: 64px;
     }
