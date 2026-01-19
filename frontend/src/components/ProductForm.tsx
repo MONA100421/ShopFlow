@@ -93,7 +93,7 @@ export default function ProductForm({
       <div className="product-form-card">
         {/* Title */}
         <div className="form-group full">
-          <label className="form-label" htmlFor="product-title">
+          <label htmlFor="product-title" className="form-label">
             Product name
           </label>
           <input
@@ -110,8 +110,10 @@ export default function ProductForm({
 
         {/* Description */}
         <div className="form-group full">
-          <label className="form-label">Product Description</label>
+          <label htmlFor="product-description" className="form-label">Product Description</label>
           <textarea
+            id="product-description"
+            name="description"
             className="form-control textarea"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -121,8 +123,10 @@ export default function ProductForm({
         {/* Category + Price */}
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">Category</label>
+            <label htmlFor="product-category" className="form-label">Category</label>
             <select
+              id="product-category"
+              name="category"
               className="form-control"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
@@ -134,8 +138,10 @@ export default function ProductForm({
           </div>
 
           <div className="form-group">
-            <label className="form-label">Price</label>
+            <label htmlFor="product-price" className="form-label">Price</label>
             <input
+              id="product-price"
+              name="price"
               type="number"
               className={`form-control ${errors.price ? "error" : ""}`}
               value={price}
@@ -152,8 +158,10 @@ export default function ProductForm({
         {/* Stock + Image */}
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">Stock</label>
+            <label htmlFor="product-stock" className="form-label">Stock</label>
             <input
+              id="product-stock"
+              name="stock"
               type="number"
               className={`form-control ${errors.stock ? "error" : ""}`}
               value={stock}
@@ -167,10 +175,12 @@ export default function ProductForm({
           </div>
 
           <div className="form-group">
-            <label className="form-label">Image URL</label>
+            <label htmlFor="product-image" className="form-label">Image URL</label>
             <div className="image-input-wrapper">
               <input
-                className="form-control"
+                id="product-image"
+                name="image"
+                className="form-control"  
                 value={image}
                 onChange={(e) => setImage(e.target.value)}
               />

@@ -66,6 +66,7 @@
 .product-category {
     margin-bottom: 8px;
     font-size: 16px;
+    font-weight: 500;
     color: #6b7280;
 }
 
@@ -79,9 +80,10 @@
 
 .product-price {
     margin-bottom: 12px;
-    font-size: px;
+    font-size: 32px;
     font-weight: 700;
     line-height: 138%;
+    letter-spacing: 0;
     color: #111827;
 }
 
