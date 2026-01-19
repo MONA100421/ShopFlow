@@ -1,4 +1,3 @@
-// frontend/src/store/authSlice.ts
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { User } from "../services/authService";
 import {
@@ -14,7 +13,7 @@ import {
   fetchGuestCartThunk,
 } from "./cartSlice";
 
-/* ================= State ================= */
+/* State */
 
 interface AuthState {
   user: User | null;
@@ -32,7 +31,7 @@ const initialState: AuthState = {
   error: null,
 };
 
-/* ================= Thunks ================= */
+/* Thunks */
 
 export const loginThunk = createAsyncThunk<
   User | null,
@@ -87,13 +86,11 @@ export const logoutThunk = createAsyncThunk<
   { dispatch: any }
 >("auth/logout", async (_, { dispatch }) => {
   await logoutAPI();
-
-  // 🔥 登出後，立刻 hydrate guest cart
   await dispatch(fetchGuestCartThunk()).unwrap();
 });
 
 
-/* ================= Slice ================= */
+/* Slice */
 
 const authSlice = createSlice({
   name: "auth",

@@ -1,9 +1,6 @@
-// frontend/src/utils/guestCart.ts
 import type { CartItem } from "../types/CartItem";
 
 const STORAGE_KEY = "guest_cart";
-
-/* ================= Helpers ================= */
 
 function save(items: CartItem[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
@@ -24,7 +21,7 @@ export function clearGuestCart() {
   localStorage.removeItem(STORAGE_KEY);
 }
 
-/* ================= Mutations ================= */
+/* Mutations*/
 
 export function addToGuestCart(item: CartItem): CartItem[] {
   const cart = getGuestCart();

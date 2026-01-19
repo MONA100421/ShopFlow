@@ -11,9 +11,7 @@ import { authMiddleware } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-/**
- * ⚠️ 關鍵：所有 cart API 都必須先過 auth
- */
+// Apply auth middleware to all cart routes
 router.use(authMiddleware);
 
 router.get("/", getCart);

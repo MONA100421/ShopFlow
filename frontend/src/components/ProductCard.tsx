@@ -36,8 +36,6 @@ export default function ProductCard({
   const isOutOfStock = product.stock === 0;
   const isMaxReached = quantity >= product.stock;
 
-  /* ================= Handlers ================= */
-
   const handleAdd = () => {
     dispatch(
       addToCartThunk({
@@ -94,8 +92,7 @@ export default function ProductCard({
         <p className="product-price">
           ${product.price.toFixed(2)}
         </p>
-
-        {/* ⭐ 關鍵：同一 row */}
+        
         <div className="product-card-actions">
           <QuantityButton
             quantity={quantity}

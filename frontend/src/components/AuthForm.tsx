@@ -19,9 +19,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
-  /* =========================
-     State
-  ========================= */
+  /* State */
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,9 +31,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  /* =========================
-     Reset state on mode change
-  ========================= */
+/* Reset state on mode change */
 
   useEffect(() => {
     setEmail("");
@@ -46,9 +42,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
     setShowPassword(false);
   }, [mode]);
 
-  /* =========================
-     Validation helpers
-  ========================= */
+  /* Validation helpers */
 
   const validateEmail = (value: string) =>
     value.includes("@") ? "" : "Invalid email input!";
@@ -56,9 +50,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const validatePassword = (value: string) =>
     value.length >= 6 ? "" : "Invalid password input!";
 
-  /* =========================
-     Submit handler
-  ========================= */
+  /* Form submit handler */
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,9 +89,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
     }
   };
 
-  /* =========================
-     Reset Success Page
-  ========================= */
+  /* Reset Success Page */
 
   if (mode === "reset-success") {
     return (
@@ -127,9 +117,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
     );
   }
 
-  /* =========================
-     Main Form
-  ========================= */
+  /* Main Form */
 
   return (
     <div className={`login-modal ${mode === "reset" ? "reset-modal" : ""}`}>

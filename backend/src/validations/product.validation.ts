@@ -1,18 +1,14 @@
 import { z } from "zod";
 import { objectIdSchema } from "./common.validation";
 
-/* ======================================================
-   Get Product By Id
-====================================================== */
+// Get Product By Id
 export const getProductByIdSchema = z.object({
   params: z.object({
     id: objectIdSchema,
   }),
 });
 
-/* ======================================================
-   Create Product
-====================================================== */
+// Create Product
 export const createProductSchema = z.object({
   body: z.object({
     title: z.string().min(1).max(120),
@@ -25,9 +21,7 @@ export const createProductSchema = z.object({
   }),
 });
 
-/* ======================================================
-   Update Product
-====================================================== */
+// Update Product
 export const updateProductSchema = z.object({
   params: z.object({
     id: objectIdSchema,
@@ -43,9 +37,7 @@ export const updateProductSchema = z.object({
   }),
 });
 
-/* ======================================================
-   Delete Product
-====================================================== */
+// Delete Product
 export const deleteProductSchema = z.object({
   params: z.object({
     id: objectIdSchema,

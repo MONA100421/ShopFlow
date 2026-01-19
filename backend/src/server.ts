@@ -1,4 +1,3 @@
-// backend/src/server.ts
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -6,7 +5,7 @@ import mongoose from "mongoose";
 import session from "express-session";
 import MongoStore from "connect-mongo";
 
-/* ================= Routes ================= */
+// Routes
 import productRoutes from "./routes/product.routes";
 import cartRoutes from "./routes/cart.routes";
 import orderRoutes from "./routes/order.routes";
@@ -16,22 +15,19 @@ dotenv.config();
 
 const app = express();
 
-/* ================= Basic Middleware ================= */
-
-// ✅ CORS（一定要在 session 前）
+// Basic Middleware 
+// CORS
 app.use(
   cors({
     origin: "http://localhost:5173",
-    credentials: true, // 🔑 allow cookie
+    credentials: true, // allow cookie
   })
 );
 
 // JSON parser
 app.use(express.json());
 
-/* ================= Session ================= */
-
-// ❗ session 一定要在所有 routes 之前
+// Session Middleware
 app.use(
   session({
     name: "connect.sid",
@@ -51,8 +47,7 @@ app.use(
   })
 );
 
-/* ================= Health Check ================= */
-
+// Health Check Endpoint
 app.get("/api/health", (_req, res) => {
   res.json({
     status: "ok",
@@ -61,16 +56,14 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
-/* ================= API Routes ================= */
-
-// ✅ 關鍵：所有 API 都統一掛在 /api
+// API Routes
+// Mount routes
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 
-/* ================= 404 Handler ================= */
-
+// 404 for API routes
 app.use((req, res) => {
   res.status(404).json({
     error: "API route not found",
@@ -78,26 +71,25 @@ app.use((req, res) => {
   });
 });
 
-/* ================= MongoDB ================= */
-
+// MongoDB Connection
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
-  console.error("❌ MONGODB_URI is missing");
+  console.error("MONGODB_URI is missing");
   process.exit(1);
 }
 
 mongoose
   .connect(MONGODB_URI)
   .then(() => {
-    console.log("✅ MongoDB connected");
+    console.log("MongoDB connected");
 
     const PORT = Number(process.env.PORT) || 4000;
     app.listen(PORT, () => {
-      console.log(`🚀 Backend running at http://localhost:${PORT}`);
+      console.log(`Backend running at http://localhost:${PORT}`);
     });
   })
   .catch((err) => {
-    console.error("❌ MongoDB connection failed:", err);
+    console.error("MongoDB connection failed:", err);
     process.exit(1);
   });

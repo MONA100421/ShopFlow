@@ -7,21 +7,19 @@ export default function NotFoundPage() {
 
   return (
     <div className="error-page">
-      {/* ===== White Rectangle Container ===== */}
       <div className="error-card">
-        {/* ===== Error Icon (SVG from Figma) ===== */}
         <img
           src={errorCircle}
           alt="error"
           className="error-icon"
         />
 
-        {/* ===== Error Title ===== */}
+        {/* Error Title */}
         <h1 className="error-title">
           Oops, something went wrong!
         </h1>
 
-        {/* ===== Action Button ===== */}
+        {/* Action Button */}
         <button
           className="error-btn"
           onClick={() => navigate("/")}

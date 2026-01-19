@@ -1,6 +1,3 @@
-/* =========================================================
-   Product Detail Page (FINAL – CLEAN, NO GLYPH OVERRIDE)
-========================================================= */
 
 .product-detail-page {
     width: 100%;
@@ -27,15 +24,12 @@
 .product-detail-card {
     width: 100%;
     min-height: 682px;
-
     display: grid;
     grid-template-columns: minmax(420px, 662px) 1fr;
     gap: 60px;
-
     background: #ffffff;
     border: 1px solid #cccccc;
     border-radius: 4px;
-
     padding: 40px;
     box-sizing: border-box;
 }
@@ -45,14 +39,11 @@
     width: 100%;
     max-width: 662px;
     height: 597px;
-
     background: #f3f4f6;
     border-radius: 4px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     overflow: hidden;
 }
 
@@ -91,28 +82,22 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    /* 價格與 badge 間距 */
     margin-bottom: 12px;
 }
 
 .out-of-stock-badge {
     width: 76px;
     height: 30px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     border-radius: 4px;
-
     background: rgba(234, 61, 47, 0.13);
     color: rgba(234, 61, 47, 1);
-
     font-family: Inter, system-ui, sans-serif;
     font-size: 10px;
     font-weight: 500;
     line-height: 138%;
-
     white-space: nowrap;
 }
 
@@ -124,8 +109,7 @@
     color: #6b7280;
 }
 
-/* ================= Actions ================= */
-/* ❗ 只控制排版與尺寸，不碰 glyph */
+/* Actions */
 
 .product-detail-actions {
     display: flex;
@@ -134,38 +118,27 @@
     margin-top: 8px;
 }
 
-/* =========================================================
-   Product Detail – Quantity & Edit Button Font Size Override
-   （只影響 Product Detail Page）
-========================================================= */
-
-/* 整顆 QuantityButton */
+/* QuantityButton */
 .product-detail-actions .qty-btn {
     height: 40px;
-    /* Figma */
     font-size: 14px;
-    /* base */
 }
 
 /* + / − */
 .product-detail-actions .qty-btn__icon {
     font-size: 18px;
-    /* 🔥 放大 + / − */
     font-weight: 600;
 }
 
-/* 中間數字 */
 .product-detail-actions .qty-btn__count {
     font-size: 16px;
-    /* 🔥 放大數字 */
     font-weight: 600;
 }
 
-/* Edit 按鈕 */
+/* Edit */
 .product-detail-actions .edit-product-btn {
     height: 40px;
     font-size: 16px;
-    /* 🔥 Edit 字樣放大 */
     font-weight: 600;
 }
 

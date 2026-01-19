@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-
 import ProductForm from "../components/ProductForm";
 import {
   createProductThunk,
@@ -9,11 +8,9 @@ import {
   deleteProductThunk,
   fetchProductByIdThunk,
 } from "../store/productsSlice";
-
 import type { Product } from "../types/Product";
 import type { ProductFormData } from "../types/ProductFormData";
 import type { RootState, AppDispatch } from "../store/store";
-
 import "./ProductFormPage.css";
 
 const DEFAULT_IMAGE = "/assets/react.svg";
@@ -33,18 +30,12 @@ export default function ProductFormPage() {
     ? list.find((p) => p.id === id)
     : undefined;
 
-  /* ======================================================
-     Fetch product if edit mode + not in store
-  ====================================================== */
   useEffect(() => {
     if (isEditMode && id && !product) {
       dispatch(fetchProductByIdThunk(id));
     }
   }, [dispatch, isEditMode, id, product]);
 
-  /* ======================================================
-     Submit handler
-  ====================================================== */
   const handleSubmit = async (formData: ProductFormData) => {
     const image = formData.image?.trim() || DEFAULT_IMAGE;
 
@@ -68,14 +59,10 @@ export default function ProductFormPage() {
 
       navigate("/");
     } catch (err) {
-      // ❗ error 已由 redux 管理，這裡只 log
       console.error("Save product failed:", err);
     }
   };
 
-  /* ======================================================
-     Delete handler
-  ====================================================== */
   const handleDelete = async () => {
     if (!product) return;
 
@@ -92,9 +79,6 @@ export default function ProductFormPage() {
     }
   };
 
-  /* ======================================================
-     Loading / Not Found
-  ====================================================== */
   if (isEditMode && loading && !product) {
     return (
       <div className="product-form-page">
@@ -115,9 +99,6 @@ export default function ProductFormPage() {
     );
   }
 
-  /* ======================================================
-     Initial form data
-  ====================================================== */
   const initialFormData: ProductFormData | undefined =
     isEditMode && product
       ? {
@@ -130,9 +111,6 @@ export default function ProductFormPage() {
         }
       : undefined;
 
-  /* ======================================================
-     Render
-  ====================================================== */
   return (
     <div className="product-form-page">
       <div className="product-form-container">
@@ -140,7 +118,6 @@ export default function ProductFormPage() {
           {isEditMode ? "Edit Product" : "Create Product"}
         </h1>
 
-        {/* 🔴 Redux / API Error */}
         {error && (
           <div className="page-error">
             {error}

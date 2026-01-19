@@ -1,21 +1,18 @@
 import "express";
 import "express-session";
 
-/* ================= Session ================= */
-
+// Session data extension
 declare module "express-session" {
   interface SessionData {
     userId?: string;
   }
 }
 
-/* ================= Express ================= */
-
+// Express request extension
 declare global {
   namespace Express {
     interface User {
       id: string;
-      // ✅ demo auth：先不強制 email / role
       email?: string;
     }
 

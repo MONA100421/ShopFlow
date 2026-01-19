@@ -1,4 +1,3 @@
-// frontend/src/store/cartSlice.ts
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { CartItem } from "../types/CartItem";
 import {
@@ -15,11 +14,8 @@ import {
 } from "../utils/guestCart";
 import { logoutThunk } from "./authSlice";
 
-/* ================= Thunks ================= */
+/* Thunks */
 
-/**
- * 🔁 Hydrate user cart（明確入口）
- */
 export const fetchUserCartThunk = createAsyncThunk<CartItem[]>(
   "cart/fetchUser",
   async () => {
@@ -27,9 +23,6 @@ export const fetchUserCartThunk = createAsyncThunk<CartItem[]>(
   }
 );
 
-/**
- * 🔁 Hydrate guest cart
- */
 export const fetchGuestCartThunk = createAsyncThunk<CartItem[]>(
   "cart/fetchGuest",
   async () => {
@@ -37,10 +30,6 @@ export const fetchGuestCartThunk = createAsyncThunk<CartItem[]>(
   }
 );
 
-/**
- * ➕ Add to cart
- * 🔥 mutation 時用 getState() 是安全的
- */
 export const addToCartThunk = createAsyncThunk<
   CartItem[],
   CartItem,
@@ -53,9 +42,6 @@ export const addToCartThunk = createAsyncThunk<
     : addToGuestCart(item);
 });
 
-/**
- * 🔼🔽 Update quantity
- */
 export const updateQuantityThunk = createAsyncThunk<
   CartItem[],
   { productId: string; delta: 1 | -1 },
@@ -68,9 +54,6 @@ export const updateQuantityThunk = createAsyncThunk<
     : updateGuestCartQuantity(productId, delta);
 });
 
-/**
- * ❌ Remove item
- */
 export const removeFromCartThunk = createAsyncThunk<
   CartItem[],
   string,
@@ -83,7 +66,7 @@ export const removeFromCartThunk = createAsyncThunk<
     : removeFromGuestCart(productId);
 });
 
-/* ================= State ================= */
+/* State */
 
 interface CartState {
   items: CartItem[];
@@ -95,7 +78,7 @@ const initialState: CartState = {
   ready: false,
 };
 
-/* ================= Slice ================= */
+/* Slice */
 
 const cartSlice = createSlice({
   name: "cart",
@@ -103,7 +86,6 @@ const cartSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // hydrate
       .addCase(fetchUserCartThunk.fulfilled, (state, action) => {
         state.items = action.payload;
         state.ready = true;
@@ -112,8 +94,6 @@ const cartSlice = createSlice({
         state.items = action.payload;
         state.ready = true;
       })
-
-      // mutations
       .addCase(addToCartThunk.fulfilled, (state, action) => {
         state.items = action.payload;
       })

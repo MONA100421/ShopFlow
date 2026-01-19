@@ -1,125 +1,68 @@
-/* =========================================================
-   Error Page (Full Page Background)
-   Figma:
-   - width: 1440
-   - height: 1024
-   - bg: #F9FAFB
-========================================================= */
-
 .error-page {
     width: 100%;
     min-height: 100vh;
-
     background: #f9fafb;
-
     display: flex;
     align-items: center;
     justify-content: center;
 }
-
-/* =========================================================
-   White Rectangle (Rectangle 3)
-   Figma:
-   - width: 1323
-   - height: 713
-   - radius: 4
-========================================================= */
 
 .error-card {
     width: 1323px;
     height: 713px;
-
     background: #ffffff;
     border-radius: 4px;
-
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-
-    /* 保證內容完全置中（設計稿核心） */
     text-align: center;
 }
-
-/* =========================================================
-   Error Icon (Fluent error-circle)
-   - 外框：100 x 100
-   - 內部 icon：SVG 本體
-========================================================= */
 
 .error-icon {
     width: 100px;
     height: 100px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     margin-bottom: 24px;
 }
 
-/* SVG 本體（你現在用的 error-circle.svg） */
 .error-icon img {
     width: 83.33px;
     height: 83.33px;
     display: block;
 }
 
-/* =========================================================
-   Error Title Text
-   Figma:
-   - font-size: 32
-   - font-weight: 700
-   - line-height: 138%
-========================================================= */
-
 .error-title {
     margin: 0 0 32px 0;
-
     font-family: Inter, system-ui, sans-serif;
     font-weight: 700;
     font-size: 32px;
     line-height: 138%;
-
     color: #111827;
 }
-
-/* =========================================================
-   Button (Go Home)
-   Figma:
-   - width: 235
-   - height: 48
-   - radius: 4
-========================================================= */
 
 .error-btn {
     width: 235px;
     height: 48px;
-
     background: #5048e5;
     border-radius: 4px;
     border: none;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     font-family: Inter, system-ui, sans-serif;
     font-weight: 600;
     font-size: 15px;
     line-height: 138%;
     color: #ffffff;
-
     cursor: pointer;
 }
 
 .error-btn:hover {
     opacity: 0.9;
 }
-
-/* =========================================================
-   Responsive (Safe shrink)
-========================================================= */
 
 @media (max-width: 1400px) {
     .error-card {

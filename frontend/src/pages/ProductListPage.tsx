@@ -2,23 +2,12 @@ import "./ProductListPage.css";
 import { useEffect, useState, useRef, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-
-
 import ProductCard from "../components/ProductCard";
 import type { RootState, AppDispatch } from "../store/store";
 import { fetchProductsThunk } from "../store/productsSlice";
-
-
 import checkRightIcon from "../assets/check-right.svg";
 
-
-/* =========================
-  Constants
-========================= */
-
-
 type SortKey = "last" | "price-asc" | "price-desc";
-
 
 const SORT_OPTIONS: { key: SortKey; label: string }[] = [
  { key: "last", label: "Last added" },
@@ -26,66 +15,44 @@ const SORT_OPTIONS: { key: SortKey; label: string }[] = [
  { key: "price-desc", label: "Price: high to low" },
 ];
 
-
 const ITEMS_PER_PAGE = 10;
 
-
-/* =========================
-  Utils
-========================= */
-
-
-// 🔑 關鍵：統一字串正規化（中文非常重要）
+/* Utils */
 function normalizeText(text: string) {
  return text
-   .normalize("NFC") // Unicode 正規化
+   .normalize("NFC")
    .toLowerCase()
    .trim();
 }
 
-
-/* =========================
-  Component
-========================= */
-
-
+/* Component */
 export default function ProductListPage() {
  const navigate = useNavigate();
  const dispatch = useDispatch<AppDispatch>();
  const dropdownRef = useRef<HTMLDivElement>(null);
 
-
- /* ===== URL Search ===== */
+ /* URL Search */
  const [searchParams] = useSearchParams();
  const rawKeyword = searchParams.get("q") ?? "";
  const keyword = normalizeText(rawKeyword);
 
-
- /* ===== Redux state ===== */
+ /* Redux state */
  const { list, loading, error } = useSelector(
    (state: RootState) => state.products
  );
 
-
  const { user } = useSelector((state: RootState) => state.auth);
  const isAdmin = user?.role === "admin";
 
-
- /* ===== Local state ===== */
+ /* Local state */
  const [sortBy, setSortBy] = useState<SortKey>("last");
  const [open, setOpen] = useState(false);
  const [currentPage, setCurrentPage] = useState(1);
 
-
- /* =========================
-    Effects
- ========================= */
-
-
+ /* Effects */
  useEffect(() => {
    dispatch(fetchProductsThunk());
  }, [dispatch]);
-
 
  // Close dropdown
  useEffect(() => {
@@ -101,27 +68,18 @@ export default function ProductListPage() {
    return () => document.removeEventListener("mousedown", handler);
  }, []);
 
-
  // Reset page when search or sort changes
  useEffect(() => {
    setCurrentPage(1);
  }, [keyword, sortBy]);
 
 
- /* =========================
-    Filter (Search) ✅ 中文版
- ========================= */
-
-
+ /* Filter (Search) for Chinese support */
  const filteredList = useMemo(() => {
    if (!keyword) return list;
-
-
    return list.filter((product) => {
      const title = normalizeText(product.title);
      const desc = normalizeText(product.description ?? "");
-
-
      return (
        title.includes(keyword) ||
        desc.includes(keyword)
@@ -130,56 +88,36 @@ export default function ProductListPage() {
  }, [list, keyword]);
 
 
- /* =========================
-    Sorting
- ========================= */
-
-
+ /* Sorting */
  const sortedList = [...filteredList].sort((a, b) => {
    if (sortBy === "price-asc") return a.price - b.price;
    if (sortBy === "price-desc") return b.price - a.price;
-
-
    return (
      new Date(b.createdAt).getTime() -
      new Date(a.createdAt).getTime()
    );
  });
 
-
- /* =========================
-    Pagination
- ========================= */
-
-
+ /* Pagination */
  const totalPages = Math.ceil(
    sortedList.length / ITEMS_PER_PAGE
  );
-
 
  const pagedList = sortedList.slice(
    (currentPage - 1) * ITEMS_PER_PAGE,
    currentPage * ITEMS_PER_PAGE
  );
 
-
  const currentLabel =
    SORT_OPTIONS.find((o) => o.key === sortBy)?.label ??
    "Last added";
 
-
- /* =========================
-    Render
- ========================= */
-
-
+ /* Render */
  return (
    <div className="product-page">
      <div className="container">
        <div className="product-header">
          <h1 className="product-title">Products</h1>
-
-
          <div className="product-header-actions">
            {/* Sort */}
            <div className="sort-dropdown" ref={dropdownRef}>
@@ -191,8 +129,6 @@ export default function ProductListPage() {
                <span>{currentLabel}</span>
                <span className={`sort-caret ${open ? "open" : ""}`} />
              </button>
-
-
              {open && (
                <div className="sort-menu">
                  {SORT_OPTIONS.map(({ key, label }) => (
@@ -218,8 +154,6 @@ export default function ProductListPage() {
                </div>
              )}
            </div>
-
-
            {isAdmin && (
              <button
                className="add-product-btn"
@@ -230,7 +164,6 @@ export default function ProductListPage() {
            )}
          </div>
        </div>
-
 
        {/* Content */}
        {loading && <p className="loading-text">Loading...</p>}
@@ -258,7 +191,6 @@ export default function ProductListPage() {
              ))}
            </div>
 
-
            {totalPages > 1 && (
              <div className="pagination">
                <button
@@ -269,7 +201,6 @@ export default function ProductListPage() {
                >
                  «
                </button>
-
 
                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                  (page) => (
@@ -284,7 +215,6 @@ export default function ProductListPage() {
                    </button>
                  )
                )}
-
 
                <button
                  className={`pagination-item ${

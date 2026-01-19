@@ -1,4 +1,3 @@
-// src/hooks/useCartTotal.ts
 import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store/store";

@@ -20,34 +20,24 @@ import twitterIcon from "../assets/twitter.svg";
 import facebookIcon from "../assets/facebook.svg";
 
 export default function MainLayout() {
-  /* ================= Local UI State ================= */
+  /* Local UI State */
   const [cartOpen, setCartOpen] = useState(false);
 
-  /* ================= Hooks ================= */
+  /* Hooks */
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  /* ================= Redux ================= */
+  /* Redux */
   const auth = useSelector((state: RootState) => state.auth);
   const cart = useSelector((state: RootState) => state.cart);
-
-  /**
-   * 🔐 Cart ready guard
-   * - auth.initialized：登入狀態已恢復
-   * - cart.items 已 hydrate（不管 user / guest）
-   */
   const cartReady = cart.ready;
-
-  /**
-   * 🛡️ 防禦式取得 items
-   */
   const items = useMemo(() => {
     if (!cartReady) return [];
     return Array.isArray(cart.items) ? cart.items : [];
   }, [cart.items, cartReady]);
 
-  /* ================= Search (IME Safe) ================= */
+  /* Search (IME Safe) */
   const [value, setValue] = useState(searchParams.get("q") || "");
   const [isComposing, setIsComposing] = useState(false);
 
@@ -55,13 +45,13 @@ export default function MainLayout() {
     navigate(v ? `/?q=${encodeURIComponent(v)}` : "/");
   };
 
-  /* ================= Auth ================= */
+  /* Auth */
   const handleLogout = () => {
     dispatch(logoutThunk());
     navigate("/auth/login");
   };
 
-  /* ================= Cart Summary ================= */
+  /* Cart Summary */
 
   const totalQuantity = useMemo(() => {
     return items.reduce(
@@ -82,10 +72,10 @@ export default function MainLayout() {
 
   return (
     <div className="app">
-      {/* ================= Header ================= */}
+      {/* Header */}
       <header className="site-header">
         <div className="container header-inner">
-          {/* ===== Logo ===== */}
+          {/* Logo */}
           <Link
             to="/"
             className="header-logo header-logo-full"
@@ -101,7 +91,7 @@ export default function MainLayout() {
             <span className="logo-text">Chuwa</span>
           </Link>
 
-          {/* ===== Search ===== */}
+          {/* Search */}
           <div className="header-search">
             <div className="search-input-wrapper">
               <input
@@ -134,9 +124,9 @@ export default function MainLayout() {
             </div>
           </div>
 
-          {/* ===== Right Actions ===== */}
+          {/* Right Actions */}
           <div className="header-actions">
-            {/* ---------- User ---------- */}
+            {/* User */}
             {!auth.isAuthenticated ? (
               <Link
                 to="/auth/login"
@@ -164,7 +154,7 @@ export default function MainLayout() {
               </button>
             )}
 
-            {/* ---------- Cart ---------- */}
+            {/* Cart */}
             <button
               type="button"
               className="header-cart"
@@ -192,14 +182,14 @@ export default function MainLayout() {
         </div>
       </header>
 
-      {/* ================= Main ================= */}
+      {/* Main */}
       <main className="site-main">
         <div className="container">
           <Outlet context={{ setCartOpen }} />
         </div>
       </main>
 
-      {/* ================= Footer ================= */}
+      {/* Footer */}
       <footer className="site-footer">
         <div className="container footer-inner">
           <span className="footer-left">
@@ -238,7 +228,7 @@ export default function MainLayout() {
         </div>
       </footer>
 
-      {/* ================= Cart Drawer ================= */}
+      {/* Cart Drawer */}
       {cartReady && (
         <CartDrawer
           open={cartOpen}

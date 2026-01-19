@@ -1,12 +1,8 @@
-// backend/src/services/cart.service.ts
 import mongoose from "mongoose";
 import Cart from "../models/Cart.model";
 import Product from "../models/Product.model";
 
-/* ======================================================
-   Helpers
-====================================================== */
-
+// Helpers
 const populateCart = async (cart: any) => {
   if (!cart) return cart;
 
@@ -39,17 +35,13 @@ const findItemByProductId = (cart: any, productId: string) =>
     return pid === productId;
   });
 
-/* ======================================================
-   Get cart items
-====================================================== */
+// Get cart items
 export const getCartItems = async (userId: string) => {
   const cart = await getOrCreateCart(userId);
   return cart.items;
 };
 
-/* ======================================================
-   Add to cart
-====================================================== */
+// Add to cart
 export const addToCart = async (
   userId: string,
   productId: string,
@@ -85,9 +77,7 @@ export const addToCart = async (
   return cart.items;
 };
 
-/* ======================================================
-   Update cart item
-====================================================== */
+// Update cart item quantity
 export const updateCartItem = async (
   userId: string,
   productId: string,
@@ -125,9 +115,7 @@ export const updateCartItem = async (
   return cart.items;
 };
 
-/* ======================================================
-   ✅ Remove item（🔥 關鍵修正）
-====================================================== */
+// Remove item from cart
 export const removeCartItem = async (
   userId: string,
   productId: string
@@ -148,9 +136,7 @@ export const removeCartItem = async (
   return cart.items;
 };
 
-/* ======================================================
-   Clear cart
-====================================================== */
+// Clear cart
 export const clearCart = async (userId: string) => {
   const cart = await getOrCreateCart(userId);
 
@@ -162,9 +148,7 @@ export const clearCart = async (userId: string) => {
   return cart.items;
 };
 
-/* ======================================================
-   Merge guest cart into user cart
-====================================================== */
+// Merge guest cart into user cart
 export const mergeCartItems = async (
   userId: string,
   guestItems: { productId: string; quantity: number }[]

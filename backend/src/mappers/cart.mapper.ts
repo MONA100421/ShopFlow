@@ -1,4 +1,3 @@
-// backend/src/mappers/cart.mapper.ts
 export const mapCartItems = ({
   items,
 }: {
@@ -6,7 +5,7 @@ export const mapCartItems = ({
 }) => {
   return {
     items: items
-      .filter((item) => item.product) // ✅ 防止 undefined
+      .filter((item) => item.product) // Ensure product exists
       .map((item) => {
         const product = item.product;
 

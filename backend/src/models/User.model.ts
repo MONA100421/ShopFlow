@@ -1,4 +1,3 @@
-// backend/src/models/User.model.ts
 import mongoose from "mongoose";
 
 export type UserRole = "admin" | "user";
@@ -13,9 +12,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
 
-    /**
-     * 🔐 Password hash (bcrypt)
-     */
+    // ️ Hashed password for security
     passwordHash: {
       type: String,
       required: true,
@@ -26,9 +23,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
 
-    /**
-     * 🔑 Role-based authorization
-     */
+    // Role: admin or regular user
     role: {
       type: String,
       enum: ["admin", "user"],

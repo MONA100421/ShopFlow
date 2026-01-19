@@ -1,38 +1,21 @@
-/* =========================================================
-   Page Wrapper（不要模仿 Figma 的 left / top）
-========================================================= */
-
 .product-form-page {
     width: 100%;
     display: flex;
     justify-content: center;
-
-    /* 🔑 關鍵：只留「section spacing」，不是畫板距離 */
     padding: 48px 0 80px;
     box-sizing: border-box;
 }
 
-/* =========================================================
-   Container（只負責包標題 + 卡片）
-========================================================= */
-
 .product-form-container {
     width: 660px;
-    /* 🔑 Figma 卡片寬度 */
 }
-
-/* =========================================================
-   Page Title（Create Product）
-========================================================= */
 
 .page-title {
     margin: 0 0 32px 0;
-
     font-family: Inter, system-ui, sans-serif;
     font-size: 32px;
     font-weight: 700;
     line-height: 1.38;
-
     color: #111827;
     text-align: left;
 }

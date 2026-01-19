@@ -1,17 +1,13 @@
-// backend/src/controllers/cart.controller.ts
 import { Request, Response } from "express";
 import * as cartService from "../services/cart.service";
 import { mapCartItems } from "../mappers/cart.mapper";
 
-/* ======================================================
-   GET /api/cart
-====================================================== */
+// GET /api/cart
 export const getCart = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    // 🔥 如果 session 還沒 ready，回空但不 throw
     if (!req.user) {
       res.json({ items: [] });
       return;
@@ -22,17 +18,14 @@ export const getCart = async (
 
     res.json(mapCartItems({ items }));
   } catch (err) {
-    console.error("❌ getCart error:", err);
+    console.error("getCart error:", err);
     res.status(500).json({
       error: "Failed to fetch cart",
     });
   }
 };
 
-/* ======================================================
-   POST /api/cart
-   body: { productId: string, quantity: number }
-====================================================== */
+// POST /api/cart
 export const addToCart = async (
   req: Request,
   res: Response
@@ -70,10 +63,7 @@ export const addToCart = async (
   }
 };
 
-/* ======================================================
-   PUT /api/cart/:productId
-   body: { delta: 1 | -1 }
-====================================================== */
+// PUT /api/cart/:productId
 export const updateCartItem = async (
   req: Request,
   res: Response
@@ -112,9 +102,7 @@ export const updateCartItem = async (
   }
 };
 
-/* ======================================================
-   DELETE /api/cart/:productId
-====================================================== */
+// DELETE /api/cart/:productId
 export const deleteCartItem = async (
   req: Request,
   res: Response
@@ -142,9 +130,7 @@ export const deleteCartItem = async (
   }
 };
 
-/* ======================================================
-   DELETE /api/cart
-====================================================== */
+// DELETE /api/cart
 export const clearCart = async (
   req: Request,
   res: Response
@@ -165,10 +151,7 @@ export const clearCart = async (
   }
 };
 
-/* ======================================================
-   POST /api/cart/merge
-   body: { items: [{ productId, quantity }] }
-====================================================== */
+// POST /api/cart/merge
 export const mergeCart = async (
   req: Request,
   res: Response
@@ -194,7 +177,7 @@ export const mergeCart = async (
 
     res.json(mapCartItems({ items: merged }));
   } catch (err) {
-    console.error("❌ mergeCart error:", err);
+    console.error("mergeCart error:", err);
     res.status(500).json({
       error: "Failed to merge cart",
     });

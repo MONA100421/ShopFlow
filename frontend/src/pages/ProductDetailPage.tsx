@@ -1,10 +1,8 @@
 import ProductImage from "../components/ProductImage";
 import QuantityButton from "../components/QuantityButton";
-
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-
 import type { AppDispatch, RootState } from "../store/store";
 import {
   addToCartThunk,
@@ -12,32 +10,24 @@ import {
   removeFromCartThunk,
 } from "../store/cartSlice";
 import { fetchProductByIdThunk } from "../store/productsSlice";
-
 import "./ProductDetailPage.css";
-
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
 
-  /* =================================================
-     Auth / Role
-  ================================================= */
+  /* Auth / Role= */
   const user = useSelector((state: RootState) => state.auth.user);
   const isAdmin = user?.role === "admin";
 
-  /* =================================================
-     Product from Redux Store
-  ================================================= */
+  /* Product from Redux Store */
   const { list, loading } = useSelector(
     (state: RootState) => state.products
   );
 
   const product = list.find((p) => p.id === id);
 
-  /* =================================================
-     Cart Item (single source of truth)
-  ================================================= */
+  /* Cart Item (single source of truth) */
   const cartItem = useSelector((state: RootState) =>
     state.cart.items.find(
       (item) => item.productId === id
@@ -46,14 +36,10 @@ export default function ProductDetailPage() {
 
   const quantity = cartItem?.quantity ?? 0;
 
-  /* =================================================
-     Local state: not found flag
-  ================================================= */
+  /* Local state: not found flag */
   const [notFound, setNotFound] = useState(false);
 
-  /* =================================================
-     Fetch Product by Id
-  ================================================= */
+  /* Fetch Product by Id if not in store */
   useEffect(() => {
     if (!id) {
       navigate("/not-found", { replace: true });
@@ -69,9 +55,7 @@ export default function ProductDetailPage() {
       });
   }, [id, product, dispatch, navigate]);
 
-  /* =================================================
-     Loading
-  ================================================= */
+  /* Loading */
   if (loading && !product && !notFound) {
     return (
       <div className="product-detail-page">
@@ -84,9 +68,7 @@ export default function ProductDetailPage() {
     );
   }
 
-  /* =================================================
-     Not Found
-  ================================================= */
+  /* Not Found */
   if (notFound) {
     navigate("/not-found", { replace: true });
     return null;
@@ -94,15 +76,11 @@ export default function ProductDetailPage() {
 
   if (!product) return null;
 
-  /* =================================================
-     Stock rules
-  ================================================= */
+  /* Stock rules */
   const isOutOfStock = product.stock === 0;
   const isMaxReached = quantity >= product.stock;
 
-  /* =================================================
-     Handlers (Redux-driven – SINGLE SOURCE)
-  ================================================= */
+  /* Handlers (Redux-driven – SINGLE SOURCE) */
   const handleAdd = () => {
     dispatch(
       addToCartThunk({
@@ -140,9 +118,7 @@ export default function ProductDetailPage() {
     }
   };
 
-  /* =================================================
-     Render
-  ================================================= */
+  /* Render */
   return (
     <div className="product-detail-page">
       <div className="product-detail-container">
@@ -151,7 +127,7 @@ export default function ProductDetailPage() {
         </h1>
 
         <div className="product-detail-card">
-          {/* ---------- Image ---------- */}
+          {/* Image */}
           <div className="product-detail-image">
             <ProductImage
               src={product.image}
@@ -159,7 +135,7 @@ export default function ProductDetailPage() {
             />
           </div>
 
-          {/* ---------- Info ---------- */}
+          {/* Info */}
           <div className="product-detail-info">
             <div className="product-category">
               {product.category}
@@ -179,14 +155,14 @@ export default function ProductDetailPage() {
                 </span>
               )}
             </div>
-            
+
             {product.description && (
               <p className="product-description">
                 {product.description}
               </p>
             )}
 
-            {/* ================= Actions (LOCKED) ================= */}
+            {/* Actions (LOCKED) */}
             <div className="product-detail-actions">
               <QuantityButton
                 quantity={quantity}

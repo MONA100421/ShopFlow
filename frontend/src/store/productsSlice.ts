@@ -12,10 +12,6 @@ import {
   deleteProductAPI,
 } from "../services/productService";
 
-/* ======================================================
-   Async Thunks
-====================================================== */
-
 /** GET /api/products */
 export const fetchProductsThunk = createAsyncThunk<
   Product[],
@@ -82,9 +78,7 @@ export const deleteProductThunk = createAsyncThunk<
   }
 });
 
-/* ======================================================
-   State
-====================================================== */
+/* State */
 
 interface ProductsState {
   list: Product[];
@@ -100,9 +94,7 @@ const initialState: ProductsState = {
   initialized: false,
 };
 
-/* ======================================================
-   Slice
-====================================================== */
+/* Slice */
 
 const productsSlice = createSlice({
   name: "products",
@@ -118,10 +110,6 @@ const productsSlice = createSlice({
 
   extraReducers: (builder) => {
     builder
-
-      /* =====================
-         Fetch All Products
-      ====================== */
       .addCase(fetchProductsThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -139,10 +127,6 @@ const productsSlice = createSlice({
         state.error =
           action.payload ?? "Failed to load products";
       })
-
-      /* =====================
-         Fetch Product By Id
-      ====================== */
       .addCase(fetchProductByIdThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -168,10 +152,6 @@ const productsSlice = createSlice({
         state.error =
           action.payload ?? "Failed to load product";
       })
-
-      /* =====================
-         Create Product
-      ====================== */
       .addCase(createProductThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -188,10 +168,6 @@ const productsSlice = createSlice({
         state.error =
           action.payload ?? "Create product failed";
       })
-
-      /* =====================
-         Update Product
-      ====================== */
       .addCase(updateProductThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -214,10 +190,6 @@ const productsSlice = createSlice({
         state.error =
           action.payload ?? "Update product failed";
       })
-
-      /* =====================
-         Delete Product
-      ====================== */
       .addCase(deleteProductThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -238,10 +210,6 @@ const productsSlice = createSlice({
       });
   },
 });
-
-/* ======================================================
-   Exports
-====================================================== */
 
 export const { clearProducts } = productsSlice.actions;
 export default productsSlice.reducer;

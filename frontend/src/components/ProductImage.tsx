@@ -1,4 +1,3 @@
-// src/components/ProductImage.tsx
 import "./ProductImage.css";
 
 interface ProductImageProps {

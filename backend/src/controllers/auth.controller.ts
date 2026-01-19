@@ -1,13 +1,8 @@
-// backend/src/controllers/auth.controller.ts
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { UserModel } from "../models/User.model";
 
-/**
- * ======================================================
- * POST /api/auth/register
- * ======================================================
- */
+// POST /api/auth/register
 export async function register(req: Request, res: Response) {
   try {
     const { email, password } = req.body as {
@@ -30,7 +25,6 @@ export async function register(req: Request, res: Response) {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // 👉 Demo 規則：email 包含 admin → admin
     const role = email.toLowerCase().includes("admin")
       ? "admin"
       : "user";
@@ -59,11 +53,7 @@ export async function register(req: Request, res: Response) {
   }
 }
 
-/**
- * ======================================================
- * POST /api/auth/login
- * ======================================================
- */
+// POST /api/auth/login
 export async function login(req: Request, res: Response) {
   try {
     const { email, password } = req.body as {
@@ -113,11 +103,7 @@ export async function login(req: Request, res: Response) {
   }
 }
 
-/**
- * ======================================================
- * POST /api/auth/logout
- * ======================================================
- */
+// POST /api/auth/logout
 export function logout(req: Request, res: Response) {
   req.session.destroy(() => {
     res.clearCookie("connect.sid");
@@ -125,11 +111,7 @@ export function logout(req: Request, res: Response) {
   });
 }
 
-/**
- * ======================================================
- * GET /api/auth/me
- * ======================================================
- */
+// GET /api/auth/me
 export async function me(req: Request, res: Response) {
   try {
     const userId = req.session.userId;
@@ -148,7 +130,7 @@ export async function me(req: Request, res: Response) {
       role: user.role,
     });
   } catch (err) {
-    console.error("❌ me error:", err);
+    console.error("error:", err);
     res.status(500).json({
       error: "Failed to fetch current user",
     });

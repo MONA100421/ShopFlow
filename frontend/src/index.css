@@ -1,74 +1,37 @@
-/* =========================================================
-   Global Root Variables & Typography
-  （安全：不影響 scroll）
-========================================================= */
-
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  /* 色彩模式 */
   color-scheme: light dark;
   color: #213547;
   background-color: #ffffff;
-
-  /* 字體渲染（安全） */
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* =========================================================
-   HTML / BODY（🔥手機 scroll 安全關鍵）
-========================================================= */
-
-/* ❗ 不設定 height: 100% */
-/* ❗ 不設定 overflow: hidden */
-
 html,
 body {
   margin: 0;
   padding: 0;
-
   width: 100%;
   height: auto;
-  /* ✅ 解除 viewport 鎖死 */
-
   overflow-x: hidden;
-  /* ✅ 防橫向爆版 */
   overflow-y: auto;
-  /* ✅ 明確允許垂直滾動 */
 }
-
-/* =========================================================
-   Body Base
-========================================================= */
 
 body {
   min-width: 320px;
-  /* 手機最小寬 */
   min-height: 100vh;
-  /* 保證至少一個畫面高 */
-
   background-color: #ffffff;
 }
 
-/* =========================================================
-   React Root
-========================================================= */
-
-/* ❗ 只用 min-height，不用 height */
 #root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
-
-/* =========================================================
-   Elements (Safe Defaults)
-========================================================= */
 
 a {
   font-weight: 500;
@@ -84,11 +47,9 @@ button {
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
-
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-
   cursor: pointer;
   background: none;
 }

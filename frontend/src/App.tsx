@@ -1,4 +1,3 @@
-// frontend/src/App.tsx
 import { Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -17,12 +16,6 @@ import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
-
-  /**
-   * 🔁 App 啟動只做一件事：
-   * - restore auth（session）
-   * - cart hydrate 由 auth thunk 內部負責
-   */
   useEffect(() => {
     dispatch(restoreAuthThunk());
   }, [dispatch]);

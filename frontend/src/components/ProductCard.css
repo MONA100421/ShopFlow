@@ -1,38 +1,24 @@
-/* =========================================================
-   Product Card (FINAL – Figma-aligned Desktop + Mobile)
-========================================================= */
-
 .product-card {
     width: 100%;
     height: 303px;
-
     background: #ffffff;
     border: 1px solid #cccccc;
     border-radius: 4px;
-
     display: flex;
     flex-direction: column;
-
     padding: 12px;
     box-sizing: border-box;
 }
-
-/* =========================================================
-   Image
-========================================================= */
 
 .product-image {
     width: 100%;
     height: 198px;
     margin-bottom: 8px;
-
     background: #f3f4f6;
     border-radius: 2px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     overflow: hidden;
 }
 
@@ -42,10 +28,6 @@
     object-fit: contain;
 }
 
-/* =========================================================
-   Content
-========================================================= */
-
 .product-content {
     flex: 1;
     display: flex;
@@ -53,18 +35,12 @@
     gap: 4px;
 }
 
-/* =========================================================
-   Title & Price (🔒 LOCKED – 防止被放大)
-========================================================= */
-
 .product-card .product-title {
     margin: 0;
     font-size: 14px;
-    /* ← 原本大小 */
     font-weight: 400;
     line-height: 24px;
     color: #6b7280;
-
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -73,15 +49,11 @@
 .product-card .product-price {
     margin: 0;
     font-size: 16px;
-    /* ← 原本大小 */
     font-weight: 600;
     line-height: 24px;
     color: #111827;
 }
 
-/* =========================================================
-   Actions Row (Desktop)
-========================================================= */
 
 .product-card-actions {
     display: flex;
@@ -90,38 +62,25 @@
     margin-top: 6px;
 }
 
-/* =========================================================
-   Edit Button (Match QuantityButton)
-========================================================= */
-
 .edit-product-btn {
     width: 110px;
     height: 26px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     background: #ffffff;
     color: #535353;
-
     border: 1px solid #cccccc;
     border-radius: 4px;
-
     font-size: 10px;
     font-weight: 600;
     line-height: 24px;
-
     cursor: pointer;
 }
 
 .edit-product-btn:hover {
     background: #f9fafb;
 }
-
-/* =========================================================
-   Mobile
-========================================================= */
 
 @media (max-width: 640px) {
     .product-card {

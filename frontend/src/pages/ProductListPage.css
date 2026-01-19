@@ -1,51 +1,32 @@
-/* =========================================================
-   Product Page Root
-========================================================= */
-
 .product-page {
     width: 100%;
     background: #f9fafb;
     padding-bottom: 80px;
 }
 
-/* =========================================================
-   Page Header (Products + Actions)
-========================================================= */
-
 .product-header {
     margin-top: 32px;
     margin-bottom: 24px;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
-/* Products title (Figma H4) */
-
 .product-header .product-title {
     margin: 0;
-
     font-family: Inter, system-ui, sans-serif;
     font-weight: 700;
     font-size: 32px;
     line-height: 138%;
     letter-spacing: 0;
-
     color: rgba(17, 24, 39, 1);
 }
-
-/* Right actions (Sort + Add Product) */
 
 .product-header-actions {
     display: flex;
     align-items: center;
     gap: 12px;
 }
-
-/* =========================================================
-   Sort Dropdown (Trigger)
-========================================================= */
 
 .sort-dropdown {
     position: relative;
@@ -55,20 +36,16 @@
     width: 179px;
     height: 40px;
     padding: 0 12px;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
-
     background: #ffffff;
     border: 1px solid #d9d9d9;
     border-radius: 4px;
-
     font-family: Inter, system-ui, sans-serif;
     font-weight: 600;
     font-size: 14px;
     color: #565656;
-
     cursor: pointer;
 }
 
@@ -79,7 +56,6 @@
 .sort-caret {
     width: 0;
     height: 0;
-
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
     border-top: 6px solid #565656;
@@ -91,38 +67,27 @@
     transform: rotate(180deg);
 }
 
-/* =========================================================
-   Sort Dropdown Menu
-========================================================= */
-
 .sort-menu {
     position: absolute;
     top: 44px;
     right: 0;
-
     width: 180px;
-
     background: #ffffff;
     border: 1px solid #cccccc;
     border-radius: 4px;
-
     display: flex;
     flex-direction: column;
-
     z-index: 20;
 }
 
 .sort-item {
     height: 25px;
     padding: 0 12px 0 16px;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
-
     background: transparent;
     border: none;
-
     cursor: pointer;
 }
 
@@ -135,7 +100,6 @@
     font-size: 12px;
     font-weight: 400;
     line-height: 25px;
-
     color: #000000;
 }
 
@@ -144,23 +108,16 @@
     height: 12px;
 }
 
-/* =========================================================
-   Add Product Button
-========================================================= */
-
 .add-product-btn {
     width: 133px;
     height: 40px;
-
     background: #5048e5;
     border-radius: 4px;
     border: none;
-
     font-family: Inter, system-ui, sans-serif;
     font-weight: 700;
     font-size: 14px;
     line-height: 138%;
-
     color: #ffffff;
     cursor: pointer;
 }
@@ -169,32 +126,19 @@
     opacity: 0.9;
 }
 
-/* =========================================================
-   Product Grid Container (White Card)
-========================================================= */
-
 .product-grid {
     width: 100%;
     min-height: 682px;
-
     background: #ffffff;
     padding: 24px;
     box-sizing: border-box;
-
     display: grid;
-
-    /* Desktop default: 5 cards */
     grid-template-columns: repeat(5, minmax(0, 1fr));
-
-    /* 🔑 Desktop fixed height (Figma aligned) */
     grid-auto-rows: 303px;
-
     gap: 24px;
 }
 
-/* =========================================================
-   Empty / Loading / Error
-========================================================= */
+/* Empty / Loading / Error States */
 
 .product-empty {
     width: 100%;
@@ -208,7 +152,6 @@
 .loading-text,
 .error-text {
     margin: 32px 0;
-
     font-family: Inter, system-ui, sans-serif;
     font-size: 14px;
 }
@@ -221,13 +164,10 @@
     color: #fc5a44;
 }
 
-/* =========================================================
-   Pagination (Figma aligned)
-========================================================= */
+/* Pagination */
 
 .pagination {
     margin-top: 40px;
-
     display: flex;
     justify-content: flex-end;
 }
@@ -235,18 +175,14 @@
 .pagination-item {
     width: 41px;
     height: 42px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     background: #ffffff;
     border: 1px solid #eceeef;
-
     font-family: Inter, system-ui, sans-serif;
     font-size: 16px;
     line-height: 24px;
-
     color: #777777;
     cursor: pointer;
 }
@@ -266,11 +202,8 @@
     cursor: not-allowed;
 }
 
-/* =========================================================
-   Responsive Layout
-========================================================= */
+/* Responsive Layouts */
 
-/* ≤1280px : 4 columns */
 @media (max-width: 1280px) {
     .product-grid {
         grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -295,19 +228,15 @@
     }
 }
 
-/* ≤768px : 2 columns */
 @media (max-width: 768px) {
     .product-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
-/* ≤640px : Mobile (🔥 關鍵修正) */
 @media (max-width: 640px) {
     .product-grid {
         grid-template-columns: 1fr;
-
-        /* 🔥 關鍵：解除固定高度，讓卡片自適應 */
         grid-auto-rows: auto;
     }
 

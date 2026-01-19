@@ -1,4 +1,3 @@
-// src/components/QuantityButton.tsx
 import "./QuantityButton.css";
 
 interface QuantityButtonProps {
@@ -16,7 +15,6 @@ export default function QuantityButton({
   onDecrease,
   disabled = false,
 }: QuantityButtonProps) {
-  // quantity === 0 → 顯示 Add
   if (quantity === 0) {
     return (
       <button
@@ -30,7 +28,6 @@ export default function QuantityButton({
     );
   }
 
-  // quantity > 0 → 顯示 - 1 +
   return (
     <div className="qty-btn qty-btn--counter">
       <button

@@ -1,4 +1,3 @@
-// src/components/RequireAdmin.tsx
 import { useSelector } from "react-redux";
 import type { RootState } from "../store/store";
 import { Navigate, Outlet } from "react-router-dom";
@@ -9,7 +8,7 @@ export default function RequireAdmin() {
   );
 
   if (!initialized) {
-    return null; // or Spinner
+    return null;
   }
 
 

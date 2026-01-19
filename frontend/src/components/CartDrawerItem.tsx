@@ -13,7 +13,6 @@ interface CartDrawerItemProps {
 export default function CartDrawerItem({
   item,
 }: CartDrawerItemProps) {
-  // ✅ 一定要用 AppDispatch
   const dispatch = useDispatch<AppDispatch>();
 
   const product = {
@@ -29,15 +28,12 @@ export default function CartDrawerItem({
 
   return (
     <div className="drawer-item">
-      {/* Image */}
       <div className="drawer-item-image">
         <ProductImage
           src={item.imageUrl}
           alt={item.name}
         />
       </div>
-
-      {/* Middle (name + qty) */}
       <div className="drawer-item-main">
         <div className="drawer-item-name">
           {item.name}
@@ -65,8 +61,6 @@ export default function CartDrawerItem({
           </button>
         </div>
       </div>
-
-      {/* Right (price + remove) */}
       <div className="drawer-item-side">
         <div className="drawer-item-price">
           ${item.subtotal.toFixed(2)}

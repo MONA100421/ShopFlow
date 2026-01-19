@@ -1,9 +1,6 @@
-// frontend/src/services/cartService.ts
 import type { CartItem } from "../types/CartItem";
 
 const API_BASE_URL = "http://localhost:4000/api/cart";
-
-/* ================= Helpers ================= */
 
 async function handleResponse(res: Response) {
   if (!res.ok) {
@@ -14,7 +11,6 @@ async function handleResponse(res: Response) {
   return data.items as CartItem[];
 }
 
-/* ================= APIs ================= */
 
 export async function fetchCartAPI(): Promise<CartItem[]> {
   const res = await fetch(API_BASE_URL, {

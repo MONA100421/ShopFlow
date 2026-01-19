@@ -1,12 +1,3 @@
-/* =========================================================
-   Login / Reset Modal (Base Rectangle)
-   Figma:
-   - width: 600
-   - height: 528 (login / register / reset-success)
-   - height: 400 (reset)
-   - radius: 10
-========================================================= */
-
 .login-modal {
     position: relative;
 
@@ -28,44 +19,34 @@
     flex-direction: column;
 }
 
-/* Reset (enter email) modal */
+/* Shorter height for reset form */
+
 .login-modal.reset-modal {
     height: 400px;
 }
 
 /* Reset success modal keeps full height */
+
 .login-modal.reset-success {
     height: 528px;
     align-items: center;
     justify-content: center;
 }
 
-/* =========================================================
-   Close Button (Clear icon)
-========================================================= */
+/* Close Button (Clear icon)*/
 
 .close-btn {
     position: absolute;
     top: 16px;
-    /* ✅ 對齊 Figma */
     right: 16px;
-    /* ✅ 對齊 Figma */
-
     width: 32px;
-    /* ✅ Figma 常見 icon hit area */
     height: 32px;
-
     padding: 0;
-    /* 🔥 移除 padding（重點） */
-
     background: transparent;
     border: none;
-
     display: flex;
-    /* 🔥 用 flex 置中 */
     align-items: center;
     justify-content: center;
-
     cursor: pointer;
 }
 
@@ -99,9 +80,7 @@
     transform: rotate(-45deg);
 }
 
-/* =========================================================
-   Header
-========================================================= */
+/* Header */
 
 .sign-in-header {
     width: 379px;
@@ -126,9 +105,7 @@
     color: #111827;
 }
 
-/* =========================================================
-   Reset description (email instruction)
-========================================================= */
+/* Reset description (email instruction)*/
 
 .reset-desc {
     width: 504px;
@@ -143,9 +120,7 @@
     text-align: center;
 }
 
-/* =========================================================
-   Form Groups
-========================================================= */
+/* Form Groups*/
 
 .email-group,
 .password-group {
@@ -157,9 +132,7 @@
     gap: 8px;
 }
 
-/* =========================================================
-   Labels
-========================================================= */
+/* Labels */
 
 .field-label {
     font-family: Inter, system-ui, sans-serif;
@@ -170,9 +143,7 @@
     color: #6b7280;
 }
 
-/* =========================================================
-   Form Control
-========================================================= */
+/* Form Control */
 
 .form-control {
     width: 504px;
@@ -191,9 +162,7 @@
     border-color: #fc5a44;
 }
 
-/* =========================================================
-   Input
-========================================================= */
+/* Input */
 
 .form-input {
     flex: 1;
@@ -212,18 +181,15 @@
     color: #111827;
 }
 
-/* =========================================================
-   Password Control
-========================================================= */
+
+/* Password Control */
 
 .password-control {
     display: flex;
     align-items: center;
 }
 
-/* =========================================================
-   Show / Hide Password
-========================================================= */
+/* Show / Hide Password */
 
 .show-password {
     display: flex;
@@ -255,9 +221,7 @@
     outline: none;
 }
 
-/* =========================================================
-   Field Error
-========================================================= */
+/* Field Error Message */
 
 .field-error {
     align-self: flex-end;
@@ -270,9 +234,7 @@
     color: #fc5a44;
 }
 
-/* =========================================================
-   Form Error (login failure)
-========================================================= */
+/* General Auth Error Message */
 
 .auth-error {
     width: 504px;
@@ -286,9 +248,7 @@
     color: #fc5a44;
 }
 
-/* =========================================================
-   Submit Button
-========================================================= */
+/* Sign In Button */
 
 .sign-in-btn {
     width: 504px;
@@ -318,9 +278,7 @@
     cursor: not-allowed;
 }
 
-/* =========================================================
-   Footer Links
-========================================================= */
+/* Auth Links (Sign Up / Reset Password) */
 
 .auth-links {
     width: 504px;
@@ -373,9 +331,7 @@
     opacity: 1;
 }
 
-/* =========================================================
-   Reset Success Page
-========================================================= */
+/* Reset Success Text */
 
 .reset-icon {
     margin-top: 140px;
@@ -394,26 +350,18 @@
     color: #000000;
 }
 
-/* =========================================================
-   Responsive (Mobile – Sigma style)
-========================================================= */
+/* Responsive (Mobile – Sigma style) */
 
 @media (max-width: 640px) {
 
-    /* Modal still looks like a card */
     .login-modal {
         width: calc(100% - 32px);
         height: auto;
-
         margin: 16px auto;
         padding: 24px 20px 32px;
-
         background: #ffffff;
-
         border-radius: 12px;
         border: 1px solid #e5e7eb;
-
-        /* ✅ 關鍵：保留陰影 */
         box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.08);
     }
 
@@ -467,9 +415,7 @@
     }
 }
 
-/* =========================================================
-   Chrome Autofill Override
-========================================================= */
+/* Chrome Autofill Override */
 
 input:-webkit-autofill,
 input:-webkit-autofill:hover,

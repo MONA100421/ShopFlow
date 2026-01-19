@@ -1,42 +1,15 @@
 import type { Product } from "../types/Product";
 
-/* ======================================================
-   Config
-====================================================== */
-
-/**
- * 🔁 是否使用 mock API
- * - true  → 前端自跑（demo / UI）
- * - false → 接 Express / MongoDB
- */
 const USE_MOCK_API = false;
-
-/**
- * Express API base
- * 對齊後端：
- * app.use("/api/products", productRoutes)
- */
 const API_BASE_URL = "http://localhost:4000/api/products";
 
-/* ======================================================
-   Mock Store（僅 demo / 前端開發用）
-====================================================== */
-
 let mockProducts: Product[] = [];
-
-/* ======================================================
-   Helpers
-====================================================== */
 
 const delay = (ms = 500) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
-/**
- * 將後端 Product（MongoDB）
- * 正規化成前端 Product 型別
- */
 const normalizeProduct = (raw: any): Product => ({
-  id: raw._id, // ✅ MongoDB ObjectId
+  id: raw._id,
   title: raw.title,
   description: raw.description ?? "",
   category: raw.category ?? "general",
@@ -46,13 +19,9 @@ const normalizeProduct = (raw: any): Product => ({
   createdAt: raw.createdAt,
 });
 
-/* ======================================================
-   APIs
-====================================================== */
 
-/**
- * GET /api/products
- */
+
+/* GET /api/products */
 export async function getProducts(): Promise<Product[]> {
   if (USE_MOCK_API) {
     await delay();
@@ -69,9 +38,7 @@ export async function getProducts(): Promise<Product[]> {
   return data.map(normalizeProduct);
 }
 
-/**
- * GET /api/products/:id
- */
+/* GET /api/products/:id */
 export async function getProductById(
   id: string
 ): Promise<Product> {
@@ -99,10 +66,7 @@ export async function getProductById(
   return normalizeProduct(data);
 }
 
-/**
- * POST /api/products
- * Admin only（目前未加 auth header）
- */
+/* POST /api/products */
 export async function createProductAPI(
   payload: Omit<Product, "id" | "createdAt">
 ): Promise<Product> {
@@ -130,7 +94,7 @@ export async function createProductAPI(
       category: payload.category,
       price: payload.price,
       stock: payload.stock,
-      imageUrl: payload.image, // ✅ 對齊後端 schema
+      imageUrl: payload.image,
     }),
   });
 
@@ -142,10 +106,7 @@ export async function createProductAPI(
   return normalizeProduct(data);
 }
 
-/**
- * PUT /api/products/:id
- * Admin only
- */
+/* PUT /api/products/:id (Admin only) */
 export async function updateProductAPI(
   product: Product
 ): Promise<Product> {
@@ -172,7 +133,7 @@ export async function updateProductAPI(
         category: product.category,
         price: product.price,
         stock: product.stock,
-        imageUrl: product.image, // ✅ 對齊後端
+        imageUrl: product.image,
       }),
     }
   );
@@ -185,10 +146,7 @@ export async function updateProductAPI(
   return normalizeProduct(data);
 }
 
-/**
- * DELETE /api/products/:id
- * Admin only（soft delete）
- */
+/* DELETE /api/products/:id (Admin only) */
 export async function deleteProductAPI(
   id: string
 ): Promise<void> {
