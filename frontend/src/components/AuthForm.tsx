@@ -44,8 +44,19 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
   /* Validation helpers */
 
-  const validateEmail = (value: string) =>
-    value.includes("@") ? "" : "Invalid email input!";
+  const validateEmail = (value: string) => {
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+    if (!value) {
+      return "Email is required";
+    }
+
+    if (!EMAIL_REGEX.test(value)) {
+      return "Please enter a valid email address.";
+    }
+
+    return "";
+  };
 
   const validatePassword = (value: string) =>
     value.length >= 6 ? "" : "Invalid password input!";
