@@ -1,11 +1,10 @@
 /* =========================================================
-   Overlay (SAFE)
+   Overlay
 ========================================================= */
 
 .cart-overlay {
   position: fixed;
   inset: 0;
-
   background: rgba(0, 0, 0, 0.45);
   z-index: 1000;
 
@@ -14,22 +13,19 @@
 }
 
 /* =========================================================
-   Drawer (🔥 Mobile SAFE)
+   Drawer
 ========================================================= */
 
-/*
-  重點：
-  - 不用 height: 100vh（手機網址列會炸）
-  - 用 min-height + max-height
-*/
-
 .cart-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+
   width: 544px;
   max-width: 100vw;
 
   min-height: 100vh;
   max-height: 100dvh;
-  /* ✅ 新版 mobile viewport */
 
   background: #ffffff;
 
@@ -53,8 +49,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  flex-shrink: 0;
 }
 
 .drawer-title {
@@ -66,180 +60,170 @@
 .drawer-close {
   background: none;
   border: none;
-
   color: #ffffff;
   font-size: 22px;
   cursor: pointer;
 }
 
 /* =========================================================
-   Items (🔥 Scroll Core)
+   Items (Scroll Area)
 ========================================================= */
-
-/*
-  Drawer 內唯一 scroll 區域
-*/
 
 .drawer-items {
   flex: 1;
-
   overflow-y: auto;
-  overflow-x: hidden;
-
   padding: 24px;
-
   -webkit-overflow-scrolling: touch;
-  /* ✅ iOS 必加 */
 }
 
 .drawer-empty {
   margin-top: 48px;
   text-align: center;
-
   font-size: 15px;
   color: #6b7280;
 }
 
 /* =========================================================
-   Item
+   Cart Item (Figma aligned)
 ========================================================= */
 
 .drawer-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 64px 1fr 92px;
   gap: 16px;
 
   padding: 16px 0;
   border-bottom: 1px solid #e5e7eb;
-
-  align-items: flex-start;
 }
 
 /* =========================================================
-   Cart Item Image (一致於 ProductCard 語意)
+   Image
 ========================================================= */
 
 .drawer-item-image {
   width: 64px;
   height: 64px;
-
   border-radius: 8px;
   background: #f3f4f6;
 
   display: flex;
   align-items: center;
   justify-content: center;
-
-  flex-shrink: 0;
   overflow: hidden;
 }
 
-.drawer-item-img.placeholder {
+.drawer-item-image img {
   width: 100%;
   height: 100%;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 12px;
-  color: #9ca3af;
+  object-fit: contain;
 }
 
-/* Content */
+/* =========================================================
+   Middle Column
+========================================================= */
 
-.drawer-item-content {
-  flex: 1;
-
+.drawer-item-main {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-/* Top row */
-
-.drawer-item-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
 .drawer-item-name {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 500;
   color: #111827;
 }
 
-.drawer-item-price {
-  font-size: 15px;
-  font-weight: 600;
-  color: #5048e5;
+/* =========================================================
+   Amount Button (🔥 Figma TRUE 1:1)
+========================================================= */
 
-  white-space: nowrap;
-  margin-right: 15px;
-}
+/*
+  重點：
+  - 外框只畫一次（88 x 26）
+  - 內部用分隔線，不是三個獨立框
+*/
 
-/* Bottom row */
+.cart-qty-control {
+  display: grid;
+  grid-template-columns: 30px 30px 30px;
 
-.drawer-item-bottom {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+  width: 88px;
+  height: 26px;
 
-/* Quantity controls */
-
-.drawer-item-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.drawer-item-actions button {
-  width: 24px;
-  height: 24px;
-
-  border: 1px solid #d1d5db;
-  background: #ffffff;
+  border: 1px solid #cccccc;
   border-radius: 4px;
+  background: #ffffff;
+}
 
-  font-size: 14px;
-  color: #111827;
+.cart-qty-btn {
+  all: unset;
+  width: 30px;
+  height: 26px;
 
-  cursor: pointer;
+  background: transparent;
+  border: none;
+
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
 
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.drawer-item-actions button:hover {
-  background: #f3f4f6;
-}
-
-.drawer-qty {
-  min-width: 24px;
-  text-align: center;
-
-  font-size: 14px;
-  font-weight: 500;
-}
-
-/* Remove */
-
-.drawer-remove {
-  font-size: 13px;
-  color: #6b7280;
-
+  
+  color: #111827;
   cursor: pointer;
-  white-space: nowrap;
+}
 
+.cart-qty-btn.minus {
+  border-right: 1px solid #cccccc;
+}
+
+.cart-qty-btn.plus {
+  border-left: 1px solid #cccccc;
+}
+
+.cart-qty-count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 16px;
+  font-weight: 500;
+  color: #111827;
+}
+
+/* =========================================================
+   Right Column (Price + Remove)
+========================================================= */
+
+.drawer-item-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.drawer-item-price {
+  font-size: 16px;
+  font-weight: 600;
+  color: #5048e5;
+  white-space: nowrap;
+}
+
+.cart-remove-btn {
   background: none;
   border: none;
-}
+  padding: 0;
 
-.drawer-remove:hover {
-  color: #ef4444;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 138%;
+  color: #6b7280;
+
   text-decoration: underline;
+  cursor: pointer;
 }
 
 /* =========================================================
@@ -248,11 +232,7 @@
 
 .drawer-footer {
   padding: 24px;
-
-  background: #ffffff;
   border-top: 1px solid #e5e7eb;
-
-  flex-shrink: 0;
 }
 
 /* =========================================================
@@ -265,9 +245,7 @@
 
 .drawer-discount label {
   display: block;
-
   margin-bottom: 6px;
-
   font-size: 14px;
   font-weight: 500;
   color: #6b7280;
@@ -281,7 +259,6 @@
 .drawer-discount input {
   flex: 1;
   height: 40px;
-
   padding: 0 12px;
 
   border: 1px solid #d1d5db;
@@ -292,8 +269,9 @@
   background: #ffffff;
 }
 
-.drawer-discount input::placeholder {
-  color: #9ca3af;
+.drawer-discount input:focus {
+  outline: none;
+  border-color: #5048e5;
 }
 
 .drawer-discount button {
@@ -302,7 +280,6 @@
 
   background: #5048e5;
   color: #ffffff;
-
   border: none;
   border-radius: 4px;
 
@@ -321,7 +298,6 @@
 .drawer-summary>div {
   display: flex;
   justify-content: space-between;
-
   margin-bottom: 10px;
 
   font-size: 14px;
@@ -340,7 +316,6 @@
 
 .drawer-checkout-btn {
   width: 100%;
-
   margin-top: 20px;
   padding: 14px 16px;
 

@@ -1,13 +1,10 @@
-import ProductImage from "./ProductImage";
-import QuantityButton from "./QuantityButton";
 import { useSelector } from "react-redux";
 import { useEffect } from "react";
 
 import type { RootState } from "../store/store";
-import type { Product } from "../types/Product";
-import { useCartItem } from "../hooks/useCartItem";
 import { useCartTotal } from "../hooks/useCartTotal";
 
+import CartDrawerItem from "./CartDrawerItem";
 import "./CartDrawer.css";
 
 interface CartDrawerProps {
@@ -23,7 +20,6 @@ export default function CartDrawer({
     (state: RootState) => state.cart.items
   );
 
-  /* ================= Cart Total Hook ================= */
   const {
     subtotal,
     tax,
@@ -35,7 +31,6 @@ export default function CartDrawer({
     applyDiscount,
   } = useCartTotal();
 
-  /* ================= Effects ================= */
   useEffect(() => {
     document.body.style.overflowY = open
       ? "hidden"
@@ -47,20 +42,18 @@ export default function CartDrawer({
 
   if (!open) return null;
 
-  /* ================= Render ================= */
   return (
     <div className="cart-overlay" onClick={onClose}>
       <aside
         className="cart-drawer"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ================= Header ================= */}
+        {/* Header */}
         <header className="drawer-header">
           <h2 className="drawer-title">
             Cart ({items.length})
           </h2>
           <button
-            type="button"
             className="drawer-close"
             onClick={onClose}
           >
@@ -68,7 +61,7 @@ export default function CartDrawer({
           </button>
         </header>
 
-        {/* ================= Items ================= */}
+        {/* Items */}
         <section className="drawer-items">
           {items.length === 0 && (
             <div className="drawer-empty">
@@ -76,59 +69,15 @@ export default function CartDrawer({
             </div>
           )}
 
-          {items.map((item) => {
-            const product = {
-              id: item.productId,
-              title: item.name,
-              price: item.price,
-              image: item.imageUrl,
-              stock: Infinity,
-            } as Product;
-
-            const {
-              quantity,
-              add,
-              increase,
-              decrease,
-            } = useCartItem(product);
-
-            return (
-              <div
-                key={item.productId}
-                className="drawer-item"
-              >
-                <div className="drawer-item-image">
-                  <ProductImage
-                    src={item.imageUrl}
-                    alt={item.name}
-                  />
-                </div>
-
-                <div className="drawer-item-content">
-                  <div className="drawer-item-top">
-                    <span className="drawer-item-name">
-                      {item.name}
-                    </span>
-                    <span className="drawer-item-price">
-                      ${item.subtotal.toFixed(2)}
-                    </span>
-                  </div>
-
-                  <div className="drawer-item-bottom">
-                    <QuantityButton
-                      quantity={quantity}
-                      onAdd={add}
-                      onIncrease={increase}
-                      onDecrease={decrease}
-                    />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {items.map((item) => (
+            <CartDrawerItem
+              key={item.productId}
+              item={item}
+            />
+          ))}
         </section>
 
-        {/* ================= Footer ================= */}
+        {/* Footer */}
         <footer className="drawer-footer">
           <div className="drawer-discount">
             <label>Apply Discount Code</label>
