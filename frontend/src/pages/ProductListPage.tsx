@@ -1,10 +1,13 @@
 import "./ProductListPage.css";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import ProductCard from "../components/ProductCard";
 import type { RootState, AppDispatch } from "../store/store";
 import { fetchProductsThunk } from "../store/productsSlice";
+
+import TriangleIcon from "../assets/Triangle.svg";
+import CheckIcon from "../assets/check-right.svg";
 
 type SortKey = "last" | "price-asc" | "price-desc";
 
@@ -23,6 +26,7 @@ function normalizeText(text: string) {
 export default function ProductListPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   /* URL Search */
   const [searchParams] = useSearchParams();
@@ -39,12 +43,27 @@ export default function ProductListPage() {
 
   /* Local state */
   const [sortBy, setSortBy] = useState<SortKey>("last");
+  const [open, setOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   /* Fetch products */
   useEffect(() => {
     dispatch(fetchProductsThunk());
   }, [dispatch]);
+
+  /* Close dropdown on outside click */
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   /* Reset page when search or sort changes */
   useEffect(() => {
@@ -87,6 +106,9 @@ export default function ProductListPage() {
     );
   }, [sortedList, currentPage]);
 
+  const currentLabel =
+    SORT_OPTIONS.find((o) => o.key === sortBy)?.label ?? "Last added";
+
   return (
     <div className="product-page">
       <div className="container">
@@ -94,22 +116,57 @@ export default function ProductListPage() {
           <h1 className="product-title">Products</h1>
 
           <div className="product-header-actions">
-            <select
-              className="sort-trigger"
-              id="product-sort"
-              name="sort"
-              aria-label="Sort products"
-              value={sortBy}
-              onChange={(e) =>
-                setSortBy(e.target.value as SortKey)
-              }
+            {/* ===== Sort Dropdown (Figma-aligned custom dropdown) ===== */}
+            <div
+              className="sort-dropdown"
+              ref={dropdownRef}
+              role="combobox"
+              aria-expanded={open}
             >
-              {SORT_OPTIONS.map((opt) => (
-                <option key={opt.key} value={opt.key}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              <button
+                type="button"
+                className="sort-trigger"
+                aria-haspopup="listbox"
+                aria-expanded={open}
+                onClick={() => setOpen((v) => !v)}
+              >
+                <span className="sort-label">{currentLabel}</span>
+                <img
+                  src={TriangleIcon}
+                  alt=""
+                  className={`sort-triangle ${open ? "open" : ""}`}
+                />
+              </button>
+
+              {open && (
+                <div className="sort-menu" role="listbox">
+                  {SORT_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      role="option"
+                      aria-selected={sortBy === opt.key}
+                      className="sort-item"
+                      onClick={() => {
+                        setSortBy(opt.key);
+                        setOpen(false);
+                      }}
+                    >
+                      <span className="sort-item-text">
+                        {opt.label}
+                      </span>
+                      {sortBy === opt.key && (
+                        <img
+                          src={CheckIcon}
+                          alt="selected"
+                          className="sort-check-icon"
+                        />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {isAdmin && (
               <button
@@ -166,23 +223,26 @@ export default function ProductListPage() {
                   «
                 </button>
 
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (page) => (
-                    <button
-                      key={page}
-                      className={`pagination-item ${
-                        page === currentPage ? "active" : ""
-                      }`}
-                      onClick={() => setCurrentPage(page)}
-                    >
-                      {page}
-                    </button>
-                  )
-                )}
+                {Array.from(
+                  { length: totalPages },
+                  (_, i) => i + 1
+                ).map((page) => (
+                  <button
+                    key={page}
+                    className={`pagination-item ${
+                      page === currentPage ? "active" : ""
+                    }`}
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    {page}
+                  </button>
+                ))}
 
                 <button
                   className={`pagination-item ${
-                    currentPage === totalPages ? "disabled" : ""
+                    currentPage === totalPages
+                      ? "disabled"
+                      : ""
                   }`}
                   onClick={() =>
                     currentPage < totalPages &&

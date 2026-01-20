@@ -1,3 +1,7 @@
+/* ======================================================
+   Page Layout
+====================================================== */
+
 .product-page {
     width: 100%;
     background: #f9fafb;
@@ -18,7 +22,6 @@
     font-weight: 700;
     font-size: 32px;
     line-height: 138%;
-    letter-spacing: 0;
     color: rgba(17, 24, 39, 1);
 }
 
@@ -28,24 +31,35 @@
     gap: 12px;
 }
 
+/* ======================================================
+   Sort Dropdown (Figma 1:1)
+====================================================== */
+
 .sort-dropdown {
     position: relative;
 }
 
+/* ---------- Trigger (179 x 40) ---------- */
 .sort-trigger {
     width: 179px;
     height: 40px;
-    padding: 0 12px;
+
     display: flex;
     align-items: center;
     justify-content: space-between;
+
+    padding: 0 12px;
+
     background: #ffffff;
     border: 1px solid #d9d9d9;
     border-radius: 4px;
+
     font-family: Inter, system-ui, sans-serif;
     font-weight: 600;
     font-size: 14px;
+    line-height: 138%;
     color: #565656;
+
     cursor: pointer;
 }
 
@@ -53,72 +67,97 @@
     background: #fafafa;
 }
 
-.sort-caret {
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 6px solid #565656;
-
+/* Triangle icon (9.68 x 6) */
+.sort-triangle {
+    width: 9.68px;
+    height: 6px;
     transition: transform 0.2s ease;
 }
 
-.sort-caret.open {
+.sort-triangle.open {
     transform: rotate(180deg);
 }
 
+/* ---------- Dropdown Menu (180 x 121) ---------- */
 .sort-menu {
     position: absolute;
     top: 44px;
     right: 0;
+
     width: 180px;
+    height: 121px;
+
     background: #ffffff;
     border: 1px solid #cccccc;
     border-radius: 4px;
-    display: flex;
-    flex-direction: column;
+
     z-index: 20;
 }
 
+/* ---------- Dropdown Item (exact Figma) ---------- */
 .sort-item {
-    height: 25px;
-    padding: 0 12px 0 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    position: relative;
+    height: 37px;
+    padding-left: 44px;
+    padding-right: 12px;
     background: transparent;
     border: none;
     cursor: pointer;
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 12px;
+    font-style: Regular;
+    font-weight: 400;
+    line-height: 25px;
+    letter-spacing: 0px;
+    color: #000000;
 }
 
 .sort-item:hover {
     background: #f9fafb;
 }
 
+/* Text block (no flex, no translate) */
 .sort-item-text {
-    font-family: Inter, system-ui, sans-serif;
-    font-size: 12px;
-    font-weight: 400;
+    display: block;
+    height: 25px;
     line-height: 25px;
-    color: #000000;
+    white-space: nowrap;
 }
 
+/* ---------- Check Icon (absolute aligned) ---------- */
 .sort-check-icon {
-    width: 12px;
-    height: 12px;
+    position: absolute;
+    left: 22px;
+    top: 53.76%;
+    opacity: 1;
+
+    width: 9.99999982885729;
+    height: 5.512030030329929;
+
+    transform: translateY(-50%);
+    width: 9.99999982885729;
 }
+
+
+
+/* ======================================================
+   Add Product Button
+====================================================== */
 
 .add-product-btn {
     width: 133px;
     height: 40px;
+
     background: #5048e5;
     border-radius: 4px;
     border: none;
+
     font-family: Inter, system-ui, sans-serif;
     font-weight: 700;
     font-size: 14px;
     line-height: 138%;
     color: #ffffff;
+
     cursor: pointer;
 }
 
@@ -126,45 +165,27 @@
     opacity: 0.9;
 }
 
+/* ======================================================
+   Product Grid
+====================================================== */
+
 .product-grid {
     width: 100%;
     min-height: 682px;
+
     background: #ffffff;
     padding: 24px;
     box-sizing: border-box;
+
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     grid-auto-rows: 303px;
     gap: 24px;
 }
 
-/* Empty / Loading / Error States */
-
-.product-empty {
-    width: 100%;
-    height: 682px;
-
-    background: #ffffff;
-    border-radius: 4px;
-    border: 1px solid #cccccc;
-}
-
-.loading-text,
-.error-text {
-    margin: 32px 0;
-    font-family: Inter, system-ui, sans-serif;
-    font-size: 14px;
-}
-
-.loading-text {
-    color: #6b7280;
-}
-
-.error-text {
-    color: #fc5a44;
-}
-
-/* Pagination */
+/* ======================================================
+   Pagination
+====================================================== */
 
 .pagination {
     margin-top: 40px;
@@ -175,15 +196,19 @@
 .pagination-item {
     width: 41px;
     height: 42px;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     background: #ffffff;
     border: 1px solid #eceeef;
+
     font-family: Inter, system-ui, sans-serif;
     font-size: 16px;
     line-height: 24px;
     color: #777777;
+
     cursor: pointer;
 }
 
@@ -202,7 +227,9 @@
     cursor: not-allowed;
 }
 
-/* Responsive Layouts */
+/* ======================================================
+   Responsive Layouts
+====================================================== */
 
 @media (max-width: 1280px) {
     .product-grid {
@@ -210,7 +237,6 @@
     }
 }
 
-/* ≤1024px : 3 columns + header vertical */
 @media (max-width: 1024px) {
     .product-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -238,10 +264,6 @@
     .product-grid {
         grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
         justify-items: center;
-    }
-
-    .product-header {
-        margin-top: 32px;
     }
 
     .product-header .product-title {
