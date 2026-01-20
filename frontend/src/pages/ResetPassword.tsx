@@ -20,6 +20,12 @@ export default function ResetPassword() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!token) {
+      setError("Invalid or missing reset token.");
+      return;
+    }
+
+
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
       return;

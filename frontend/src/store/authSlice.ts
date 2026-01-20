@@ -61,9 +61,21 @@ export const registerThunk = createAsyncThunk<
   { email: string; password: string },
   { dispatch: any }
 >("auth/register", async (payload, { dispatch }) => {
+  // 1️⃣ 注册（后端会写 session）
   await registerAPI(payload);
-  return dispatch(loginThunk(payload)).unwrap();
+
+  // 2️⃣ 从 session 获取当前用户
+  const user = await meAPI();
+
+  // 3️⃣ 注册后也拉一次用户购物车（和 login 对齐）
+  if (user) {
+    await dispatch(fetchUserCartThunk()).unwrap();
+  }
+
+  // 4️⃣ 返回用户，交给 reducer
+  return user;
 });
+
 
 export const restoreAuthThunk = createAsyncThunk<
   User | null,

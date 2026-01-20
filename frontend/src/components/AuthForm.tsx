@@ -88,8 +88,27 @@ export default function AuthForm({ mode }: AuthFormProps) {
       }
 
       if (mode === "reset") {
+        const res = await fetch(
+          "http://localhost:4000/api/auth/forgot-password",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email }),
+          }
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setFormError(data.message || "Failed to send reset email");
+          return;
+        }
+
         navigate("/auth/reset-success");
       }
+
     } catch {
       setFormError("Invalid email or password");
     } finally {

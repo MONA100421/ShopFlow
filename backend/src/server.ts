@@ -1,6 +1,17 @@
 // ✅ 一定要在最上面
 import dotenv from "dotenv";
-dotenv.config();
+
+// 强制指定 .env 路径（backend/.env）
+dotenv.config({
+  path: __dirname + "/../.env",
+});
+
+// 🔎 强制验证（临时）
+console.log("FRONTEND_PUBLIC_URL =", process.env.FRONTEND_PUBLIC_URL);
+console.log("FRONTEND_URL =", process.env.FRONTEND_URL);
+console.log("process.cwd() =", process.cwd());
+console.log("__dirname =", __dirname);
+
 
 // 下面才開始 import 其他東西
 import express from "express";
