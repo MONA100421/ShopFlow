@@ -80,7 +80,7 @@ export default function CartDrawer({
         {/* Footer */}
         <footer className="drawer-footer">
           <div className="drawer-discount">
-            <label>Apply Discount Code</label>
+            <label htmlFor="discount-code">Apply Discount Code</label>
             <div className="drawer-discount-row">
               <input
                 id="discount-code"

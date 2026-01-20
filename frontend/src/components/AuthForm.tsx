@@ -158,9 +158,11 @@ export default function AuthForm({ mode }: AuthFormProps) {
       <form onSubmit={handleSubmit} noValidate>
         {/* Email */}
         <div className={`email-group ${emailError ? "has-error" : ""}`}>
-          <label className="field-label">Email</label>
+          <label className="field-label" htmlFor="auth-email">Email</label>
           <div className={`form-control ${emailError ? "error" : ""}`}>
             <input
+              id="auth-email"
+              name="email"
               className="form-input"
               type="email"
               value={email}
@@ -180,7 +182,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
         {/* Password */}
         {mode !== "reset" && (
           <div className={`password-group ${passwordError ? "has-error" : ""}`}>
-            <label className="field-label">Password</label>
+            <label className="field-label" htmlFor="auth-email">Password</label>
             <div
               className={`form-control password-control ${
                 passwordError ? "error" : ""
@@ -188,6 +190,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
             >
               <input
                 className="form-input"
+                id="auth-password"
+                name="password"
                 type={showPassword ? "text" : "password"}
                 value={password}
                 autoComplete={

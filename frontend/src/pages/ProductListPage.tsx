@@ -82,7 +82,7 @@ export default function ProductListPage() {
     });
   }, [list, keyword]);
 
-  /* Sorting (🔥 防止 runtime error) */
+  /* Sorting */
   const sortedList = useMemo(() => {
     if (!Array.isArray(filteredList)) return [];
 
@@ -168,8 +168,6 @@ export default function ProductListPage() {
 
         {/* Loading */}
         {loading && <p className="loading-text">Loading...</p>}
-
-        {/* ❗ Error 只在「完全沒資料」時顯示 */}
         {error && list.length === 0 && (
           <p className="error-text">{error}</p>
         )}
