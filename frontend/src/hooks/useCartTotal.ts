@@ -14,24 +14,26 @@ export function useCartTotal() {
   const [discountInput, setDiscountInput] = useState("");
   const [discountApplied, setDiscountApplied] = useState(false);
   const subtotal = useMemo(() => {
-    return items.reduce(
-      (sum, item) => sum + (item.subtotal ?? 0),
-      0
-    );
+    return items.reduce((sum, item) => {
+      if (!item || typeof item.subtotal !== "number") {
+        return sum;
+      }
+      return sum + item.subtotal;
+    }, 0);
   }, [items]);
+
   const tax = useMemo(() => {
     return subtotal * TAX_RATE;
   }, [subtotal]);
+
   const discount = discountApplied
     ? DISCOUNT_AMOUNT
     : 0;
+
   const total = Math.max(subtotal + tax - discount, 0);
+
   const applyDiscount = () => {
-    if (discountInput === DISCOUNT_CODE) {
-      setDiscountApplied(true);
-    } else {
-      setDiscountApplied(false);
-    }
+    setDiscountApplied(discountInput === DISCOUNT_CODE);
   };
 
   return {

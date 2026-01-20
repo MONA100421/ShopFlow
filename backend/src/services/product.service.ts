@@ -1,4 +1,5 @@
 import Product, { IProduct } from "../models/Product.model";
+import Cart from "../models/Cart.model";
 
 type CreateProductInput = Partial<IProduct>;
 type UpdateProductInput = Partial<IProduct>;
@@ -34,9 +35,22 @@ export const updateProduct = async (
 export const deleteProduct = async (
   productId: string
 ): Promise<IProduct | null> => {
-  return Product.findByIdAndUpdate(
+  const product = await Product.findByIdAndUpdate(
     productId,
     { isActive: false },
     { new: true }
   );
+
+  if (!product) return null;
+
+  await Cart.updateMany(
+    {},
+    {
+      $pull: {
+        items: { product: product._id },
+      },
+    }
+  );
+
+  return product;
 };

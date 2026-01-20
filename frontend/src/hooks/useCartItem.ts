@@ -6,8 +6,10 @@ import {
   removeFromCartThunk,
 } from "../store/cartSlice";
 import type { Product } from "../types/Product";
+import type { CartProduct } from "../types/CartProduct";
 
-export function useCartItem(product: Product) {
+
+export function useCartItem(product: CartProduct) {
   const dispatch = useDispatch<AppDispatch>();
 
   const cartItem = useSelector((state: RootState) =>

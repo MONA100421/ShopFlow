@@ -4,7 +4,14 @@ import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../store/store";
 import { removeFromCartThunk } from "../store/cartSlice";
 import type { CartItem } from "../types/CartItem";
-import type { Product } from "../types/Product";
+
+interface CartProduct {
+  id: string;
+  title: string;
+  price: number;
+  image: string;
+  stock: number;
+}
 
 interface CartDrawerItemProps {
   item: CartItem;
@@ -14,14 +21,21 @@ export default function CartDrawerItem({
   item,
 }: CartDrawerItemProps) {
   const dispatch = useDispatch<AppDispatch>();
+  if (
+    !item ||
+    !item.productId ||
+    typeof item.price !== "number"
+  ) {
+    return null;
+  }
 
-  const product = {
+  const product: CartProduct = {
     id: item.productId,
     title: item.name,
     price: item.price,
     image: item.imageUrl,
     stock: Infinity,
-  } as Product;
+  };
 
   const { quantity, increase, decrease } =
     useCartItem(product);
@@ -34,6 +48,7 @@ export default function CartDrawerItem({
           alt={item.name}
         />
       </div>
+
       <div className="drawer-item-main">
         <div className="drawer-item-name">
           {item.name}
@@ -61,9 +76,10 @@ export default function CartDrawerItem({
           </button>
         </div>
       </div>
+
       <div className="drawer-item-side">
         <div className="drawer-item-price">
-          ${item.subtotal.toFixed(2)}
+          ${(item.subtotal ?? 0).toFixed(2)}
         </div>
 
         <button

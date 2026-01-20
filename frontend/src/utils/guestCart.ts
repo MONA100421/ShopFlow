@@ -72,3 +72,12 @@ export function removeFromGuestCart(
   save(cart);
   return cart;
 }
+
+export function cleanupGuestCart(validProductIds: string[]): CartItem[] {
+  const cart = getGuestCart().filter((item) =>
+    validProductIds.includes(item.productId)
+  );
+
+  save(cart);
+  return cart;
+}

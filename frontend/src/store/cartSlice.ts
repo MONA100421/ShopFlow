@@ -11,6 +11,7 @@ import {
   addToGuestCart,
   updateGuestCartQuantity,
   removeFromGuestCart,
+  cleanupGuestCart,
 } from "../utils/guestCart";
 import { logoutThunk } from "./authSlice";
 
@@ -65,6 +66,14 @@ export const removeFromCartThunk = createAsyncThunk<
     ? removeFromCartAPI(productId)
     : removeFromGuestCart(productId);
 });
+
+export const syncGuestCartThunk = createAsyncThunk<
+  CartItem[],
+  string[]
+>("cart/syncGuest", async (validProductIds) => {
+  return cleanupGuestCart(validProductIds);
+});
+
 
 /* State */
 

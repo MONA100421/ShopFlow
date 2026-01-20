@@ -96,9 +96,13 @@ export const deleteProduct = async (
       return;
     }
 
-    res.status(200).json(product);
+    res.status(200).json({
+      message: "Product deleted and removed from all carts",
+      product,
+    });
   } catch (error) {
     console.error("deleteProduct error:", error);
     res.status(500).json({ error: "Failed to delete product" });
   }
 };
+

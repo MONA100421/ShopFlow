@@ -10,8 +10,14 @@ const populateCart = async (cart: any) => {
     path: "items.product",
   });
 
+  cart.items = cart.items.filter(
+    (item: any) => item.product && item.product.isActive
+  );
+
+  await cart.save();
   return cart;
 };
+
 
 const getOrCreateCart = async (userId: string) => {
   let cart = await Cart.findOne({ user: userId });

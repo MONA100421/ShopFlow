@@ -11,6 +11,12 @@ import {
   updateProductAPI,
   deleteProductAPI,
 } from "../services/productService";
+import {
+  fetchUserCartThunk,
+  fetchGuestCartThunk,
+} from "./cartSlice";
+import type { RootState } from "./store";
+
 
 /** GET /api/products */
 export const fetchProductsThunk = createAsyncThunk<
@@ -68,15 +74,31 @@ export const updateProductThunk = createAsyncThunk<
 export const deleteProductThunk = createAsyncThunk<
   string,
   string,
-  { rejectValue: string }
->("products/delete", async (productId, { rejectWithValue }) => {
+  {
+    rejectValue: string;
+    state: RootState;
+  }
+>("products/delete", async (productId, thunkAPI) => {
+  const { rejectWithValue, dispatch, getState } = thunkAPI;
+
   try {
     await deleteProductAPI(productId);
+    
+    const isAuthenticated =
+      getState().auth.isAuthenticated;
+
+    if (isAuthenticated) {
+      dispatch(fetchUserCartThunk());
+    } else {
+      dispatch(fetchGuestCartThunk());
+    }
+
     return productId;
   } catch {
     return rejectWithValue("Delete product failed");
   }
 });
+
 
 /* State */
 
