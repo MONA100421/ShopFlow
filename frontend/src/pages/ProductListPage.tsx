@@ -1,8 +1,12 @@
 import "./ProductListPage.css";
-import { useEffect, useState, useMemo, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import ProductCard from "../components/ProductCard";
+import Pagination from "../components/Pagination";
 import type { RootState, AppDispatch } from "../store/store";
 import { fetchProductsThunk } from "../store/productsSlice";
 
@@ -28,67 +32,112 @@ export default function ProductListPage() {
   const dispatch = useDispatch<AppDispatch>();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  /* URL Search */
-  const [searchParams] = useSearchParams();
-  const rawKeyword = searchParams.get("q") ?? "";
-  const keyword = normalizeText(rawKeyword);
+  /* ======================================================
+     URL state (single source of truth)
+  ====================================================== */
 
-  /* Redux state */
+  const [searchParams, setSearchParams] =
+    useSearchParams();
+
+  const keyword = normalizeText(
+    searchParams.get("q") ?? ""
+  );
+
+  const sortBy = (searchParams.get("sort") ??
+    "last") as SortKey;
+
+  const pageFromUrl = Number(
+    searchParams.get("page") ?? "1"
+  );
+
+  const currentPage =
+    Number.isNaN(pageFromUrl) || pageFromUrl < 1
+      ? 1
+      : pageFromUrl;
+
+  /* ======================================================
+     Redux state
+  ====================================================== */
+
   const { list, loading, error } = useSelector(
     (state: RootState) => state.products
   );
 
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector(
+    (state: RootState) => state.auth
+  );
   const isAdmin = user?.role === "admin";
 
-  /* Local state */
-  const [sortBy, setSortBy] = useState<SortKey>("last");
-  const [open, setOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  /* ======================================================
+     Fetch products
+  ====================================================== */
 
-  /* Fetch products */
   useEffect(() => {
     dispatch(fetchProductsThunk());
   }, [dispatch]);
 
-  /* Close dropdown on outside click */
+  /* ======================================================
+     Close dropdown on outside click
+  ====================================================== */
+
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
+        !dropdownRef.current.contains(
+          e.target as Node
+        )
       ) {
         setOpen(false);
       }
     };
     document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    return () =>
+      document.removeEventListener(
+        "mousedown",
+        handler
+      );
   }, []);
 
-  /* Reset page when search or sort changes */
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [keyword, sortBy]);
+  /* ======================================================
+     Local UI state
+  ====================================================== */
+  
+  const [open, setOpen] = useState(false);
 
-  /* Filter (Search) */
+  /* ======================================================
+     Filter
+  ====================================================== */
+
   const filteredList = useMemo(() => {
     if (!Array.isArray(list)) return [];
     if (!keyword) return list;
 
     return list.filter((product) => {
       const title = normalizeText(product.title);
-      const desc = normalizeText(product.description ?? "");
-      return title.includes(keyword) || desc.includes(keyword);
+      const desc = normalizeText(
+        product.description ?? ""
+      );
+      return (
+        title.includes(keyword) ||
+        desc.includes(keyword)
+      );
     });
   }, [list, keyword]);
 
-  /* Sorting */
+  /* ======================================================
+     Sorting
+  ====================================================== */
+
   const sortedList = useMemo(() => {
     if (!Array.isArray(filteredList)) return [];
 
     return [...filteredList].sort((a, b) => {
-      if (sortBy === "price-asc") return a.price - b.price;
-      if (sortBy === "price-desc") return b.price - a.price;
+      if (sortBy === "price-asc")
+        return a.price - b.price;
+      if (sortBy === "price-desc")
+        return b.price - a.price;
+
       return (
         new Date(b.createdAt).getTime() -
         new Date(a.createdAt).getTime()
@@ -96,8 +145,13 @@ export default function ProductListPage() {
     });
   }, [filteredList, sortBy]);
 
-  /* Pagination */
-  const totalPages = Math.ceil(sortedList.length / ITEMS_PER_PAGE);
+  /* ======================================================
+     Pagination
+  ====================================================== */
+
+  const totalPages = Math.ceil(
+    sortedList.length / ITEMS_PER_PAGE
+  );
 
   const pagedList = useMemo(() => {
     return sortedList.slice(
@@ -106,49 +160,71 @@ export default function ProductListPage() {
     );
   }, [sortedList, currentPage]);
 
+  /* ======================================================
+     Helpers
+  ====================================================== */
+
+  const updateParams = (updates: Record<string, string>) => {
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      Object.entries(updates).forEach(([k, v]) =>
+        params.set(k, v)
+      );
+      return params;
+    });
+  };
+
   const currentLabel =
-    SORT_OPTIONS.find((o) => o.key === sortBy)?.label ?? "Last added";
+    SORT_OPTIONS.find(
+      (o) => o.key === sortBy
+    )?.label ?? "Last added";
+
+  /* ======================================================
+     Render
+  ====================================================== */
 
   return (
     <div className="product-page">
       <div className="container">
         <div className="product-header">
-          <h1 className="product-title">Products</h1>
+          <h1 className="product-title">
+            Products
+          </h1>
 
           <div className="product-header-actions">
-            {/* ===== Sort Dropdown (Figma-aligned custom dropdown) ===== */}
+            {/* Sort */}
             <div
               className="sort-dropdown"
               ref={dropdownRef}
-              role="combobox"
-              aria-expanded={open}
             >
               <button
                 type="button"
                 className="sort-trigger"
-                aria-haspopup="listbox"
-                aria-expanded={open}
-                onClick={() => setOpen((v) => !v)}
+                onClick={() =>
+                  setOpen((v) => !v)
+                }
               >
-                <span className="sort-label">{currentLabel}</span>
+                <span>{currentLabel}</span>
                 <img
                   src={TriangleIcon}
                   alt=""
-                  className={`sort-triangle ${open ? "open" : ""}`}
+                  className={`sort-triangle ${
+                    open ? "open" : ""
+                  }`}
                 />
               </button>
 
               {open && (
-                <div className="sort-menu" role="listbox">
+                <div className="sort-menu">
                   {SORT_OPTIONS.map((opt) => (
                     <button
                       key={opt.key}
-                      type="button"
-                      role="option"
-                      aria-selected={sortBy === opt.key}
                       className="sort-item"
                       onClick={() => {
-                        setSortBy(opt.key);
+                        updateParams({
+                          sort: opt.key,
+                          page: "1",
+                        });
                         setOpen(false);
                       }}
                     >
@@ -171,7 +247,9 @@ export default function ProductListPage() {
             {isAdmin && (
               <button
                 className="add-product-btn"
-                onClick={() => navigate("/products/new")}
+                onClick={() =>
+                  navigate("/products/new")
+                }
               >
                 Add Product
               </button>
@@ -179,20 +257,21 @@ export default function ProductListPage() {
           </div>
         </div>
 
-        {/* Loading */}
-        {loading && <p className="loading-text">Loading...</p>}
-
-        {/* Error */}
-        {error && list.length === 0 && (
-          <p className="error-text">{error}</p>
+        {loading && (
+          <p className="loading-text">
+            Loading...
+          </p>
         )}
 
-        {/* Empty */}
+        {error && list.length === 0 && (
+          <p className="error-text">
+            {error}
+          </p>
+        )}
+
         {!loading && pagedList.length === 0 ? (
           <div className="product-empty">
-            <p style={{ textAlign: "center", color: "#6b7280" }}>
-              No products found
-            </p>
+            <p>No products found</p>
           </div>
         ) : (
           <>
@@ -203,56 +282,21 @@ export default function ProductListPage() {
                   product={product}
                   isAdmin={isAdmin}
                   onEdit={(id) =>
-                    navigate(`/products/${id}/edit`)
+                    navigate(
+                      `/products/${id}/edit`
+                    )
                   }
                 />
               ))}
             </div>
 
-            {totalPages > 1 && (
-              <div className="pagination">
-                <button
-                  className={`pagination-item ${
-                    currentPage === 1 ? "disabled" : ""
-                  }`}
-                  onClick={() =>
-                    currentPage > 1 &&
-                    setCurrentPage(currentPage - 1)
-                  }
-                >
-                  «
-                </button>
-
-                {Array.from(
-                  { length: totalPages },
-                  (_, i) => i + 1
-                ).map((page) => (
-                  <button
-                    key={page}
-                    className={`pagination-item ${
-                      page === currentPage ? "active" : ""
-                    }`}
-                    onClick={() => setCurrentPage(page)}
-                  >
-                    {page}
-                  </button>
-                ))}
-
-                <button
-                  className={`pagination-item ${
-                    currentPage === totalPages
-                      ? "disabled"
-                      : ""
-                  }`}
-                  onClick={() =>
-                    currentPage < totalPages &&
-                    setCurrentPage(currentPage + 1)
-                  }
-                >
-                  »
-                </button>
-              </div>
-            )}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) =>
+                updateParams({ page: String(page) })
+              }
+            />
           </>
         )}
       </div>
