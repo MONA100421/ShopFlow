@@ -32,9 +32,7 @@ export default function ProductListPage() {
   const dispatch = useDispatch<AppDispatch>();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  /* ======================================================
-     URL state (single source of truth)
-  ====================================================== */
+  /* URL state */
 
   const [searchParams, setSearchParams] =
     useSearchParams();
@@ -55,9 +53,7 @@ export default function ProductListPage() {
       ? 1
       : pageFromUrl;
 
-  /* ======================================================
-     Redux state
-  ====================================================== */
+  /* Redux state */
 
   const { list, loading, error } = useSelector(
     (state: RootState) => state.products
@@ -68,17 +64,13 @@ export default function ProductListPage() {
   );
   const isAdmin = user?.role === "admin";
 
-  /* ======================================================
-     Fetch products
-  ====================================================== */
+  /* Fetch products */
 
   useEffect(() => {
     dispatch(fetchProductsThunk());
   }, [dispatch]);
 
-  /* ======================================================
-     Close dropdown on outside click
-  ====================================================== */
+  /* Close dropdown on outside click */
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -99,15 +91,11 @@ export default function ProductListPage() {
       );
   }, []);
 
-  /* ======================================================
-     Local UI state
-  ====================================================== */
+  /* Local UI state */
   
   const [open, setOpen] = useState(false);
 
-  /* ======================================================
-     Filter
-  ====================================================== */
+  /* Filter */
 
   const filteredList = useMemo(() => {
     if (!Array.isArray(list)) return [];
@@ -125,9 +113,7 @@ export default function ProductListPage() {
     });
   }, [list, keyword]);
 
-  /* ======================================================
-     Sorting
-  ====================================================== */
+  /* Sorting */
 
   const sortedList = useMemo(() => {
     if (!Array.isArray(filteredList)) return [];
@@ -145,9 +131,7 @@ export default function ProductListPage() {
     });
   }, [filteredList, sortBy]);
 
-  /* ======================================================
-     Pagination
-  ====================================================== */
+  /* Pagination */
 
   const totalPages = Math.ceil(
     sortedList.length / ITEMS_PER_PAGE
@@ -160,9 +144,7 @@ export default function ProductListPage() {
     );
   }, [sortedList, currentPage]);
 
-  /* ======================================================
-     Helpers
-  ====================================================== */
+  /* Helpers */
 
   const updateParams = (updates: Record<string, string>) => {
     setSearchParams((prev) => {
@@ -179,9 +161,7 @@ export default function ProductListPage() {
       (o) => o.key === sortBy
     )?.label ?? "Last added";
 
-  /* ======================================================
-     Render
-  ====================================================== */
+  /* Render */
 
   return (
     <div className="product-page">
