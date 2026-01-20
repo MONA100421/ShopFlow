@@ -15,6 +15,9 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import ProductFormPage from "./pages/ProductFormPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
+import ResetPassword from "./pages/ResetPassword";
+
+
 function App() {
   const dispatch = useDispatch<AppDispatch>();
 
@@ -40,6 +43,8 @@ function App() {
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+
       </Route>
     </Routes>
   );

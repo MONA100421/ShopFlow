@@ -7,14 +7,14 @@ export async function sendTestEmail(
   options: {
     subject: string;
     html: string;
+    text?: string; // ✅ 关键：允许 text
   }
 ) {
-  const msg = {
+  await sgMail.send({
     to,
     from: process.env.SENDGRID_FROM_EMAIL as string,
     subject: options.subject,
     html: options.html,
-  };
-
-  await sgMail.send(msg);
+    text: options.text, // ✅ 同步传给 SendGrid
+  });
 }

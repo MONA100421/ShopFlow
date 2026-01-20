@@ -4,8 +4,13 @@ import { UserModel } from "../models/User.model";
 import { PasswordReset } from "../models/passwordReset.model";
 import { sendTestEmail } from "../services/sendgrid";
 
+import bcrypt from "bcryptjs";
+
 const router = Router();
 
+/**
+ * Forgot password
+ */
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
 
@@ -21,40 +26,35 @@ router.post("/forgot-password", async (req, res) => {
   console.log("🔍 FORGOT PASSWORD EMAIL:", email);
   console.log("🔍 USER FOUND:", !!user);
 
-
   if (user) {
-    // 1️⃣ raw token
     const rawToken = crypto.randomBytes(32).toString("hex");
 
-    // 2️⃣ hash token
     const tokenHash = crypto
       .createHash("sha256")
       .update(rawToken)
       .digest("hex");
 
-    // 3️⃣ expires
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
-    // 4️⃣ store in DB
     await PasswordReset.create({
       userId: user._id,
       tokenHash,
       expiresAt,
     });
 
-    // 5️⃣ reset link
     const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}`;
+
     console.log("🚀 ABOUT TO SEND RESET EMAIL TO:", user.email);
-    
-    // 6️⃣ send email（⚠️ 一定要在 if 裡）
+
     await sendTestEmail(user.email, {
-      subject: "Reset your password",
+      subject: "SendGrid works!",
       html: `
-        <p>You requested to reset your password.</p>
-        <p>Click the link below to reset it:</p>
-        <a href="${resetLink}">${resetLink}</a>
-        <p>This link will expire in 15 minutes.</p>
+        <h2>SendGrid works!</h2>
+        <p>This is a password reset test.</p>
+        <p>Reset link:</p>
+        <p>${resetLink}</p>
       `,
+      text: `Reset link: ${resetLink}`,
     });
 
     console.log("RESET PASSWORD LINK:", resetLink);
@@ -62,5 +62,53 @@ router.post("/forgot-password", async (req, res) => {
 
   return res.json({ message: responseMessage });
 });
+
+/**
+ * STEP 3.2.1
+ * Reset password - API skeleton
+ */
+router.post("/reset-password", async (req, res) => {
+  const { token, password } = req.body;
+
+  if (!token || !password) {
+    return res.status(400).json({
+      message: "Invalid request",
+    });
+  }
+
+  // 1️⃣ hash incoming token
+  const tokenHash = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+
+  // 2️⃣ find reset record
+  const resetRecord = await PasswordReset.findOne({
+    tokenHash,
+    expiresAt: { $gt: new Date() },
+  });
+
+  if (!resetRecord) {
+    return res.status(400).json({
+      message: "Invalid or expired reset token",
+    });
+  }
+
+  // 🔐 STEP 3.2.3 START
+  // 3️⃣ hash new password
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  // 4️⃣ update user password
+  await UserModel.findByIdAndUpdate(resetRecord.userId, {
+    passwordHash,
+  });
+  await PasswordReset.deleteOne({ _id: resetRecord._id });
+  
+  return res.json({
+    message: "password updated",
+  });
+});
+
+
 
 export default router;
