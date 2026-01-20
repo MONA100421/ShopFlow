@@ -44,10 +44,9 @@ export default function ProductForm({
     setPreviewUrl(initialData.image ?? null);
   }, [initialData]);
 
-  /* SINGLE SOURCE OF TRUTH: image validation */
+  /* Image validation */
   const isValidImageSource = (value: string) => {
     if (value.startsWith("data:image/")) return true;
-
     try {
       const url = new URL(value);
       return ["http:", "https:"].includes(url.protocol);
@@ -58,8 +57,6 @@ export default function ProductForm({
 
   const handlePreview = () => {
     const trimmed = image.trim();
-
-    // reset previous image error
     setErrors((prev) => ({ ...prev, image: undefined }));
 
     if (!trimmed) {
@@ -123,11 +120,13 @@ export default function ProductForm({
   };
 
   return (
-    <form className="product-form" onSubmit={handleSubmit}>
+    <form className="product-form" onSubmit={handleSubmit} noValidate>
       <div className="product-form-card">
-        {/* Title */}
+        {/* Product Name */}
         <div className="form-group full">
-          <label className="form-label" htmlFor="product-title">Product name</label>
+          <label className="form-label" htmlFor="product-title">
+            Product name
+          </label>
           <input
             id="product-title"
             name="title"
@@ -135,13 +134,22 @@ export default function ProductForm({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
-          {errors.title && <div className="form-error">{errors.title}</div>}
+          {errors.title && (
+            <div className="form-error">{errors.title}</div>
+          )}
         </div>
 
         {/* Description */}
         <div className="form-group full">
-          <label className="form-label">Product Description</label>
+          <label
+            className="form-label"
+            htmlFor="product-description"
+          >
+            Product Description
+          </label>
           <textarea
+            id="product-description"
+            name="description"
             className="form-control textarea"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -151,7 +159,12 @@ export default function ProductForm({
         {/* Category + Price */}
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label" htmlFor="product-category">Category</label>
+            <label
+              className="form-label"
+              htmlFor="product-category"
+            >
+              Category
+            </label>
             <select
               id="product-category"
               name="category"
@@ -166,38 +179,71 @@ export default function ProductForm({
           </div>
 
           <div className="form-group">
-            <label className="form-label">Price</label>
+            <label
+              className="form-label"
+              htmlFor="product-price"
+            >
+              Price
+            </label>
             <input
+              id="product-price"
+              name="price"
               type="number"
               className={`form-control ${errors.price ? "error" : ""}`}
               value={price}
               onChange={(e) =>
-                setPrice(e.target.value === "" ? "" : Number(e.target.value))
+                setPrice(
+                  e.target.value === ""
+                    ? ""
+                    : Number(e.target.value)
+                )
               }
             />
-            {errors.price && <div className="form-error">{errors.price}</div>}
+            {errors.price && (
+              <div className="form-error">{errors.price}</div>
+            )}
           </div>
         </div>
 
         {/* Stock + Image */}
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label">Stock</label>
+            <label
+              className="form-label"
+              htmlFor="product-stock"
+            >
+              Stock
+            </label>
             <input
+              id="product-stock"
+              name="stock"
               type="number"
               className={`form-control ${errors.stock ? "error" : ""}`}
               value={stock}
               onChange={(e) =>
-                setStock(e.target.value === "" ? "" : Number(e.target.value))
+                setStock(
+                  e.target.value === ""
+                    ? ""
+                    : Number(e.target.value)
+                )
               }
             />
-            {errors.stock && <div className="form-error">{errors.stock}</div>}
+            {errors.stock && (
+              <div className="form-error">{errors.stock}</div>
+            )}
           </div>
 
           <div className="form-group">
-            <label className="form-label">Image URL</label>
+            <label
+              className="form-label"
+              htmlFor="product-image"
+            >
+              Image URL
+            </label>
             <div className="image-input-wrapper">
               <input
+                id="product-image"
+                name="image"
                 className={`form-control ${errors.image ? "error" : ""}`}
                 value={image}
                 onChange={(e) => setImage(e.target.value)}
@@ -210,7 +256,9 @@ export default function ProductForm({
                 Preview
               </button>
             </div>
-            {errors.image && <div className="form-error">{errors.image}</div>}
+            {errors.image && (
+              <div className="form-error">{errors.image}</div>
+            )}
           </div>
         </div>
 
@@ -236,7 +284,11 @@ export default function ProductForm({
         {/* Actions */}
         <div className="form-actions">
           {onDelete && (
-            <button type="button" className="delete-btn" onClick={onDelete}>
+            <button
+              type="button"
+              className="delete-btn"
+              onClick={onDelete}
+            >
               Delete
             </button>
           )}

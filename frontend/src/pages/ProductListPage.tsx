@@ -1,11 +1,10 @@
 import "./ProductListPage.css";
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import ProductCard from "../components/ProductCard";
 import type { RootState, AppDispatch } from "../store/store";
 import { fetchProductsThunk } from "../store/productsSlice";
-import checkRightIcon from "../assets/check-right.svg";
 
 type SortKey = "last" | "price-asc" | "price-desc";
 
@@ -17,16 +16,13 @@ const SORT_OPTIONS: { key: SortKey; label: string }[] = [
 
 const ITEMS_PER_PAGE = 10;
 
-/* Utils */
 function normalizeText(text: string) {
   return text.normalize("NFC").toLowerCase().trim();
 }
 
-/* Component */
 export default function ProductListPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
   /* URL Search */
   const [searchParams] = useSearchParams();
@@ -43,27 +39,12 @@ export default function ProductListPage() {
 
   /* Local state */
   const [sortBy, setSortBy] = useState<SortKey>("last");
-  const [open, setOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  /* Fetch products (only once on mount) */
+  /* Fetch products */
   useEffect(() => {
     dispatch(fetchProductsThunk());
   }, [dispatch]);
-
-  /* Close dropdown */
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      ) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
 
   /* Reset page when search or sort changes */
   useEffect(() => {
@@ -89,7 +70,6 @@ export default function ProductListPage() {
     return [...filteredList].sort((a, b) => {
       if (sortBy === "price-asc") return a.price - b.price;
       if (sortBy === "price-desc") return b.price - a.price;
-
       return (
         new Date(b.createdAt).getTime() -
         new Date(a.createdAt).getTime()
@@ -107,10 +87,6 @@ export default function ProductListPage() {
     );
   }, [sortedList, currentPage]);
 
-  const currentLabel =
-    SORT_OPTIONS.find((o) => o.key === sortBy)?.label ?? "Last added";
-
-  /* Render */
   return (
     <div className="product-page">
       <div className="container">
@@ -118,42 +94,22 @@ export default function ProductListPage() {
           <h1 className="product-title">Products</h1>
 
           <div className="product-header-actions">
-            {/* Sort */}
-            <div className="sort-dropdown" ref={dropdownRef}>
-              <button
-                className="sort-trigger"
-                type="button"
-                onClick={() => setOpen((v) => !v)}
-              >
-                <span>{currentLabel}</span>
-                <span className={`sort-caret ${open ? "open" : ""}`} />
-              </button>
-
-              {open && (
-                <div className="sort-menu">
-                  {SORT_OPTIONS.map(({ key, label }) => (
-                    <button
-                      key={key}
-                      type="button"
-                      className="sort-item"
-                      onClick={() => {
-                        setSortBy(key);
-                        setOpen(false);
-                      }}
-                    >
-                      <span className="sort-item-text">{label}</span>
-                      {sortBy === key && (
-                        <img
-                          src={checkRightIcon}
-                          alt="selected"
-                          className="sort-check-icon"
-                        />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <select
+              className="sort-trigger"
+              id="product-sort"
+              name="sort"
+              aria-label="Sort products"
+              value={sortBy}
+              onChange={(e) =>
+                setSortBy(e.target.value as SortKey)
+              }
+            >
+              {SORT_OPTIONS.map((opt) => (
+                <option key={opt.key} value={opt.key}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
 
             {isAdmin && (
               <button
@@ -168,6 +124,8 @@ export default function ProductListPage() {
 
         {/* Loading */}
         {loading && <p className="loading-text">Loading...</p>}
+
+        {/* Error */}
         {error && list.length === 0 && (
           <p className="error-text">{error}</p>
         )}
