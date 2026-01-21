@@ -7,7 +7,7 @@ A production-ready e-commerce platform built with the MERN stack, demonstrating 
 - **Chenyi Weng**
 - **Bingchen Li**
 
-## 🚀 Tech Stack
+## 🚀 Tech Stacks
 
 ### Frontend
 ![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black)
@@ -157,7 +157,7 @@ npm run dev:all
 - **Order history** with GET endpoints
 - **Cart summary** with tax calculation (10%) and discount support
 
-## 🏗️ Technical Architecture
+## 🧱 Technical Architecture
 
 ### Frontend Stack
 - **React 19** with TypeScript
@@ -228,7 +228,7 @@ ShopFlow/
     └── package.json
 ```
 
-## 📊 API Endpoints
+## 🔧 API Endpoints
 
 ### Authentication
 - `POST /api/auth/register` - User registration 
