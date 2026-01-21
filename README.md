@@ -127,7 +127,7 @@ npm install
 npm run dev:all
 ```
 
-## 🛍️ Implemented Features
+## 🐻‍❄️ Implemented Features
 
 ### User Authentication
 - **Session-based authentication** with MongoDB store
