@@ -3,8 +3,9 @@ import {
   Link,
   useNavigate,
   useSearchParams,
+  useLocation,
 } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import type { RootState, AppDispatch } from "../store/store";
@@ -20,39 +21,60 @@ import twitterIcon from "../assets/twitter.svg";
 import facebookIcon from "../assets/facebook.svg";
 
 export default function MainLayout() {
-  /* Local UI State */
+  /* =====================
+     Local UI State
+  ===================== */
   const [cartOpen, setCartOpen] = useState(false);
 
-  /* Hooks */
+  /* =====================
+     Hooks
+  ===================== */
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
 
-  /* Redux */
+  /* =====================
+     Redux State
+  ===================== */
   const auth = useSelector((state: RootState) => state.auth);
   const cart = useSelector((state: RootState) => state.cart);
   const cartReady = cart.ready;
+
   const items = useMemo(() => {
     if (!cartReady) return [];
     return Array.isArray(cart.items) ? cart.items : [];
   }, [cart.items, cartReady]);
 
-  /* Search (IME Safe) */
+  /* =====================
+     Search
+  ===================== */
   const [value, setValue] = useState(searchParams.get("q") || "");
   const [isComposing, setIsComposing] = useState(false);
 
+  useEffect(() => {
+    setValue(searchParams.get("q") || "");
+  }, [searchParams]);
+
   const commitSearch = (v: string) => {
-    navigate(v ? `/?q=${encodeURIComponent(v)}` : "/");
+    if (!v) {
+      navigate("/");
+    } else {
+      navigate(`/?q=${encodeURIComponent(v)}&page=1`);
+    }
   };
 
-  /* Auth */
+  /* =====================
+     Auth
+  ===================== */
   const handleLogout = () => {
     dispatch(logoutThunk());
     navigate("/auth/login");
   };
 
-  /* Cart Summary */
-
+  /* =====================
+     Cart Summary
+  ===================== */
   const totalQuantity = useMemo(() => {
     return items.reduce(
       (sum, item) => sum + (item.quantity ?? 0),
@@ -72,19 +94,20 @@ export default function MainLayout() {
 
   return (
     <div className="app">
-      {/* Header */}
+      {/* =====================
+          Header
+      ===================== */}
       <header className="site-header">
         <div className="container header-inner">
-          {/* Logo */}
           <Link
-            to="/"
+            to={`/${location.search}`}
             className="header-logo header-logo-full"
           >
             Management <span>Chuwa</span>
           </Link>
 
           <Link
-            to="/"
+            to={`/${location.search}`}
             className="header-logo header-logo-short"
           >
             <span className="logo-m">M</span>
@@ -100,9 +123,7 @@ export default function MainLayout() {
                 className="search-input"
                 placeholder="Search"
                 value={value}
-                onCompositionStart={() =>
-                  setIsComposing(true)
-                }
+                onCompositionStart={() => setIsComposing(true)}
                 onCompositionEnd={(e) => {
                   setIsComposing(false);
                   const v = e.currentTarget.value;
@@ -182,14 +203,18 @@ export default function MainLayout() {
         </div>
       </header>
 
-      {/* Main */}
+      {/* =====================
+          Main
+      ===================== */}
       <main className="site-main">
         <div className="container">
           <Outlet context={{ setCartOpen }} />
         </div>
       </main>
 
-      {/* Footer */}
+      {/* =====================
+          Footer
+      ===================== */}
       <footer className="site-footer">
         <div className="container footer-inner">
           <span className="footer-left">
@@ -228,7 +253,9 @@ export default function MainLayout() {
         </div>
       </footer>
 
-      {/* Cart Drawer */}
+      {/* =====================
+          Cart Drawer
+      ===================== */}
       {cartReady && (
         <CartDrawer
           open={cartOpen}
