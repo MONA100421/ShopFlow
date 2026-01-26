@@ -5,11 +5,14 @@ import App from "./App";
 import "./index.css";
 import "./App.css";
 import { store } from "./store/store";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
     <BrowserRouter>
-      <App />
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
     </BrowserRouter>
   </Provider>
 );
