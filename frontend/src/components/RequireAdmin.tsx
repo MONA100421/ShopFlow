@@ -8,7 +8,7 @@ export default function RequireAdmin() {
   );
 
   if (!initialized) {
-    return null;
+    return <p>Loading...</p>;
   }
 
 
