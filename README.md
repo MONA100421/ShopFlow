@@ -39,12 +39,12 @@ A production-ready e-commerce platform built with the MERN stack, demonstrating 
 ```mermaid
 graph LR
     A[User Input] --> B[AuthForm Component]
-    B --> C[authSlice Thunks]
-    C --> D[authService API]
-    D --> E[Backend Controller]
+    B --> C[authSlice Thunks<br/>loginThunk/registerThunk]
+    C --> D[authService API<br/>loginAPI/registerAPI]
+    D --> E[Backend Controller<br/>auth.controller.ts]
     E --> F[bcrypt Hashing]
-    F --> G[Session Creation]
-    G --> H[Redux State Update]
+    F --> G[Session Creation<br/>req.session.userId]
+    G --> H[Redux State Update<br/>authSlice]
     H --> I[UI Re-render]
 ```
 
@@ -52,27 +52,27 @@ graph LR
 ```mermaid
 graph LR
     A[Add to Cart] --> B{User Authenticated?}
-    B -->|No| C[localStorage Guest Cart]
-    B -->|Yes| D[cartSlice Thunk]
-    C --> E[Guest Cart Utils]
-    D --> F[cartService API]
-    E --> G[Cart Merge on Login]
-    F --> H[Backend Cart Service]
+    B -->|No| C[localStorage Guest Cart<br/>guestCart.ts utils]
+    B -->|Yes| D[cartSlice Thunks<br/>addToCart/updateCart]
+    C --> E[Guest Cart Utils<br/>addToGuestCart/updateGuestCart]
+    D --> F[cartService API<br/>cartService.ts]
+    E --> G[Cart Merge on Login<br/>loginThunk calls mergeCartAPI]
+    F --> H[Backend Cart Service<br/>cart.controller.ts]
     G --> H
-    H --> I[MongoDB Storage]
-    I --> J[Redux State Update]
+    H --> I[MongoDB Storage<br/>Cart.model.ts]
+    I --> J[Redux State Update<br/>cartSlice]
 ```
 
 ### Product Management Flow
 ```mermaid
 graph LR
-    A[Product Form] --> B[productsSlice Thunks]
-    B --> C[productService API]
-    C --> D[Zod Validation]
-    D --> E[Backend Controller]
-    E --> F[Product Service]
-    F --> G[MongoDB Operations]
-    G --> H[Redux State Update]
+    A[Product Form] --> B[productsSlice Thunks<br/>productsSlice.ts]
+    B --> C[productService API<br/>productService.ts]
+    C --> D[Zod Validation<br/>validate middleware]
+    D --> E[Backend Controller<br/>product.controller.ts]
+    E --> F[Product Service<br/>product.service.ts]
+    F --> G[MongoDB Operations<br/>Product.model.ts]
+    G --> H[Redux State Update<br/>productsSlice]
     H --> I[UI Re-render]
 ```
 
@@ -177,55 +177,82 @@ npm run dev:all
 
 ```
 ShopFlow/
-├── frontend/                 # React frontend application
-│   ├── src/
-│   │   ├── components/      # Reusable UI components
-│   │   │   ├── AuthForm.tsx
-│   │   │   ├── CartDrawer.tsx
-│   │   │   ├── ProductCard.tsx
-│   │   │   ├── ProductForm.tsx
-│   │   │   └── RequireAdmin.tsx
-│   │   ├── pages/          # Page components
-│   │   │   ├── ProductListPage.tsx
-│   │   │   ├── ProductDetailPage.tsx
-│   │   │   ├── ProductFormPage.tsx
-│   │   │   └── AuthPage.tsx
-│   │   ├── store/          # Redux store and slices
-│   │   │   ├── authSlice.ts
-│   │   │   ├── cartSlice.ts
-│   │   │   └── productsSlice.ts
-│   │   ├── services/       # API service functions
-│   │   ├── types/          # TypeScript type definitions
-│   │   └── utils/          # Utility functions
-│   │       └── guestCart.ts
-│   └── package.json
-└── backend/                 # Express backend API
-    ├── src/
-    │   ├── models/         # Mongoose data models
-    │   │   ├── User.model.ts
-    │   │   ├── Product.model.ts
-    │   │   └── Cart.model.ts
-    │   ├── routes/         # API route definitions
-    │   │   ├── auth.routes.ts
-    │   │   ├── product.routes.ts
-    │   │   ├── cart.routes.ts
-    │   │   └── order.routes.ts
-    │   ├── controllers/    # Route controller logic
-    │   │   ├── auth.controller.ts
-    │   │   ├── product.controller.ts
-    │   │   └── cart.controller.ts
-    │   ├── services/       # Business logic layer
-    │   │   ├── auth.service.ts
-    │   │   ├── product.service.ts
-    │   │   └── cart.service.ts
-    │   ├── middlewares/    # Custom middleware
-    │   │   └── auth.middleware.ts
-    │   ├── validations/    # Zod schemas
-    │   │   └── product.validation.ts
-    │   ├── mappers/        # Data transformation
-    │   │   └── cart.mapper.ts
-    │   └── server.ts       # Server entry point
-    └── package.json
+├── frontend/                 # React frontend application  
+│   ├── src/  
+│   │   ├── components/      # Reusable UI components  
+│   │   │   ├── AuthForm.tsx  
+│   │   │   ├── CartDrawer.tsx  
+│   │   │   ├── CartDrawerItem.tsx  
+│   │   │   ├── Pagination.tsx  
+│   │   │   ├── ProductCard.tsx  
+│   │   │   ├── ProductForm.tsx  
+│   │   │   ├── ProductImage.tsx  
+│   │   │   ├── QuantityButton.tsx  
+│   │   │   └── RequireAdmin.tsx  
+│   │   ├── pages/          # Page components  
+│   │   │   ├── AuthPage.tsx  
+│   │   │   ├── NotFoundPage.tsx  
+│   │   │   ├── ProductDetailPage.tsx  
+│   │   │   ├── ProductFormPage.tsx  
+│   │   │   └── ProductListPage.tsx  
+│   │   ├── layouts/        # Layout components  
+│   │   │   └── MainLayout.tsx  
+│   │   ├── store/          # Redux store and slices  
+│   │   │   ├── authSlice.ts  
+│   │   │   ├── cartSlice.ts  
+│   │   │   ├── productsSlice.ts  
+│   │   │   └── store.ts  
+│   │   ├── services/       # API service functions  
+│   │   │   ├── authService.ts  
+│   │   │   ├── cartService.ts  
+│   │   │   └── productService.ts  
+│   │   ├── hooks/          # Custom React hooks  
+│   │   │   ├── useCartItem.ts  
+│   │   │   └── useCartTotal.ts  
+│   │   ├── types/          # TypeScript type definitions  
+│   │   │   ├── CartItem.ts  
+│   │   │   ├── CartProduct.ts  
+│   │   │   ├── Product.ts  
+│   │   │   ├── ProductFormData.ts  
+│   │   │   └── User.ts  
+│   │   ├── utils/          # Utility functions  
+│   │   │   └── guestCart.ts  
+│   │   ├── assets/         # Static assets (SVG icons)  
+│   │   ├── App.tsx         # Root component  
+│   │   └── main.tsx        # Application entry point  
+│   ├── public/             # Public assets  
+│   ├── package.json  
+│   └── vite.config.ts      # Vite configuration  
+└── backend/                 # Express backend API  
+    ├── src/  
+    │   ├── controllers/    # Route controller logic  
+    │   │   ├── auth.controller.ts  
+    │   │   ├── cart.controller.ts  
+    │   │   └── product.controller.ts  
+    │   ├── models/         # Mongoose data models  
+    │   │   ├── Cart.model.ts  
+    │   │   ├── Product.model.ts  
+    │   │   └── User.model.ts  
+    │   ├── routes/         # API route definitions  
+    │   │   ├── auth.routes.ts  
+    │   │   ├── cart.routes.ts  
+    │   │   ├── order.routes.ts  
+    │   │   └── product.routes.ts  
+    │   ├── services/       # Business logic layer  
+    │   │   ├── cart.service.ts  
+    │   │   └── product.service.ts  
+    │   ├── middlewares/    # Custom middleware  
+    │   │   ├── auth.middleware.ts  
+    │   │   └── validate.ts  
+    │   ├── validations/    # Zod schemas  
+    │   │   ├── common.validation.ts  
+    │   │   └── product.validation.ts  
+    │   ├── mappers/        # Data transformation  
+    │   │   └── cart.mapper.ts  
+    │   ├── types/          # TypeScript type definitions  
+    │   │   └── express.d.ts  
+    │   └── server.ts       # Server entry point  
+    └── package.json 
 ```
 
 ## 🔧 API Endpoints
