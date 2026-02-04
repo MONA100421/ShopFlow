@@ -3,11 +3,11 @@
 A production-ready e-commerce platform built with the MERN stack, demonstrating full-stack development capabilities with TypeScript, Redux state management, and secure session-based authentication.
 
 ## 🛍️ Product Catalog (ShopFlow Nexus)
-### Desktop View
-![Product Catalog - Desktop](./screenshots/products-desktop.png)
 
-### Mobile View
-![Product Catalog - Mobile](./screenshots/products-mobile.png)
+<p align="center">
+  <img src="./screenshots/products-desktop.png" width="60%" />
+  <img src="./screenshots/products-mobile.png" width="31%" />
+</p>
 
 ## 👨‍💻 Authors
 
