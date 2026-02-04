@@ -103,15 +103,15 @@ export default function MainLayout() {
             to={`/${location.search}`}
             className="header-logo header-logo-full"
           >
-            Management <span>Chuwa</span>
+            ShopFlow <span>Nexus</span>
           </Link>
 
           <Link
             to={`/${location.search}`}
             className="header-logo header-logo-short"
           >
-            <span className="logo-m">M</span>
-            <span className="logo-text">Chuwa</span>
+            <span className="logo-m">S</span>
+            <span className="logo-text">Nexus</span>
           </Link>
 
           {/* Search */}
@@ -218,7 +218,7 @@ export default function MainLayout() {
       <footer className="site-footer">
         <div className="container footer-inner">
           <span className="footer-left">
-            © {new Date().getFullYear()} All Rights Reserved.
+            © {new Date().getFullYear()} Chenyi Weng. All Rights Reserved.
           </span>
 
           <div className="footer-social">
