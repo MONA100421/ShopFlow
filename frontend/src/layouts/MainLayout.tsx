@@ -218,7 +218,7 @@ export default function MainLayout() {
       <footer className="site-footer">
         <div className="container footer-inner">
           <span className="footer-left">
-            © {new Date().getFullYear()} Chenyi Weng. All Rights Reserved.
+            © {new Date().getFullYear()} Chenyi Weng & Bingchen Li. All Rights Reserved.
           </span>
 
           <div className="footer-social">
